@@ -1,0 +1,34 @@
+package io.github.kloping.mihdp.dao;
+
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+/**
+ * @author github.kloping
+ */
+@Data
+@Accessors(chain = true)
+public class User {
+    /**
+     * 唯一id
+     */
+    @TableId
+    private String id;
+    /**
+     * 游戏内唯一标识
+     */
+    private String uid;
+    /**
+     * 暂时可空
+     */
+    private String icon = "";
+    /**
+     * 经验值
+     */
+    private Integer xp;
+    /**
+     * 等级
+     */
+    private Integer level;
+}

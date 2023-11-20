@@ -3,9 +3,10 @@ package io.github.kloping.mihdp.wss;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import io.github.kloping.mihdp.Main;
+import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.services.BaseService;
 import io.github.kloping.mihdp.wss.data.BasePack;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
-import io.github.kloping.mihdp.ex.GeneralData;
 import org.java_websocket.WebSocket;
 
 /**
@@ -13,6 +14,7 @@ import org.java_websocket.WebSocket;
  */
 public abstract class GameClient {
     public static String PASS_WORD = null;
+    public static final String TRANS_ACTION = "msg";
 
     public final String id;
     public final WebSocket webSocket;
@@ -34,6 +36,13 @@ public abstract class GameClient {
         ReqDataPack data = JSON.parseObject(msg, ReqDataPack.class);
         if (data == null) return;
         GeneralData resData = gson.fromJson(data.getContent(), GeneralData.TYPE_TOKEN);
+        if (data.getAction().equals(TRANS_ACTION)) {
+            String action = BaseService.trnasActionOrNull(resData);
+            if (action != null) {
+                System.err.println("conversion action: " + action);
+                data.setAction(action);
+            }
+        }
         Main.APPLICATION.executeMethod(data.getBot_id(), data.getAction(), data, this, resData);
     }
 

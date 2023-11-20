@@ -7,10 +7,10 @@ import io.github.kloping.MySpringTool.annotations.DefAction;
 import io.github.kloping.MySpringTool.entity.interfaces.Runner;
 import io.github.kloping.MySpringTool.exceptions.NoRunException;
 import io.github.kloping.MySpringTool.interfaces.QueueExecutor;
+import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.mapper.ConfigMapper;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
-import io.github.kloping.mihdp.wss.data.ResData;
 import io.github.kloping.mihdp.wss.data.ResDataPack;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
@@ -21,14 +21,6 @@ import java.lang.reflect.Method;
  */
 @Controller
 public class BaseController implements Runner {
-    @AutoStand
-    ConfigMapper configMapper;
-
-    @Action("get")
-    public ResData getInfo() {
-        System.out.println(configMapper);
-    }
-
     public BaseController(QueueExecutor queueExecutor) {
         queueExecutor.setAfter(this);
     }
@@ -42,10 +34,10 @@ public class BaseController implements Runner {
         ResDataPack pack = new ResDataPack();
         pack.setId(reqDataPack.getId());
         pack.setAction(reqDataPack.getAction());
-        if (t instanceof ResData) {
-            pack.setData((ResData) t);
+        if (t instanceof GeneralData) {
+            pack.setData((GeneralData) t);
         } else {
-            pack.setData(new ResData.ResDataText(t.toString()));
+            pack.setData(new GeneralData.ResDataText(t.toString()));
         }
         try {
             client.webSocket.send(pack.toString());
@@ -56,6 +48,13 @@ public class BaseController implements Runner {
         }
     }
 
+    @AutoStand
+    ConfigMapper configMapper;
+
+    @Action("get")
+    public Object getInfo(ReqDataPack dataPack) {
+        return dataPack.getSender_id() + " 测试通过";
+    }
 
     @DefAction
     public void intercept0(ReqDataPack pack) {

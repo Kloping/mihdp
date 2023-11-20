@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import io.github.kloping.mihdp.Main;
 import io.github.kloping.mihdp.wss.data.BasePack;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
-import io.github.kloping.mihdp.wss.data.ResData;
+import io.github.kloping.mihdp.ex.GeneralData;
 import org.java_websocket.WebSocket;
 
 /**
@@ -33,7 +33,7 @@ public abstract class GameClient {
     public void onMessage(String msg) {
         ReqDataPack data = JSON.parseObject(msg, ReqDataPack.class);
         if (data == null) return;
-        ResData resData = gson.fromJson(data.getContent(), ResData.TYPE_TOKEN);
+        GeneralData resData = gson.fromJson(data.getContent(), GeneralData.TYPE_TOKEN);
         Main.APPLICATION.executeMethod(data.getBot_id(), data.getAction(), data, this, resData);
     }
 

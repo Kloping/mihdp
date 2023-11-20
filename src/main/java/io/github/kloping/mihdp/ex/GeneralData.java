@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.wss.data;
+package io.github.kloping.mihdp.ex;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.reflect.TypeToken;
@@ -10,8 +10,8 @@ import java.util.Base64;
 import java.util.List;
 
 @Data
-public class ResData {
-    public static final Type TYPE_TOKEN = new TypeToken<ResData>() {
+public class GeneralData {
+    public static final Type TYPE_TOKEN = new TypeToken<GeneralData>() {
     }.getType();
 
     protected String type;
@@ -23,7 +23,7 @@ public class ResData {
 
     @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class ResDataText extends ResData {
+    public static class ResDataText extends GeneralData {
         private String content;
 
         public ResDataText(String text) {
@@ -34,7 +34,7 @@ public class ResData {
 
     @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class ResDataAt extends ResData {
+    public static class ResDataAt extends GeneralData {
         private String id;
 
         public ResDataAt(String id) {
@@ -45,7 +45,7 @@ public class ResData {
 
     @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class ResDataImage extends ResData {
+    public static class ResDataImage extends GeneralData {
         //base64
         private String data;
         private String p = "base64";
@@ -63,10 +63,10 @@ public class ResData {
 
     @EqualsAndHashCode(callSuper = true)
     @Data
-    public static class ResDataChain extends ResData {
-        private List<ResData> list;
+    public static class ResDataChain extends GeneralData {
+        private List<GeneralData> list;
 
-        public ResDataChain(List<ResData> list) {
+        public ResDataChain(List<GeneralData> list) {
             this.list = list;
             this.type = "chain";
         }

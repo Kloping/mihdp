@@ -1,11 +1,7 @@
 package io.github.kloping.mihdp;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 import io.github.kloping.MySpringTool.StarterObjectApplication;
-import io.github.kloping.MySpringTool.annotations.Bean;
 import io.github.kloping.MySpringTool.h1.impl.component.FieldManagerImpl;
 import io.github.kloping.MySpringTool.h1.impl.component.PackageScannerImpl;
 import io.github.kloping.MySpringTool.interfaces.Logger;
@@ -14,11 +10,9 @@ import io.github.kloping.MySpringTool.interfaces.component.FieldManager;
 import io.github.kloping.MySpringTool.interfaces.component.PackageScanner;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.GameWebSocketServer;
-import io.github.kloping.mihdp.wss.data.DataDeserializer;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
-import io.github.kloping.mihdp.wss.data.ResData;
+import io.github.kloping.mihdp.ex.GeneralData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -70,7 +64,7 @@ public class Main implements CommandLineRunner {
         ConfigurableApplicationContext context = SpringApplication.run(Main.class, args);
         APPLICATION = new StarterObjectApplication(BaseComponent.class);
         APPLICATION.setMainKey(String.class);
-        APPLICATION.setAccessTypes(ReqDataPack.class, GameClient.class, ResData.class);
+        APPLICATION.setAccessTypes(ReqDataPack.class, GameClient.class, GeneralData.class);
         APPLICATION.setWaitTime(60000);
         APPLICATION.run0(BaseComponent.class);
         ContextManager contextManager = APPLICATION.INSTANCE.getContextManager();

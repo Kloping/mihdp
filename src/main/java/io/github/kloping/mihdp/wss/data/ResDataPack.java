@@ -1,15 +1,11 @@
 package io.github.kloping.mihdp.wss.data;
 
 import com.alibaba.fastjson.JSON;
+import io.github.kloping.mihdp.ex.GeneralData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author github.kloping
@@ -22,7 +18,7 @@ public class ResDataPack {
     private String action;
 
     private String id;
-    private ResData data;
+    private GeneralData data;
 
     @Override
     public String toString() {

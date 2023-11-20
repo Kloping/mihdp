@@ -7,9 +7,10 @@ import io.github.kloping.MySpringTool.annotations.CommentScan;
 import io.github.kloping.MySpringTool.h1.impl.LoggerImpl;
 import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.mihdp.wss.GameClient;
-import io.github.kloping.mihdp.wss.data.DataDeserializer;
-import io.github.kloping.mihdp.wss.data.ResData;
+import io.github.kloping.mihdp.ex.DataDeserializer;
+import io.github.kloping.mihdp.ex.GeneralData;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,7 +24,7 @@ import java.util.Date;
  */
 @Configuration
 @CommentScan(path = "io.github.kloping.mihdp.game")
-public class BaseComponent {
+public class BaseComponent implements CommandLineRunner {
     @Bean
     public Logger getLogger() {
         Logger l = new LoggerImpl();
@@ -37,13 +38,24 @@ public class BaseComponent {
     @Bean
     public Gson gson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        JsonDeserializer<ResData> deserializer = new DataDeserializer();
-        gsonBuilder.registerTypeAdapter(ResData.class, deserializer);
+        JsonDeserializer<GeneralData> deserializer = new DataDeserializer();
+        gsonBuilder.registerTypeAdapter(GeneralData.class, deserializer);
         return gsonBuilder.create();
     }
 
     @Bean
     public String password(@Value("${wss.password:123456}") String pwd) {
         return GameClient.PASS_WORD = pwd;
+    }
+
+    /**
+     * 初始化数据
+     *
+     * @param args incoming main method arguments
+     * @throws Exception
+     */
+    @Override
+    public void run(String... args) throws Exception {
+
     }
 }

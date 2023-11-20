@@ -52,6 +52,7 @@ public class GameWebSocketServer extends WebSocketServer {
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         logger.info("Closed connection from " + conn.getRemoteSocketAddress());
+        CLIENT_MAP.remove(conn.getRemoteSocketAddress().toString());
     }
 
     @Override
@@ -68,10 +69,11 @@ public class GameWebSocketServer extends WebSocketServer {
     @Override
     public void onError(WebSocket conn, Exception ex) {
         logger.info("Error occurred on connection from " + conn.getRemoteSocketAddress() + ": " + ex.getMessage());
+        CLIENT_MAP.remove(conn.getRemoteSocketAddress().toString());
     }
 
     @Override
     public void onStart() {
-        logger.info("WebSocket server started on port:" + Ansi.ansi().fgRgb(Color.PINK.getRGB()).a(getPort()).reset().toString());
+        logger.info("WebSocket server started on port:" + Ansi.ansi().fgRgb(Color.RED.getRGB()).a(getPort()).reset().toString());
     }
 }

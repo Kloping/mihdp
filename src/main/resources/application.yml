@@ -2,8 +2,6 @@ spring:
   datasource:
     url: jdbc:sqlite:data.db
     driver-class-name: org.sqlite.JDBC
-super:
-  qid: 3474006766
 wss:
   port: 6034
   password: "123456"

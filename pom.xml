@@ -86,5 +86,17 @@
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <!--图片处理工具-->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.14</version>
+        </dependency>
+        <!--gift 动态图处理工具-->
+        <dependency>
+            <groupId>com.madgag</groupId>
+            <artifactId>animated-gif-lib</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
 </project>

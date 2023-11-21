@@ -1,11 +1,15 @@
 package io.github.kloping.mihdp.game.v1;
 
 import io.github.kloping.MySpringTool.annotations.Action;
+import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.game.services.BaseService;
 import io.github.kloping.mihdp.game.utils.NumberSelector;
+import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
+import io.github.kloping.rand.RandomUtils;
 
 /**
  * @author github.kloping
@@ -19,22 +23,35 @@ public class BeginController {
 
     @Action("reg")
     public String reg(ReqDataPack pack, GameClient client) {
-        NumberSelector.reg(pack.getSender_id())
-                .set(1, d -> "当前是新手教程阶段\n1.继续 2.跳过").set(2, d -> {
+        if (userMapper.selectById(pack.getSender_id()) != null) return null;
+        NumberSelector.reg(pack.getSender_id()).set(1,
+                d -> "该游戏是养成类游戏;您拥有自己的经验/等级/积分和游戏币" +
+                        "\n同样 您可以拥有一或多个魂角 它们同样拥有自己的等级/经验与属性;" +
+                        "\n您通过不同方式收集材料获得道具或战斗使其升级/突破/强化;使它们拥有更强的战斗力;" +
+                        "\n游戏内战斗方式采用条式进度;" +
+                        "\n1.继续 2.跳过").set(2, d -> {
                     NumberSelector.DATA_MAP.remove(pack.getSender_id());
+
                     NumberSelector.clear(pack.getSender_id());
                     return regNow(pack.getSender_id());
                 })
-                .next(1, d -> "嵌套教程 1.继续 2.跳过")
-                .next(1, d -> "1.确定注册 2.取消注册")
-                .next(2, d -> {
-                    NumberSelector.clear(pack.getSender_id());
-                    return "取消成功";
-                }).set(1, d -> regNow(pack.getSender_id()));
+        ;
         return "即将进入新手教程阶段\n完成后可快速入门和获得大量奖励\n1.确定 2.跳过";
     }
 
+    @AutoStand
+    UserMapper userMapper;
+
     private String regNow(String senderId) {
+        User user = new User().setId(senderId);
+        String uid = userMapper.selectMaxUid();
+        if (uid == null) {
+            uid = "1000001";
+        }
+        Long tuid = Long.valueOf(uid);
+        tuid = tuid + RandomUtils.RANDOM.nextInt(10) + 1;
+        user.setUid(tuid.toString());
+        userMapper.insert(user);
         NumberSelector.clear(senderId);
         return "注册成功!";
     }

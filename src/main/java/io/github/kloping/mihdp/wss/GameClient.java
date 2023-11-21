@@ -2,7 +2,7 @@ package io.github.kloping.mihdp.wss;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
-import io.github.kloping.mihdp.Main;
+import io.github.kloping.mihdp.MihDpMain;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.services.BaseService;
 import io.github.kloping.mihdp.wss.data.BasePack;
@@ -43,7 +43,7 @@ public abstract class GameClient {
                 data.setAction(action);
             }
         }
-        Main.APPLICATION.executeMethod(data.getBot_id(), data.getAction(), data, this, resData);
+        MihDpMain.APPLICATION.executeMethod(data.getBot_id(), data.getAction(), data, this, resData);
     }
 
     private Long auth_cd = 0L;

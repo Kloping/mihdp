@@ -20,15 +20,23 @@ public class User {
      */
     private String uid;
     /**
+     * 不唯一名字
+     */
+    private String name = "魂士";
+    /**
      * 暂时可空
      */
     private String icon = "";
     /**
      * 经验值
      */
-    private Integer xp;
+    private Integer xp = 0;
     /**
      * 等级
      */
-    private Integer level;
+    private Integer level = 1;
+    /**
+     * 注册时间
+     */
+    private Long reg = System.currentTimeMillis();
 }

@@ -1,9 +1,10 @@
-package io.github.kloping.mihdp;
+package io.github.kloping.mihdp.utils;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.github.kloping.clasz.ClassUtils;
 import io.github.kloping.judge.Judge;
+import io.github.kloping.rand.RandomUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,6 @@ import java.util.regex.Pattern;
  * @date 2023-07-20
  */
 public class Utils {
-    public static final Random RANDOM = new Random();
 
     public static final <T, K1, K2> T getValueOrDefault(Map<K1, Map<K2, T>> map, K1 k1, K2 k2, T def) {
         if (map.containsKey(k1)) {
@@ -42,7 +42,7 @@ public class Utils {
     }
 
     public static <T> T getRandT(List<T> ts) {
-        return ts.get(RANDOM.nextInt(ts.size()));
+        return ts.get(RandomUtils.RANDOM.nextInt(ts.size()));
     }
 
     public static String getExceptionLine(Throwable e) {

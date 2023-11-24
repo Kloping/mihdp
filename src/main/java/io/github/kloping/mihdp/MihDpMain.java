@@ -69,6 +69,14 @@ public class MihDpMain implements CommandLineRunner {
         APPLICATION.setAccessTypes(ReqDataPack.class, GameClient.class, GeneralData.class);
         APPLICATION.setWaitTime(60000);
         APPLICATION.logger = context.getBean(Logger.class);
+        APPLICATION.INSTANCE.getPRE_SCAN_RUNNABLE().add(() -> {
+            final String hostKey = "spt.redis.host";
+            final String portKey = "spt.redis.port";
+            String host = context.getEnvironment().getProperty(hostKey);
+            String port = context.getEnvironment().getProperty(portKey);
+            APPLICATION.INSTANCE.getContextManager().append(String.class, host, hostKey);
+            APPLICATION.INSTANCE.getContextManager().append(Integer.class, Integer.valueOf(port), portKey);
+        });
         APPLICATION.run0(BaseComponent.class);
         ContextManager contextManager = APPLICATION.INSTANCE.getContextManager();
         for (String beanDefinitionName : context.getBeanDefinitionNames()) {

@@ -5,3 +5,8 @@ spring:
 wss:
   port: 6034
   password: "123456"
+# 必须配置
+spt:
+  redis:
+    port: 6379
+    host: "localhost"

@@ -49,6 +49,11 @@
             <version>0.6.2-R3</version>
         </dependency>
         <dependency>
+            <groupId>io.github.Kloping</groupId>
+            <artifactId>spt-redis</artifactId>
+            <version>0.2.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

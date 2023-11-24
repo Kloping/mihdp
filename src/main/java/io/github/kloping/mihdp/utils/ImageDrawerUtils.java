@@ -1,16 +1,21 @@
 package io.github.kloping.mihdp.utils;
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.util.Iterator;
 
 /**
  * @author github-kloping
@@ -62,6 +67,9 @@ public class ImageDrawerUtils {
     public static final Color BLACK_A35 = new Color(0, 0, 0, 89);
     public static final Color WHITE_A35 = new Color(211, 211, 211, 89);
 
+    public static final Stroke STROKE1 = new BasicStroke(1.0f);
+    public static final Stroke STROKE2 = new BasicStroke(2.0f);
+    public static final Stroke STROKE3 = new BasicStroke(3.0f);
 
 
     public static void drawStringContinuousDiscoloration(Graphics graphics, int x, int y,
@@ -338,6 +346,76 @@ public class ImageDrawerUtils {
         encoder.finish();
         return outFile.getAbsolutePath();
     }
+
+
+    /**
+     * 重置图形的边长大小
+     *
+     * @param src
+     * @param width
+     * @param height
+     * @throws IOException
+     */
+    public static BufferedImage resizeImage(BufferedImage src, int width, int height) throws IOException {
+        FileOutputStream out = null;
+        try {
+            // 放大边长
+            BufferedImage tag = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            //绘制放大后的图片
+            tag.getGraphics().drawImage(src, 0, 0, width, height, null);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(baos);
+            encoder.encode(tag);
+            return ImageIO.read(new ByteArrayInputStream(baos.toByteArray()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 对图片裁剪，并把裁剪新图片保存
+     *
+     * @param bytes            读取图片二进制
+     * @param position         图片切割位置
+     * @param readImageFormat  读取图片格式
+     * @param writeImageFormat 写入图片格式
+     * @throws IOException
+     */
+    public static byte[] cropImage(byte[] bytes, int[] position, String readImageFormat, String writeImageFormat) throws IOException {
+        FileInputStream fis = null;
+        ImageInputStream iis = null;
+        InputStream is = null;
+        ByteArrayOutputStream out = null;
+        int x = position[0];
+        int y = position[1];
+        int width = position[2];
+        int height = position[3];
+        try {
+            //读取图片文件
+            //fis = new FileInputStream();
+            is = new ByteArrayInputStream(bytes);
+            Iterator it = ImageIO.getImageReadersByFormatName(readImageFormat);
+            ImageReader reader = (ImageReader) it.next();
+            //获取图片流
+            iis = ImageIO.createImageInputStream(is);
+            reader.setInput(iis, true);
+            ImageReadParam param = reader.getDefaultReadParam();
+            //定义一个矩形
+            Rectangle rect = new Rectangle(x, y, width, height);
+            //提供一个 BufferedImage，将其用作解码像素数据的目标。
+            param.setSourceRegion(rect);
+            BufferedImage bi = reader.read(0, param);
+            //保存新图片
+            out = new ByteArrayOutputStream();
+            ImageIO.write(bi, writeImageFormat, out);
+            return out.toByteArray();
+        } finally {
+            if (fis != null) fis.close();
+            if (iis != null) iis.close();
+        }
+    }
+
 
     public static BufferedImage readImage(String file, int w, int h) {
         try {

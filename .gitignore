@@ -1,6 +1,8 @@
 */test/*
 logs/*
 data.db
+temp.*
+application.yml
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

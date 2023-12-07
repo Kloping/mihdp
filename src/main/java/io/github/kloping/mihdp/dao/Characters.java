@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
+ * 魂角
  * @author github.kloping
  */
 @Data
@@ -19,7 +20,7 @@ public class Characters {
     /**
      * 拥有者id
      */
-    private String oid;
+    private String uid;
     /**
      * 角色id
      */
@@ -32,4 +33,6 @@ public class Characters {
      * 主武器id
      */
     private Integer mid;
+
+    private Integer hp;
 }

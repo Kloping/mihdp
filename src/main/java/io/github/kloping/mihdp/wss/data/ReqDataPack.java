@@ -31,9 +31,23 @@ public class ReqDataPack {
 
     private Map<String, Object> args = new HashMap<>();
 
+    public boolean containsArgs(String... names) {
+        for (String name : names) {
+            if (args.get(name) != null) return true;
+        }
+        return false;
+    }
+
+    public Object getArgValue(String... names) {
+        for (String name : names) {
+            Object v = args.get(name);
+            if (v != null) return v;
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);
     }
-
 }

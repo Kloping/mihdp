@@ -24,6 +24,9 @@ public class BaseController implements Runner {
         queueExecutor.setAfter(this);
     }
 
+    @AutoStand
+    DrawController drawController;
+
     @Override
     public void run(Method method, Object t, Object[] objects) throws NoRunException {
         if (t == null) return;
@@ -32,10 +35,16 @@ public class BaseController implements Runner {
         ResDataPack pack = new ResDataPack();
         pack.setId(reqDataPack.getId());
         pack.setAction(reqDataPack.getAction());
+        pack.setTime(reqDataPack.getTime());
+        pack.setArgs(reqDataPack.getArgs());
         if (t instanceof GeneralData) {
             pack.setData((GeneralData) t);
         } else {
             pack.setData(new GeneralData.ResDataText(t.toString()));
+        }
+        if (reqDataPack.getArgValue("draw").toString().equals("true")) {
+            GeneralData data = drawController.draw(pack);
+            if (data != null) pack.setData(data);
         }
         try {
             client.webSocket.send(pack.toString());

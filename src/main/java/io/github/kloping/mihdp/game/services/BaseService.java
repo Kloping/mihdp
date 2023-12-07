@@ -13,10 +13,17 @@ import java.util.Map;
 public class BaseService {
     public static final Map<String, String> MSG2ACTION = new HashMap<>();
 
+    public static final String[] BASE_ICON_ARGS = {"icon", "src"};
+
     static {
         MSG2ACTION.put("测试", "test");
     }
 
+    /**
+     * 将 data转为action 或者null
+     * @param resData
+     * @return
+     */
     public static String trnasActionOrNull(GeneralData resData) {
         if (resData instanceof GeneralData.ResDataText) {
             GeneralData.ResDataText text = (GeneralData.ResDataText) resData;

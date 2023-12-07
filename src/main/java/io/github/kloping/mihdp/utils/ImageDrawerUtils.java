@@ -235,22 +235,6 @@ public class ImageDrawerUtils {
         return image;
     }
 
-    /**
-     * 画一条线
-     *
-     * @param image
-     * @param x
-     * @param y
-     * @return
-     */
-    public static BufferedImage putRect(BufferedImage image, int x, int y, int length, int height) {
-        Graphics graphics = image.getGraphics();
-        graphics.setColor(Color.BLACK);
-        graphics.fillRect(x, y, length, height);
-        graphics.dispose();
-        return image;
-    }
-
     public static Image getImageByUrl2Size(URL url, int width, int height) {
         try {
             BufferedImage image = ImageIO.read(url);
@@ -346,7 +330,6 @@ public class ImageDrawerUtils {
         encoder.finish();
         return outFile.getAbsolutePath();
     }
-
 
     /**
      * 重置图形的边长大小

@@ -4,9 +4,11 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.mihdp.dao.User;
+import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.game.services.BaseService;
 import io.github.kloping.mihdp.game.utils.NumberSelector;
 import io.github.kloping.mihdp.mapper.UserMapper;
+import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.rand.RandomUtils;
@@ -34,24 +36,35 @@ public class BeginController {
 
                     NumberSelector.clear(pack.getSender_id());
                     return regNow(pack.getSender_id());
-                })
-        ;
+                });
+
         return "即将进入新手教程阶段\n完成后可快速入门和获得大量奖励\n1.确定 2.跳过";
     }
 
     @AutoStand
     UserMapper userMapper;
 
+    @AutoStand
+    UsersResourcesMapper resourcesMapper;
+
     private String regNow(String senderId) {
         User user = new User().setId(senderId);
+        //获得最小uid
         String uid = userMapper.selectMaxUid();
         if (uid == null) {
             uid = "1000001";
         }
+        //加随机
         Long tuid = Long.valueOf(uid);
         tuid = tuid + RandomUtils.RANDOM.nextInt(10) + 1;
         user.setUid(tuid.toString());
+        //注册user
         userMapper.insert(user);
+        //注册 resource
+        UsersResources resources = new UsersResources();
+        resources.setUid(tuid.toString());
+        resourcesMapper.insert(resources);
+        //清除选项
         NumberSelector.clear(senderId);
         return "注册成功!";
     }

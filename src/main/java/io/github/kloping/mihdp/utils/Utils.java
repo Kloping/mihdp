@@ -3,7 +3,6 @@ package io.github.kloping.mihdp.utils;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.github.kloping.clasz.ClassUtils;
-import io.github.kloping.judge.Judge;
 import io.github.kloping.rand.RandomUtils;
 
 import java.io.File;
@@ -13,7 +12,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,7 +58,18 @@ public class Utils {
         }
     }
 
-
+    public static String filterOverW(Integer v) {
+        if (v >= 10000) {
+            float f0 = v / 10000;
+            String f1 = String.valueOf(f0);
+            if (f1.indexOf(".") == 1) {
+                if (f1.length() > 3) return f1.substring(0, 3) + "w";
+                else return f1 + "w";
+            } else {
+                return f1.substring(0, f1.indexOf(".") + 2) + "w";
+            }
+        } else return v.toString();
+    }
     /**
      * Created by lingsf on 2019/11/5.
      * modify by kloping on 2022/2/24

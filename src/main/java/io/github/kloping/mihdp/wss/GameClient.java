@@ -38,13 +38,11 @@ public abstract class GameClient {
         if (data == null) return;
         GeneralData resData = gson.fromJson(data.getContent(), GeneralData.TYPE_TOKEN);
         data.getArgs().put(ODATA_KEY, resData);
+
         if (data.getAction().equals(TRANS_ACTION)) {
-            String action = BaseService.trnasActionOrNull(resData);
-            if (action != null) {
-                System.err.println("conversion action: " + action);
-                data.setAction(action);
-            }
+            data = BaseService.trnasActionOrNull(data);
         }
+
         MihDpMain.APPLICATION.executeMethod(data.getBot_id(), data.getAction(), data, this, resData);
     }
 

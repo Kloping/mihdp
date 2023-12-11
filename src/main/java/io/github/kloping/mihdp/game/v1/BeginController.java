@@ -9,6 +9,7 @@ import io.github.kloping.mihdp.game.services.BaseService;
 import io.github.kloping.mihdp.game.utils.NumberSelector;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
+import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.rand.RandomUtils;
@@ -58,6 +59,9 @@ public class BeginController {
     @AutoStand
     UsersResourcesMapper resourcesMapper;
 
+    @AutoStand
+    LanguageConfig languageConfig;
+
     private String regNow(String senderId) {
         User user = new User().setId(senderId);
         //获得最小uid
@@ -77,6 +81,6 @@ public class BeginController {
         resourcesMapper.insert(resources);
         //清除选项
         NumberSelector.clear(senderId);
-        return "注册成功!";
+        return languageConfig.getString("RegistrationSuccessfulTips");
     }
 }

@@ -8,17 +8,21 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
-import io.github.kloping.mihdp.dao.Bag;
+import io.github.kloping.date.DateUtils;
 import io.github.kloping.mihdp.dao.Characters;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
+import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.services.BaseService;
 import io.github.kloping.mihdp.mapper.BagMaper;
 import io.github.kloping.mihdp.mapper.CharactersMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
+import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
+import io.github.kloping.number.NumberUtils;
+import io.github.kloping.rand.RandomUtils;
 import io.github.kloping.spt.RedisOperate;
 
 import java.util.List;
@@ -29,8 +33,12 @@ import java.util.List;
 @Controller
 public class InfoController {
 
+    @AutoStand(id = "defaultConfig")
+    JSONObject defaultConfig;
     @AutoStand
-    JSONObject config;
+    LanguageConfig lconfig;
+    @AutoStand(id = "language")
+    String language;
     @AutoStand
     public RedisOperate<String> redisOperate0;
     @AutoStand
@@ -46,64 +54,205 @@ public class InfoController {
     public void before(ReqDataPack dataPack) {
     }
 
+    private User getUser(ReqDataPack dataPack) {
+        String sid = dataPack.getSender_id();
+        return getUser(sid);
+    }
+
+    private User getUser(String sid) {
+        User user = userMapper.selectById(sid);
+        return user;
+    }
+
     {
         BaseService.MSG2ACTION.put("信息", "info");
         BaseService.MSG2ACTION.put("当前信息", "info");
     }
 
     @Action("info")
-    public Object info(ReqDataPack dataPack, GameClient client) {
-        String sid = dataPack.getSender_id();
-        User user = userMapper.selectById(sid);
-        if (user == null) return "您当前仍未'注册';请先进行'注册;";
-        else {
-            Integer level = user.getLevel();
-            JSONArray ar = config.getJSONArray("xp_list");
-            Integer max;
-            if (ar.size() > level) {
-                max = ar.getInteger(level - 1);
-            } else {
-                max = 99999;
-            }
-            JSONObject jo = JSONObject.parseObject(JSON.toJSONString(user));
-            jo.put("max", max);
-            return jo.toString();
-        }
-    }
-
-    {
-        BaseService.MSG2ACTION.put("资源", "resource");
-        BaseService.MSG2ACTION.put("我的资源", "resource");
-    }
-
-    @Action("resource")
-    public Object resource(ReqDataPack dataPack) {
-        String sid = dataPack.getSender_id();
-        User user = userMapper.selectById(sid);
-        if (user == null) return "您当前仍未'注册';请先进行'注册;";
+    public Object info(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) return lconfig.getString("UnregisteredPrompt");
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
-        List<Bag> bags = bagMaper.selectByUid(user.getUid());
+        Integer level = user.getLevel();
+        JSONArray ar = defaultConfig.getJSONArray("xp_list");
+        Integer max;
+        if (ar.size() > level) {
+            max = ar.getInteger(level - 1);
+        } else {
+            max = 99999;
+        }
+        if (user.getXp() >= max) {
+            user.setLevel(user.getLevel() + 1);
+            user.setXp(0);
+            userMapper.updateById(user);
+        }
         QueryWrapper<Characters> qw = new QueryWrapper<>();
         qw.eq("uid", user.getUid());
         List<Characters> characters = charactersMapper.selectList(qw);
-        JSONObject data = JSON.parseObject(JSON.toJSONString(user));
-        data.put("bags", JSONArray.parseArray(JSON.toJSONString(bags)));
+
+        JSONObject data = JSONObject.parseObject(JSON.toJSONString(user));
+        data.put("max", max);
         data.put("characters", JSONArray.parseArray(JSON.toJSONString(characters)));
         data.putAll(JSON.parseObject(JSON.toJSONString(resources)));
+
+        if (dataPack.containsArgs(BaseService.BASE_ICON_ARGS)) {
+            data.put("icon", dataPack.getArgValue(BaseService.BASE_ICON_ARGS));
+        }
+        if (dataPack.containsArgs(BaseService.BASE_NAME_ARGS)) {
+            data.put("name", dataPack.getArgValue(BaseService.BASE_NAME_ARGS));
+        }
         return data;
     }
 
     {
-        BaseService.MSG2ACTION.put("商城", "shopping");
-        BaseService.MSG2ACTION.put("商店", "shopping");
-        BaseService.MSG2ACTION.put("商场", "shopping");
+        BaseService.MSG2ACTION.put("签到", "sign");
+        BaseService.MSG2ACTION.put("打卡", "sign");
     }
 
-    @Action("shopping")
-    public Object shopping(ReqDataPack pack) {
+    @Action("sign")
+    public Object sign(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
-        data.put("data", config.getJSONArray("resources"));
-        data.putAll(config.getJSONObject("shopping"));
+        if (resources.getDay() == DateUtils.getDay()) {
+            data.put("tips", lconfig.getString("SignFail"));
+            data.put("t", false);
+        } else {
+            int r = 300;
+            r = (int) (r + (NumberUtils.percentTo(user.getLevel(), r)));
+            resources.setScore0(resources.getScore0() + r);
+            resources.setDay(DateUtils.getDay());
+            resources.setDays(resources.getDays() + 1);
+            user.addXp(1);
+            resources.setFz(0);
+            usersResourcesMapper.updateById(resources);
+            userMapper.updateById(user);
+            data.put("tips", lconfig.getString("SignSuccess", r));
+            data.put("t", true);
+        }
+        data.putAll((JSONObject) info(dataPack));
         return data;
     }
+
+    {
+        BaseService.MSG2ACTION.put("打工", "work0");
+        BaseService.MSG2ACTION.put("干活", "work0");
+        BaseService.MSG2ACTION.put("上班", "work0");
+    }
+
+    @Action("work0")
+    public Object work0(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+        JSONObject data = new JSONObject();
+        long k0 = resources.getK();
+        if (k0 > System.currentTimeMillis()) {
+            int m = (int) ((k0 - System.currentTimeMillis()) / 60000);
+            data.put("tips", lconfig.getString("Work0Fail", m));
+            data.put("t", false);
+        } else {
+            int f0 = RandomUtils.RANDOM.nextInt(6) + 18;
+            resources.setK(System.currentTimeMillis() + f0 * 60L * 1000);
+            int r = 300;
+            r = (int) (r + (NumberUtils.percentTo(user.getLevel(), r)));
+            user.addXp(1);
+            resources.setScore(r + resources.getScore());
+            usersResourcesMapper.updateById(resources);
+            userMapper.updateById(user);
+            data.put("tips", lconfig.getString("Work0Success", f0, r));
+            data.put("t", true);
+        }
+        data.putAll((JSONObject) info(dataPack));
+        return data;
+    }
+
+    {
+        BaseService.MSG2ACTION.put("取积分", "get0");
+    }
+
+    @Action("get0")
+    public Object get0(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+        JSONObject data = new JSONObject();
+        Integer sc = NumberUtils.getIntegerFromString(dataPack.getContent(), 1);
+        if (resources.getScore0() >= sc) {
+            resources.setScore(resources.getScore() + sc);
+            resources.setScore0(resources.getScore0() - sc);
+            usersResourcesMapper.updateById(resources);
+            data.put("tips", lconfig.getString("Get0Success"));
+            data.put("t", true);
+        } else {
+            data.put("tips", lconfig.getString("Get0Fail", sc, resources.getScore0()));
+            data.put("t", false);
+        }
+        data.putAll((JSONObject) info(dataPack));
+        return data;
+    }
+
+    {
+        BaseService.MSG2ACTION.put("存积分", "put0");
+    }
+
+    @Action("put0")
+    public Object put0(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+        JSONObject data = new JSONObject();
+        Integer sc = NumberUtils.getIntegerFromString(dataPack.getContent(), 1);
+        if (resources.getScore() >= sc) {
+            resources.setScore(resources.getScore() - sc);
+            resources.setScore0(resources.getScore0() + sc);
+            usersResourcesMapper.updateById(resources);
+            data.put("tips", lconfig.getString("Put0Success"));
+            data.put("t", true);
+        } else {
+            data.put("tips", lconfig.getString("Put0Fail", sc, resources.getScore0()));
+            data.put("t", false);
+        }
+        data.putAll((JSONObject) info(dataPack));
+        return data;
+    }
+
+    {
+        BaseService.MSG2ACTION.put("积分转让", "trans0");
+        BaseService.MSG2ACTION.put("转让积分", "trans0");
+    }
+
+    @Action("trans0")
+    public Object trans0(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
+        GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
+        if (at == null) return lconfig.getString("TargetNotFoundPrompt");
+        String aid = at.getId();
+        User atUser = getUser(aid);
+        if (atUser == null) return lconfig.getString("TargetUnregisteredPrompt");
+        GeneralData.ResDataText text = generalData.find(GeneralData.ResDataText.class);
+        Integer sc = 1;
+        if (text != null) sc = NumberUtils.getIntegerFromString(text.getContent(), 1);
+        UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+        UsersResources atResources = usersResourcesMapper.selectById(atUser.getUid());
+        JSONObject data = new JSONObject();
+        if (resources.getScore() >= sc) {
+            resources.setScore(resources.getScore() - sc);
+            atResources.setScore(atResources.getScore() + sc);
+            usersResourcesMapper.updateById(resources);
+            usersResourcesMapper.updateById(atResources);
+            data.put("tips", lconfig.getString("Trans0Success"));
+            data.put("t", true);
+        } else {
+            data.put("tips", lconfig.getString("Trans0Fail", sc, resources.getScore0()));
+            data.put("t", false);
+        }
+        data.putAll((JSONObject) info(dataPack));
+        return data;
+    }
+
 }

@@ -10,6 +10,7 @@ import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.ex.DataDeserializer;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -54,6 +55,18 @@ public class BaseComponent implements CommandLineRunner {
             ClassPathResource classPathResource = new ClassPathResource("default.json");
             String json = ReadUtils.readAll(classPathResource.getInputStream(), "utf-8");
             return JSONObject.parseObject(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Bean
+    public LanguageConfig languagesConfig(@Value("${language:zh}") String local) {
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("languages.json");
+            String json = ReadUtils.readAll(classPathResource.getInputStream(), "utf-8");
+            JSONObject data = JSONObject.parseObject(json);
+            return new LanguageConfig(local, data);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -39,4 +39,8 @@ public class User {
      * 注册时间
      */
     private Long reg = System.currentTimeMillis();
+
+    public void addXp(int i) {
+        this.xp += i;
+    }
 }

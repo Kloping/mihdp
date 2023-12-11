@@ -2,6 +2,7 @@ package io.github.kloping.mihdp.ex;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.reflect.TypeToken;
+import io.github.kloping.judge.Judge;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,6 +14,10 @@ import java.util.List;
 public class GeneralData {
     public static final Type TYPE_TOKEN = new TypeToken<GeneralData>() {
     }.getType();
+
+    public <T extends GeneralData> T find(Class<T> cla) {
+        return cla == this.getClass() ? (T) this : null;
+    }
 
     protected String type;
 
@@ -29,6 +34,11 @@ public class GeneralData {
         public ResDataText(String text) {
             this.type = "text";
             this.content = text;
+        }
+
+        @Override
+        public <T extends GeneralData> T find(Class<T> cla) {
+            return (Judge.isNotEmpty(content) && cla == this.getClass()) ? (T) this : null;
         }
     }
 
@@ -69,6 +79,17 @@ public class GeneralData {
         public ResDataChain(List<GeneralData> list) {
             this.list = list;
             this.type = "chain";
+        }
+
+        @Override
+        public <T extends GeneralData> T find(Class<T> cla) {
+            GeneralData data = super.find(cla);
+            if (data == null) {
+                for (GeneralData generalData : list) {
+                    if (generalData.find(cla) != null) return (T) generalData;
+                }
+            }
+            return (T) data;
         }
     }
 }

@@ -4,12 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.date.DateUtils;
 import io.github.kloping.io.ReadUtils;
 import io.github.kloping.judge.Judge;
+import io.github.kloping.mihdp.dao.User;
+import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.services.BaseService;
 import io.github.kloping.mihdp.utils.ImageDrawerUtils;
-import io.github.kloping.mihdp.utils.Utils;
 import io.github.kloping.mihdp.wss.data.ResDataPack;
 import io.github.kloping.number.NumberUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -41,130 +42,188 @@ public class DrawController {
         if (ACTION2DRAWER.containsKey(action)) {
             GeneralData.ResDataText text = (GeneralData.ResDataText) dataPack.getData();
             String jsonD = text.getContent();
-            BufferedImage image = ACTION2DRAWER.get(action).draw(JSON.parseObject(jsonD), dataPack);
-            if (image != null) {
-                try {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(image, "jpg", baos);
-                    return new GeneralData.ResDataImage(baos.toByteArray());
-                } catch (IOException e) {
-                    e.printStackTrace();
+            try {
+                BufferedImage image = ACTION2DRAWER.get(action).draw(JSON.parseObject(jsonD), dataPack);
+                if (image != null) {
+                    try {
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ImageIO.write(image, "jpg", baos);
+                        return new GeneralData.ResDataImage(baos.toByteArray());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+            } catch (com.alibaba.fastjson.JSONException je) {
+                System.err.println("跳过");
             }
         }
         return null;
     }
 
     {
-        ACTION2DRAWER.put("info", (o, p) -> {
-            try {
-                ClassPathResource classPathResource = new ClassPathResource("bg0.jpg");
-                byte[] bytes = ReadUtils.readAll(classPathResource.getInputStream());
-                bytes = ImageDrawerUtils.cropImage(bytes, new int[]{0, 0, 600, 300}, "jpg", "jpg");
-                BufferedImage bg = ImageIO.read(new ByteArrayInputStream(bytes));
-                BufferedImage icon0 = null;
-                if (Judge.isEmpty(o.getString("icon"))) {
-                    icon0 = ImageIO.read(new ClassPathResource("0.jpg").getInputStream());
-                } else if (p.containsArgs(BaseService.BASE_ICON_ARGS)) {
-                    icon0 = ImageIO.read(new URL(p.getArgValue(BaseService.BASE_ICON_ARGS).toString()));
-                } else icon0 = ImageIO.read(new URL(o.getString("icon")));
-                icon0 = ImageDrawerUtils.resizeImage(icon0, 220, 220);
-                icon0 = ImageDrawerUtils.roundImage(icon0, 9999);
-                bg = ImageDrawerUtils.putImage(bg, icon0, 15, 15);
+        ACTION2DRAWER.put("info", (o, p) -> info(o, "信息获取成功!", true));
+        ACTION2DRAWER.put("sign", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
+        ACTION2DRAWER.put("work0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
+        ACTION2DRAWER.put("get0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
+        ACTION2DRAWER.put("put0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
+    }
 
-                int x = 265, y = 50;
 
-                Graphics2D g2 = (Graphics2D) bg.getGraphics();
-                g2.setStroke(ImageDrawerUtils.STROKE2);
-                g2.setFont(ImageDrawerUtils.SMALL_FONT38);
-                g2.setColor(ImageDrawerUtils.ORIGIN_A75);
-                g2.drawString("uid:" + o.get("uid"), x, y);
-                ImageDrawerUtils.drawStringContinuousDiscoloration(g2, x, y + 53, o.getString("name"), ImageDrawerUtils.YELLOW_A85
-                        , " Lv.", ImageDrawerUtils.BLUE2_A75, String.valueOf(o.get("level")), ImageDrawerUtils.RED_A75);
+    /**
+     * @param o
+     * @param tips 成功或失败的提示
+     * @param t    成功或失败
+     * @return
+     */
+    public static final BufferedImage info(JSONObject o, String tips, Boolean t) {
+        try {
+            int xp = o.getInteger("xp");
+            int max = o.getInteger("max");
+            String icon = o.getString("icon");
+            String name = o.getString("name");
+            User user = o.toJavaObject(User.class);
+            UsersResources resources = o.toJavaObject(UsersResources.class);
 
-                y = 160;
-                g2.setFont(ImageDrawerUtils.SMALL_FONT20);
-                ImageDrawerUtils.drawStringContinuousDiscoloration(g2, x, y - 20, "经验:", ImageDrawerUtils.BLACK_A60, String.format("%s/%s", o.get("xp"), o.get("max")), Color.WHITE);
+            ClassPathResource classPathResource = new ClassPathResource("bg3.jpg");
+            byte[] bytes = ReadUtils.readAll(classPathResource.getInputStream());
+            BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
+            image = ImageDrawerUtils.resizeImage(image, 800, 1000);
+            BufferedImage icon0;
+            if (Judge.isEmpty(icon)) {
+                ClassPathResource iconr = new ClassPathResource("0.jpg");
+                icon0 = ImageIO.read(iconr.getInputStream());
+                icon0 = ImageDrawerUtils.resizeImage(icon0, 180, 180);
+            } else icon0 = ImageDrawerUtils.readImage(new URL(icon), 180, 180);
 
-                g2.setColor(ImageDrawerUtils.BLACK_A85);
-                g2.fillRoundRect(x - 5, y - 5, 310, 70, 30, 30);
-                g2.setColor(ImageDrawerUtils.WHITE_A80);
-                g2.fillRoundRect(x, y, 300, 60, 25, 25);
+            icon0 = ImageDrawerUtils.roundImage(icon0, 999);
+            image = ImageDrawerUtils.putImage(image, icon0, 310, 50);
+            Graphics graphics = image.getGraphics();
 
-                int b = NumberUtils.toPercent(o.getInteger("xp"), o.getInteger("max"));
+            graphics.setColor(ImageDrawerUtils.BLACK_A75);
+            graphics.drawString(String.format("%s/%s", xp, max), 150, 220);
+            graphics.setColor(Color.WHITE);
+            graphics.drawRoundRect(150, 240, 500, 20, 5, 5);
+            int r0 = NumberUtils.toPercent(xp, max);
+            if (r0 < 30) graphics.setColor(ImageDrawerUtils.YELLOW_A75);
+            else if (r0 < 60) graphics.setColor(Color.GREEN);
+            else graphics.setColor(ImageDrawerUtils.ORIGIN_A75);
+            graphics.fillRoundRect(150, 240, r0 * 5, 20, 5, 5);
 
-                if (b <= 25) g2.setColor(ImageDrawerUtils.YELLOW_A85);
-                else if (b <= 50) g2.setColor(ImageDrawerUtils.BLUE3_A75);
-                else if (b <= 75) g2.setColor(ImageDrawerUtils.GREEN_A85);
-                else g2.setColor(ImageDrawerUtils.RED_A75);
 
-                g2.fillRoundRect(x, y, b * 3, 60, 25, 25);
+            graphics.setColor(ImageDrawerUtils.BLACK_A45);
+            graphics.drawRoundRect(280, 270, 240, 40, 40, 20);
 
-                g2.setColor(ImageDrawerUtils.WHITE_A80);
-                g2.setFont(ImageDrawerUtils.SMALL_FONT22);
-                g2.fillRoundRect(10, bg.getHeight() - 40, bg.getWidth() - 20, 37, 15, 15);
-                String tips = "create by github@kloping";
-                g2.setColor(ImageDrawerUtils.BLUE_A75);
-                int tw = g2.getFontMetrics().stringWidth(tips);
-                g2.drawString(tips, (bg.getWidth() - 10) / 2 - (tw / 2), bg.getHeight() - 15);
-                g2.dispose();
-                return bg;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT22);
+            graphics.drawString(name, (image.getWidth() - graphics.getFontMetrics().stringWidth(name)) / 2, 300);
+
+            int x = 0, y = 0;
+            //========line-1-start====
+            y = 380;
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT24);
+
+            graphics.setColor(ImageDrawerUtils.GREEN_A75);
+            graphics.drawString("当前积分: " + resources.getScore(), 30, y);
+
+            graphics.setColor(ImageDrawerUtils.BLUE_A75);
+            graphics.drawString("存储积分: " + resources.getScore0(), 300, y);
+
+            graphics.setColor(ImageDrawerUtils.BLACK_A45);
+            graphics.drawString("预计利息:", 560, 380);
+            int r1 = (resources.getScore0() >= 10000 ? (int) (resources.getScore0() / 10000 * 4) : 0);
+            if (r1 == 0) graphics.setColor(ImageDrawerUtils.GREEN_A85);
+            else if (r1 < 100) graphics.setColor(ImageDrawerUtils.BLUE_A75);
+            else graphics.setColor(ImageDrawerUtils.RED_A75);
+            graphics.drawString(String.valueOf(r1), 700, 380);
+            //========line-1-end=========
+
+            //========line-2-start===========
+            y += 100;
+            graphics.setColor(ImageDrawerUtils.BLACK_A75);
+            graphics.drawString("签到状态: ", 30, y);
+            graphics.drawString("签到次数: ", 300, y);
+            graphics.drawString("积分加成: ", 560, y);
+
+            if (resources.getDay() == DateUtils.getDay()) {
+                graphics.setColor(ImageDrawerUtils.GREEN_A75);
+                graphics.drawString("√", 150, y);
+            } else {
+                graphics.setColor(ImageDrawerUtils.RED_A75);
+                graphics.drawString("×", 150, y);
             }
-        });
-        ACTION2DRAWER.put("resource", (o, p) -> {
-            try {
-                ClassPathResource classPathResource = new ClassPathResource("bg0.jpg");
-                BufferedImage image = ImageIO.read(classPathResource.getInputStream());
-                image = ImageDrawerUtils.resizeImage(image, 500, 700);
-                Graphics2D g2 = (Graphics2D) image.getGraphics();
-                Graphics graphics = g2;
 
-                int x = 5, y = 160;
+            int r2 = resources.getDays();
+            if (r2 < 100) graphics.setColor(ImageDrawerUtils.GREEN_A85);
+            else if (r2 < 300) graphics.setColor(ImageDrawerUtils.BLUE_A75);
+            else graphics.setColor(ImageDrawerUtils.RED_A75);
+            graphics.drawString(String.valueOf(r2), 420, y);
 
-                graphics.setColor(ImageDrawerUtils.BLACK_A35);
-                graphics.drawRoundRect(x - 3, y + 2, 496, 56, 10, 10);
+            int r3 = user.getLevel();
+            if (r3 < 3) graphics.setColor(ImageDrawerUtils.GREEN_A85);
+            else if (r3 < 7) graphics.setColor(ImageDrawerUtils.BLUE_A75);
+            else graphics.setColor(ImageDrawerUtils.RED_A75);
+            graphics.drawString(r3 + "%", 700, y);
+            //========line-2-end===========
 
-                g2.setFont(ImageDrawerUtils.SMALL_FONT38_TYPE0);
-                ImageDrawerUtils.drawStringContinuousDiscoloration(g2, x, y + g2.getFont().getSize()
-                        , "uid:" + o.get("uid"), ImageDrawerUtils.ORIGIN_A75
-                        , "/", ImageDrawerUtils.BLACK_A85
-                        , "lv." + o.get("level"), ImageDrawerUtils.BLUE2_A75
-                        , "/", ImageDrawerUtils.BLACK_A85
-                );
-                x = 335;
-                g2.setFont(ImageDrawerUtils.SMALL_FONT32);
-                g2.drawImage(ImageIO.read(new ClassPathResource("gold.png").getInputStream()),
-                        x, y, 45, 45, null);
-                g2.setColor(ImageDrawerUtils.ORIGIN_A80);
-                g2.drawString(":" + Utils.filterOverW(Integer.valueOf(o.get("gold").toString())), x + 50, y + g2.getFont().getSize() + 10);
-                //line1 = end
-                x = 5;
-                y += 62;
-                graphics.setColor(ImageDrawerUtils.BLACK_A35);
-                graphics.drawRoundRect(x - 3, y, 496, 56, 10, 10);
-                //==
-                g2.setFont(ImageDrawerUtils.SMALL_FONT22);
+            //========line-3-start===========
+            y += 100;
+            graphics.setColor(ImageDrawerUtils.BLACK_A75);
+            graphics.drawString("打工状态: ", 30, y);
+            graphics.drawString("打劫次数: ", 300, y);
 
-                int y0 = y + g2.getFont().getSize();
-                g2.setColor(ImageDrawerUtils.YELLOW_A85);
-                g2.drawString("灵力:" + o.get("energy"), x, y0);
-                g2.setColor(ImageDrawerUtils.BLACK_A75);
-                g2.drawString(String.format("积分[存]:%s[%s]", Utils.filterOverW(o.getInteger("score")), Utils.filterOverW(o.getInteger("score0"))), x + 150, y0);
-                y0 = y0 + g2.getFont().getSize() + 5;
-                g2.setColor(ImageDrawerUtils.BLUE2_A75);
-                g2.drawString(String.format("背包:%s", o.getJSONArray("bags").size()), x, y0);
-                g2.setColor(ImageDrawerUtils.GREEN_A85);
-                g2.drawString(String.format("角色:%s个", o.getJSONArray("characters").size()), x + 150, y0);
-
-                g2.dispose();
-                return image;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
+            if (resources.getK() > System.currentTimeMillis()) {
+                graphics.setColor(ImageDrawerUtils.GREEN_A75);
+                graphics.drawString("进行中.", 150, y);
+            } else {
+                graphics.setColor(ImageDrawerUtils.RED_A75);
+                graphics.drawString("空闲中.", 150, y);
             }
-        });
+
+            if (resources.getFz() >= 12) graphics.setColor(ImageDrawerUtils.GREEN_A75);
+            else graphics.setColor(ImageDrawerUtils.ORIGIN_A75);
+
+            graphics.drawString(String.valueOf(12 - resources.getFz()), 420, y);
+
+            graphics.setColor(ImageDrawerUtils.RED_A75);
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT26);
+            graphics.drawString("等级: " + user.getLevel().toString(), 560, y);
+            //========line-3-end===========
+
+            //========line-4-start===========
+            y += 100;
+            ImageDrawerUtils.drawStringContinuousDiscoloration(graphics, 30, y,
+                    "特殊币: ", ImageDrawerUtils.BLACK_A85, resources.getGold().toString(), ImageDrawerUtils.RED_A75);
+            ImageDrawerUtils.drawStringContinuousDiscoloration(graphics, 300, y,
+                    "灵力: ", ImageDrawerUtils.BLACK_A85, String.valueOf(resources.getEnergy()), ImageDrawerUtils.RED_A75);
+            ImageDrawerUtils.drawStringContinuousDiscoloration(graphics, 560, y,
+                    "魂角数: ", ImageDrawerUtils.BLACK_A85, String.valueOf(o.getJSONArray("characters").size()), ImageDrawerUtils.RED_A75);
+            //========line-4-end===========
+
+
+            //========line-tips-start===========
+            y = 750;
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT28);
+            graphics.setColor(ImageDrawerUtils.BLACK_A75);
+            graphics.drawRoundRect(180, y, 440, 60, 30, 30);
+            if (t) graphics.setColor(ImageDrawerUtils.GREEN_A85);
+            else graphics.setColor(Color.RED);
+            graphics.drawString(tips, (image.getWidth() - graphics.getFontMetrics().stringWidth(tips)) / 2, y + 40);
+            //========line-tips-end===========
+
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT18);
+            graphics.setColor(ImageDrawerUtils.BLACK_A75);
+            String dt = DateUtils.getFormat();
+            graphics.drawString(dt, (image.getWidth() - graphics.getFontMetrics().stringWidth(dt)) / 2, y + 130);
+            graphics.drawString(user.getId(), 5, 20);
+
+
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT18_TYPE0);
+            dt = "create by github@kloping";
+            graphics.drawString(dt, image.getWidth() - graphics.getFontMetrics().stringWidth(dt) - 5, image.getHeight() - graphics.getFontMetrics().getHeight());
+            graphics.dispose();
+            return image;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

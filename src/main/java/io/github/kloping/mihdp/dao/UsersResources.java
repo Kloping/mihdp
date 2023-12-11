@@ -31,4 +31,20 @@ public class UsersResources {
      * 体力
      */
     public Integer energy = 200;
+    /**
+     * 签到标记
+     */
+    private Integer day = 0;
+    /**
+     * 签到天数
+     */
+    private Integer days = 0;
+    /**
+     * 犯罪指数
+     */
+    private Integer fz = 0;
+    /**
+     * 打工cd
+     */
+    private Long k = 0L;
 }

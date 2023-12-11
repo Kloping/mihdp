@@ -10,3 +10,5 @@ spt:
   redis:
     port: 6379
     host: "localhost"
+
+language: "zh"

@@ -9,7 +9,9 @@ import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
 import io.github.kloping.MySpringTool.interfaces.component.FieldManager;
 import io.github.kloping.MySpringTool.interfaces.component.PackageScanner;
+import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.utils.Utils;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.GameWebSocketServer;
@@ -60,6 +62,8 @@ public class MihDpMain implements CommandLineRunner {
 
     }
 
+    public static final String[] REQUIRED_PROPERTIES = {"language"};
+
     public static StarterObjectApplication APPLICATION = null;
 
     public static void main(String[] args) {
@@ -85,8 +89,14 @@ public class MihDpMain implements CommandLineRunner {
             if (obj instanceof BaseMapper) {
                 contextManager.append(obj);
             } else if (obj instanceof JSONObject) {
-                contextManager.append(obj);
+                contextManager.append(obj, beanDefinitionName);
+            } else if (obj instanceof LanguageConfig) {
+                contextManager.append(obj, beanDefinitionName);
             }
+        }
+        for (String requiredProperty : REQUIRED_PROPERTIES) {
+            String v = context.getEnvironment().getProperty(requiredProperty);
+            if (Judge.isNotEmpty(v)) contextManager.append(v, requiredProperty);
         }
         FieldManager fieldManager = APPLICATION.INSTANCE.getFieldManager();
         if (fieldManager instanceof FieldManagerImpl) {

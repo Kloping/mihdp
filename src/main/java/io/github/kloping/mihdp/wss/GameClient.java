@@ -15,6 +15,7 @@ import org.java_websocket.WebSocket;
 public abstract class GameClient {
     public static String PASS_WORD = null;
     public static final String TRANS_ACTION = "msg";
+    public static final String ODATA_KEY = "odata-key";
 
     public final String id;
     public final WebSocket webSocket;
@@ -36,6 +37,7 @@ public abstract class GameClient {
         ReqDataPack data = JSON.parseObject(msg, ReqDataPack.class);
         if (data == null) return;
         GeneralData resData = gson.fromJson(data.getContent(), GeneralData.TYPE_TOKEN);
+        data.getArgs().put(ODATA_KEY, resData);
         if (data.getAction().equals(TRANS_ACTION)) {
             String action = BaseService.trnasActionOrNull(resData);
             if (action != null) {

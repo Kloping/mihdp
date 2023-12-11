@@ -1,8 +1,6 @@
 package io.github.kloping.mihdp.utils;
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 
@@ -347,8 +345,7 @@ public class ImageDrawerUtils {
             //绘制放大后的图片
             tag.getGraphics().drawImage(src, 0, 0, width, height, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(baos);
-            encoder.encode(tag);
+            ImageIO.write(tag, "png", baos);
             return ImageIO.read(new ByteArrayInputStream(baos.toByteArray()));
         } catch (Exception e) {
             e.printStackTrace();

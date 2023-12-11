@@ -28,6 +28,7 @@ import java.util.List;
  */
 @Controller
 public class InfoController {
+
     @AutoStand
     JSONObject config;
     @AutoStand
@@ -49,6 +50,7 @@ public class InfoController {
         BaseService.MSG2ACTION.put("信息", "info");
         BaseService.MSG2ACTION.put("当前信息", "info");
     }
+
     @Action("info")
     public Object info(ReqDataPack dataPack, GameClient client) {
         String sid = dataPack.getSender_id();
@@ -56,7 +58,13 @@ public class InfoController {
         if (user == null) return "您当前仍未'注册';请先进行'注册;";
         else {
             Integer level = user.getLevel();
-            Integer max = config.getJSONArray("xp_list").getInteger(level - 1);
+            JSONArray ar = config.getJSONArray("xp_list");
+            Integer max;
+            if (ar.size() > level) {
+                max = ar.getInteger(level - 1);
+            } else {
+                max = 99999;
+            }
             JSONObject jo = JSONObject.parseObject(JSON.toJSONString(user));
             jo.put("max", max);
             return jo.toString();
@@ -82,6 +90,20 @@ public class InfoController {
         data.put("bags", JSONArray.parseArray(JSON.toJSONString(bags)));
         data.put("characters", JSONArray.parseArray(JSON.toJSONString(characters)));
         data.putAll(JSON.parseObject(JSON.toJSONString(resources)));
+        return data;
+    }
+
+    {
+        BaseService.MSG2ACTION.put("商城", "shopping");
+        BaseService.MSG2ACTION.put("商店", "shopping");
+        BaseService.MSG2ACTION.put("商场", "shopping");
+    }
+
+    @Action("shopping")
+    public Object shopping(ReqDataPack pack) {
+        JSONObject data = new JSONObject();
+        data.put("data", config.getJSONArray("resources"));
+        data.putAll(config.getJSONObject("shopping"));
         return data;
     }
 }

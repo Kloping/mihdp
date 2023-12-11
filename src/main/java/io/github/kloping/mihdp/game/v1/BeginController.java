@@ -26,9 +26,10 @@ public class BeginController {
     @Action("reg")
     public String reg(ReqDataPack pack, GameClient client) {
         if (userMapper.selectById(pack.getSender_id()) != null) return null;
+        /*
         NumberSelector.reg(pack.getSender_id()).set(1,
                 d -> "该游戏是养成类游戏;您拥有自己的经验/等级/积分和游戏币" +
-                        "\n同样 您可以拥有一或多个魂角 它们同样拥有自己的等级/经验与属性;" +
+                        "\n同样 您可以拥有一或多个魂角(jue) 它们同样拥有自己的等级/经验与属性;" +
                         "\n您通过不同方式收集材料获得道具或战斗使其升级/突破/强化;使它们拥有更强的战斗力;" +
                         "\n游戏内战斗方式采用条式进度;" +
                         "\n1.继续 2.跳过").set(2, d -> {
@@ -37,8 +38,18 @@ public class BeginController {
                     NumberSelector.clear(pack.getSender_id());
                     return regNow(pack.getSender_id());
                 });
-
         return "即将进入新手教程阶段\n完成后可快速入门和获得大量奖励\n1.确定 2.跳过";
+        */
+        NumberSelector.reg(pack.getSender_id()).set(1, d -> {
+            NumberSelector.DATA_MAP.remove(pack.getSender_id());
+            NumberSelector.clear(pack.getSender_id());
+            return regNow(pack.getSender_id());
+        }).set(2, d -> {
+            NumberSelector.DATA_MAP.remove(pack.getSender_id());
+            NumberSelector.clear(pack.getSender_id());
+            return regNow(pack.getSender_id());
+        });
+        return "新手教程开发中 回复此条消息附带1以完成注册\n1.确定 2.跳过";
     }
 
     @AutoStand

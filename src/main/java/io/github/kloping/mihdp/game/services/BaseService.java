@@ -30,7 +30,9 @@ public class BaseService {
             String content = text.getContent().trim();
             if (content.matches("\\d")) {
                 return "s" + content.trim();
-            } else return MSG2ACTION.get(content);
+            } else {
+                return MSG2ACTION.get(content);
+            }
         }
         return null;
     }

@@ -149,14 +149,14 @@ public class DrawController {
                 g2.setFont(ImageDrawerUtils.SMALL_FONT22);
 
                 int y0 = y + g2.getFont().getSize();
-                g2.setColor(ImageDrawerUtils.ORIGIN_A75);
+                g2.setColor(ImageDrawerUtils.YELLOW_A85);
                 g2.drawString("灵力:" + o.get("energy"), x, y0);
                 g2.setColor(ImageDrawerUtils.BLACK_A75);
                 g2.drawString(String.format("积分[存]:%s[%s]", Utils.filterOverW(o.getInteger("score")), Utils.filterOverW(o.getInteger("score0"))), x + 150, y0);
                 y0 = y0 + g2.getFont().getSize() + 5;
                 g2.setColor(ImageDrawerUtils.BLUE2_A75);
                 g2.drawString(String.format("背包:%s", o.getJSONArray("bags").size()), x, y0);
-                g2.setColor(ImageDrawerUtils.ORIGIN_A75);
+                g2.setColor(ImageDrawerUtils.GREEN_A85);
                 g2.drawString(String.format("角色:%s个", o.getJSONArray("characters").size()), x + 150, y0);
 
                 g2.dispose();

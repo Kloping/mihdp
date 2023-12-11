@@ -22,7 +22,7 @@ public class User {
     /**
      * 不唯一名字
      */
-    private String name = "魂士";
+    private String name = "默认昵称";
     /**
      * 暂时可空
      */

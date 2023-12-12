@@ -4,7 +4,6 @@ import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
-import io.github.kloping.mihdp.wss.data.ResDataPack;
 
 import java.util.HashMap;
 import java.util.Map;

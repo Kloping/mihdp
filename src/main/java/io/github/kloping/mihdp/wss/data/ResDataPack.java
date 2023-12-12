@@ -21,8 +21,10 @@ public class ResDataPack {
     private String action;
 
     private String id;
+    private String bot_id;
+    private String env_type;
+    private String env_id = "";
     private GeneralData data;
-
     private Long time = 0L;
 
     private Map<String, Object> args = new HashMap<>();

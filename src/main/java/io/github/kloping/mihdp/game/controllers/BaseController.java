@@ -34,6 +34,9 @@ public class BaseController implements Runner {
         ReqDataPack reqDataPack = (ReqDataPack) objects[2];
         ResDataPack pack = new ResDataPack();
         pack.setId(reqDataPack.getId());
+        pack.setBot_id(reqDataPack.getBot_id());
+        pack.setEnv_type(reqDataPack.getEnv_type());
+        pack.setEnv_id(reqDataPack.getEnv_id());
         pack.setAction(reqDataPack.getAction());
         pack.setTime(reqDataPack.getTime());
         pack.setArgs(reqDataPack.getArgs());

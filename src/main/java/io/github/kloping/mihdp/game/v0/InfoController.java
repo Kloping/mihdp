@@ -255,4 +255,63 @@ public class InfoController {
         return data;
     }
 
+    {
+        BaseService.MSG2ACTION.put("积分转让", "trans0");
+        BaseService.MSG2ACTION.put("转让积分", "trans0");
+    }
+
+    @Action("rob0")
+    public Object rob0(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
+        GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
+        if (at == null) return lconfig.getString("TargetNotFoundPrompt");
+        String aid = at.getId();
+        User atUser = getUser(aid);
+        if (atUser == null) return lconfig.getString("TargetUnregisteredPrompt");
+        GeneralData.ResDataText text = generalData.find(GeneralData.ResDataText.class);
+        Integer sc = 1;
+        if (text != null) sc = NumberUtils.getIntegerFromString(text.getContent(), 1);
+        UsersResources r = usersResourcesMapper.selectById(user.getUid());
+        UsersResources r0 = usersResourcesMapper.selectById(atUser.getUid());
+        JSONObject data = new JSONObject();
+        if (sc == 1) {
+            if (r.getScore() > 60) {
+                if (r0.getScore() > 60) {
+                    if (r.getFz() < 12) {
+                        int l = RandomUtils.RANDOM.nextInt(20) + 40;
+                        r.setScore(r.getScore() + l);
+                        r0.setScore(r0.getScore() - l);
+                        r.addFz(1);
+                        usersResourcesMapper.updateById(r);
+                        usersResourcesMapper.updateById(r0);
+                        return lconfig.getString("Rob0Success", l);
+                    } else return lconfig.getString("Rob0Fail0");
+                } else return lconfig.getString("TargetScoreDeficiency");
+            } else return lconfig.getString("ScoreDeficiency");
+        } else {
+            int suc = 0;
+            int all = 0;
+            for (Integer i = 0; i < sc; i++) {
+                if (r.getScore() > 60) {
+                    if (r0.getScore() > 60) {
+                        if (r.getFz() < 12) {
+                            int l = RandomUtils.RANDOM.nextInt(20) + 40;
+                            r.setScore(r.getScore() + l);
+                            r0.setScore(r0.getScore() - l);
+                            r.addFz(1);
+                            suc++;
+                            all += l;
+                        }
+                    }
+                }
+            }
+            if (suc > 0) {
+                usersResourcesMapper.updateById(r0);
+                usersResourcesMapper.updateById(r);
+            }
+            return lconfig.getString("Rob1Success", suc, all, suc);
+        }
+    }
 }

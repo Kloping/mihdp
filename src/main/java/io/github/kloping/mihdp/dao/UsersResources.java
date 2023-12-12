@@ -47,4 +47,8 @@ public class UsersResources {
      * 打工cd
      */
     private Long k = 0L;
+
+    public void addFz(int i) {
+        fz += i;
+    }
 }

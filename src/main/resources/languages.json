@@ -13,6 +13,11 @@
     "Put0Success": "存积分成功!",
     "Put0Fail": "当前积分不足:%s",
     "Trans0Success": "积分转让成功!",
-    "Trans0Fail": "积分转让失败!"
+    "Trans0Fail": "积分转让失败!",
+    "Rob0Success": "成功打劫了%s积分!\n增加1指数",
+    "Rob1Success": "累计成功打劫%s次共%s积分,增加%s指数",
+    "Rob0Fail0": "打劫次数上限!",
+    "TargetScoreDeficiency": "对方积分不足!",
+    "ScoreDeficiency": "积分不足!"
   }
 }

@@ -1,2 +1,3 @@
-mvn package assembly:single
-java -Dfile.encoding=UTF-8 -cp "target/*" io.github.kloping.mihdp.MihDpMain
+mvn clean dependency:copy-dependencies -DoutputDirectory=libs compile
+
+java -Dfile.encoding=UTF-8 -cp "./target/classes:./libs/*" io.github.kloping.mihdp.MihDpMain

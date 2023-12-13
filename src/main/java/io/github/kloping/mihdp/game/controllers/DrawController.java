@@ -42,8 +42,14 @@ public class DrawController {
         if (ACTION2DRAWER.containsKey(action)) {
             GeneralData.ResDataText text = (GeneralData.ResDataText) dataPack.getData();
             String jsonD = text.getContent();
+            JSONObject data = null;
             try {
-                BufferedImage image = ACTION2DRAWER.get(action).draw(JSON.parseObject(jsonD), dataPack);
+                data = JSON.parseObject(jsonD);
+            } catch (com.alibaba.fastjson.JSONException je) {
+                System.err.println("跳过");
+            }
+            if (data != null) {
+                BufferedImage image = ACTION2DRAWER.get(action).draw(data, dataPack);
                 if (image != null) {
                     try {
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -53,9 +59,7 @@ public class DrawController {
                         e.printStackTrace();
                     }
                 }
-            } catch (com.alibaba.fastjson.JSONException je) {
-                System.err.println("跳过");
-            }
+            } else return null;
         }
         return null;
     }

@@ -20,6 +20,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -52,10 +53,10 @@ public class BaseComponent implements CommandLineRunner {
     @Bean
     public JSONObject defaultConfig() {
         try {
-            ClassPathResource classPathResource = new ClassPathResource("default.json");
-            String json = ReadUtils.readAll(classPathResource.getInputStream(), "utf-8");
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("default.json");
+            String json = ReadUtils.readAll(is, "utf-8");
             return JSONObject.parseObject(json);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -63,13 +64,11 @@ public class BaseComponent implements CommandLineRunner {
     @Bean
     public LanguageConfig languagesConfig(@Value("${language:zh}") String local) {
         try {
-            System.out.println("start load local " + local);
-            ClassPathResource classPathResource = new ClassPathResource("languages.json");
-            String json = ReadUtils.readAll(classPathResource.getInputStream(), "utf-8");
-            System.out.println("load " + json);
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("languages.json");
+            String json = ReadUtils.readAll(is, "utf-8");
             JSONObject data = JSONObject.parseObject(json);
             return new LanguageConfig(local, data);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

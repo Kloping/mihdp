@@ -10,7 +10,7 @@ public class LanguageConfig {
     private JSONObject data = null;
 
     public LanguageConfig(String local, JSONObject data) {
-        this.local = local;
+        this.local = local == null ? this.local : local;
         this.data = data.getJSONObject(local);
         System.out.println("load local `" + local + "` for " + this.data.keySet().toString());
     }

@@ -45,9 +45,11 @@ public class BaseController implements Runner {
         } else {
             pack.setData(new GeneralData.ResDataText(t.toString()));
         }
-        if (reqDataPack.getArgValue("draw").toString().equals("true")) {
-            GeneralData data = drawController.draw(pack);
-            if (data != null) pack.setData(data);
+        if (reqDataPack.containsArgs("draw")) {
+            if (reqDataPack.getArgValue("draw").toString().equals("true")) {
+                GeneralData data = drawController.draw(pack);
+                if (data != null) pack.setData(data);
+            }
         }
         try {
             client.webSocket.send(pack.toString());

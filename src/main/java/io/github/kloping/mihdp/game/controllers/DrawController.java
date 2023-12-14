@@ -70,6 +70,8 @@ public class DrawController {
         ACTION2DRAWER.put("work0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
         ACTION2DRAWER.put("get0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
         ACTION2DRAWER.put("put0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
+        ACTION2DRAWER.put("put0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
+        ACTION2DRAWER.put("trans0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
     }
 
 
@@ -112,7 +114,6 @@ public class DrawController {
             else if (r0 < 60) graphics.setColor(Color.GREEN);
             else graphics.setColor(ImageDrawerUtils.ORIGIN_A75);
             graphics.fillRoundRect(150, 240, r0 * 5, 20, 5, 5);
-
 
             graphics.setColor(ImageDrawerUtils.BLACK_A45);
             graphics.drawRoundRect(280, 270, 240, 40, 40, 20);
@@ -217,7 +218,7 @@ public class DrawController {
             graphics.setColor(ImageDrawerUtils.BLACK_A75);
             String dt = DateUtils.getFormat();
             graphics.drawString(dt, (image.getWidth() - graphics.getFontMetrics().stringWidth(dt)) / 2, y + 130);
-            graphics.drawString(user.getId(), 5, 20);
+            graphics.drawString(String.format("%s - %s", user.getId(), user.getUid()), 5, 20);
 
 
             graphics.setFont(ImageDrawerUtils.SMALL_FONT18_TYPE0);

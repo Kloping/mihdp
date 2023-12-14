@@ -62,25 +62,34 @@ public class BeginController {
     @AutoStand
     LanguageConfig languageConfig;
 
-    private String regNow(String senderId) {
-        User user = new User().setId(senderId);
-        //获得最小uid
-        String uid = userMapper.selectMaxUid();
-        if (uid == null) {
-            uid = "1000001";
-        }
-        //加随机
-        Long tuid = Long.valueOf(uid);
-        tuid = tuid + RandomUtils.RANDOM.nextInt(10) + 1;
-        user.setUid(tuid.toString());
-        //注册user
-        userMapper.insert(user);
-        //注册 resource
-        UsersResources resources = new UsersResources();
-        resources.setUid(tuid.toString());
-        resourcesMapper.insert(resources);
-        //清除选项
-        NumberSelector.clear(senderId);
+    public String regNow(String senderId) {
+        User user = regNow0(senderId);
         return languageConfig.getString("RegistrationSuccessfulTips");
+    }
+
+    public User regNow0(String senderId) {
+        try {
+            User user = new User().setId(senderId);
+            //获得最小uid
+            String uid = userMapper.selectMaxUid();
+            if (uid == null) {
+                uid = "1000001";
+            }
+            //加随机
+            Long tuid = Long.valueOf(uid);
+            tuid = tuid + RandomUtils.RANDOM.nextInt(10) + 1;
+            user.setUid(tuid.toString());
+            //注册user
+            userMapper.insert(user);
+            //注册 resource
+            UsersResources resources = new UsersResources();
+            resources.setUid(tuid.toString());
+            resourcesMapper.insert(resources);
+            //清除选项
+            NumberSelector.clear(senderId);
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

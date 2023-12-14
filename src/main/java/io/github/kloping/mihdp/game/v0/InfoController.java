@@ -14,6 +14,7 @@ import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.services.BaseService;
+import io.github.kloping.mihdp.game.v1.BeginController;
 import io.github.kloping.mihdp.mapper.BagMaper;
 import io.github.kloping.mihdp.mapper.CharactersMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
@@ -49,7 +50,8 @@ public class InfoController {
     BagMaper bagMaper;
     @AutoStand
     CharactersMapper charactersMapper;
-
+    @AutoStand
+    BeginController beginController;
     @Before
     public void before(ReqDataPack dataPack) {
     }
@@ -72,7 +74,7 @@ public class InfoController {
     @Action("info")
     public Object info(ReqDataPack dataPack) {
         User user = getUser(dataPack);
-        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         Integer level = user.getLevel();
         JSONArray ar = defaultConfig.getJSONArray("xp_list");
@@ -113,7 +115,7 @@ public class InfoController {
     @Action("sign")
     public Object sign(ReqDataPack dataPack) {
         User user = getUser(dataPack);
-        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         if (resources.getDay() == DateUtils.getDay()) {
@@ -145,7 +147,7 @@ public class InfoController {
     @Action("work0")
     public Object work0(ReqDataPack dataPack) {
         User user = getUser(dataPack);
-        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         long k0 = resources.getK();
@@ -176,7 +178,7 @@ public class InfoController {
     @Action("get0")
     public Object get0(ReqDataPack dataPack) {
         User user = getUser(dataPack);
-        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         Integer sc = NumberUtils.getIntegerFromString(dataPack.getContent(), 1);
@@ -201,7 +203,7 @@ public class InfoController {
     @Action("put0")
     public Object put0(ReqDataPack dataPack) {
         User user = getUser(dataPack);
-        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         Integer sc = NumberUtils.getIntegerFromString(dataPack.getContent(), 1);
@@ -227,7 +229,7 @@ public class InfoController {
     @Action("trans0")
     public Object trans0(ReqDataPack dataPack) {
         User user = getUser(dataPack);
-        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
         GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
         if (at == null) return lconfig.getString("TargetNotFoundPrompt");
@@ -263,7 +265,7 @@ public class InfoController {
     @Action("rob0")
     public Object rob0(ReqDataPack dataPack) {
         User user = getUser(dataPack);
-        if (user == null) return lconfig.getString("UnregisteredPrompt");
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
         GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
         if (at == null) return lconfig.getString("TargetNotFoundPrompt");

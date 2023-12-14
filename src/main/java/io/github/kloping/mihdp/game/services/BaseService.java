@@ -48,26 +48,10 @@ public class BaseService {
             }
         } else if (generalData instanceof GeneralData.ResDataChain) {
             GeneralData.ResDataChain chain = (GeneralData.ResDataChain) generalData;
-            for (GeneralData data : chain.getList()) {
-                if (data instanceof GeneralData.ResDataText) {
-                    GeneralData.ResDataText text = (GeneralData.ResDataText) data;
-                    String content = text.getContent().trim();
-                    if (content.matches("\\d")) {
-                        text.setContent(null);
-                        action = "s" + content.trim();
-                    } else if (MSG2ACTION.containsKey(content)) {
-                        text.setContent(null);
-                        action = MSG2ACTION.get(content);
-                    } else {
-                        for (String key : MSG2ACTION.keySet()) {
-                            if (content.startsWith(key)) {
-                                text.setContent(text.getContent().replace(key, "").trim());
-                                action = MSG2ACTION.get(key);
-                                break;
-                            }
-                        }
-                    }
-                }
+            chain.filterAt(pack.getBot_id());
+            GeneralData d0 = chain.getList().get(0);
+            if (d0 instanceof GeneralData.ResDataText) {
+                action = toAction((GeneralData.ResDataText) d0, action);
             }
         }
         if (action != null) {
@@ -75,5 +59,26 @@ public class BaseService {
             pack.setAction(action);
         }
         return pack;
+    }
+
+    private static String toAction(GeneralData.ResDataText d0, String action) {
+        GeneralData.ResDataText text = d0;
+        String content = text.getContent().trim();
+        if (content.matches("\\d")) {
+            text.setContent(null);
+            action = "s" + content.trim();
+        } else if (MSG2ACTION.containsKey(content)) {
+            text.setContent(null);
+            action = MSG2ACTION.get(content);
+        } else {
+            for (String key : MSG2ACTION.keySet()) {
+                if (content.startsWith(key)) {
+                    text.setContent(text.getContent().replace(key, "").trim());
+                    action = MSG2ACTION.get(key);
+                    break;
+                }
+            }
+        }
+        return action;
     }
 }

@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 
 import java.lang.reflect.Type;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 
 @Data
@@ -90,6 +91,18 @@ public class GeneralData {
                 }
             }
             return (T) data;
+        }
+
+        public void filterAt(String botId) {
+            Iterator<GeneralData> iterator = list.listIterator();
+            while (iterator.hasNext()) {
+                GeneralData data = iterator.next();
+                if (data instanceof GeneralData.ResDataAt) {
+                    GeneralData.ResDataAt at = (ResDataAt) data;
+                    if (at.getId().equals(botId))
+                        iterator.remove();
+                }
+            }
         }
     }
 }

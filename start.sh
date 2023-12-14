@@ -6,4 +6,4 @@ else
   mvn clean dependency:copy-dependencies -DoutputDirectory=libs compile
 fi
 
-java -Dfile.encoding=UTF-8 -cp "./target/classes:./libs/*" io.github.kloping.mihdp.MihDpMain
+java -Dfile.encoding=UTF-8 -classpath "./target/classes:./libs/*" io.github.kloping.mihdp.MihDpMain

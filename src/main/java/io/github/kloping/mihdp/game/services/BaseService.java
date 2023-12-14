@@ -49,20 +49,22 @@ public class BaseService {
         } else if (generalData instanceof GeneralData.ResDataChain) {
             GeneralData.ResDataChain chain = (GeneralData.ResDataChain) generalData;
             for (GeneralData data : chain.getList()) {
-                GeneralData.ResDataText text = (GeneralData.ResDataText) generalData;
-                String content = text.getContent().trim();
-                if (content.matches("\\d")) {
-                    text.setContent(null);
-                    action = "s" + content.trim();
-                } else if (MSG2ACTION.containsKey(content)) {
-                    text.setContent(null);
-                    action = MSG2ACTION.get(content);
-                } else {
-                    for (String key : MSG2ACTION.keySet()) {
-                        if (content.startsWith(key)) {
-                            text.setContent(text.getContent().replace(key, "").trim());
-                            action = MSG2ACTION.get(key);
-                            break;
+                if (data instanceof GeneralData.ResDataText) {
+                    GeneralData.ResDataText text = (GeneralData.ResDataText) data;
+                    String content = text.getContent().trim();
+                    if (content.matches("\\d")) {
+                        text.setContent(null);
+                        action = "s" + content.trim();
+                    } else if (MSG2ACTION.containsKey(content)) {
+                        text.setContent(null);
+                        action = MSG2ACTION.get(content);
+                    } else {
+                        for (String key : MSG2ACTION.keySet()) {
+                            if (content.startsWith(key)) {
+                                text.setContent(text.getContent().replace(key, "").trim());
+                                action = MSG2ACTION.get(key);
+                                break;
+                            }
                         }
                     }
                 }

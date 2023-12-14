@@ -63,12 +63,15 @@ public class BaseComponent implements CommandLineRunner {
     @Bean
     public LanguageConfig languagesConfig(@Value("${language:zh}") String local) {
         try {
+            System.out.println("start load local " + local);
             ClassPathResource classPathResource = new ClassPathResource("languages.json");
             String json = ReadUtils.readAll(classPathResource.getInputStream(), "utf-8");
+            System.out.println("load " + json);
             JSONObject data = JSONObject.parseObject(json);
             return new LanguageConfig(local, data);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return null;
         }
     }
 

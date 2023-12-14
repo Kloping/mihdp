@@ -256,8 +256,8 @@ public class InfoController {
     }
 
     {
-        BaseService.MSG2ACTION.put("积分转让", "trans0");
-        BaseService.MSG2ACTION.put("转让积分", "trans0");
+        BaseService.MSG2ACTION.put("打劫", "rob0");
+        BaseService.MSG2ACTION.put("抢劫", "rob0");
     }
 
     @Action("rob0")

@@ -28,7 +28,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /**
  * @author github.kloping
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "io.github.kloping.mihdp")
 @EnableAsync
 @EnableScheduling
 public class MihDpMain implements CommandLineRunner {

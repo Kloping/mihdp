@@ -66,7 +66,6 @@ public class BaseComponent implements CommandLineRunner {
         try {
             InputStream is = this.getClass().getClassLoader().getResourceAsStream("languages.json");
             String json = ReadUtils.readAll(is, "utf-8");
-            System.out.println(json);
             JSONObject data = JSONObject.parseObject(json);
             return new LanguageConfig(local, data);
         } catch (Exception e) {

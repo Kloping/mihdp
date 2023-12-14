@@ -49,9 +49,11 @@ public class BaseService {
         } else if (generalData instanceof GeneralData.ResDataChain) {
             GeneralData.ResDataChain chain = (GeneralData.ResDataChain) generalData;
             chain.filterAt(pack.getBot_id());
-            GeneralData d0 = chain.getList().get(0);
-            if (d0 instanceof GeneralData.ResDataText) {
-                action = toAction((GeneralData.ResDataText) d0, action);
+            if (!chain.getList().isEmpty()) {
+                GeneralData d0 = chain.getList().get(0);
+                if (d0 instanceof GeneralData.ResDataText) {
+                    action = toAction((GeneralData.ResDataText) d0, action);
+                }
             }
         }
         if (action != null) {

@@ -11,4 +11,4 @@ spt:
     port: 6379
     host: "localhost"
 
-language: "zh"
+m-language: "zh"

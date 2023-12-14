@@ -62,7 +62,7 @@ public class BaseComponent implements CommandLineRunner {
     }
 
     @Bean
-    public LanguageConfig languagesConfig(@Value("${language:zh}") String local) {
+    public LanguageConfig languagesConfig(@Value("${m-language:zh}") String local) {
         try {
             InputStream is = this.getClass().getClassLoader().getResourceAsStream("languages.json");
             String json = ReadUtils.readAll(is, "utf-8");

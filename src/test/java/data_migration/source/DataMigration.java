@@ -28,9 +28,10 @@ public class DataMigration {
     @Bean
     public DataSource getDataSource() {
         DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mysql://localhost:3306/testdb0?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/gdb0?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true");
         dataSource.setUsername("root");
         dataSource.setPassword("root");
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
         return dataSource;
     }
 }

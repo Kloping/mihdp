@@ -275,7 +275,7 @@ public class InfoController {
         if (atUser == null) return lconfig.getString("TargetUnregisteredPrompt");
         String text = generalData.allText();
         Integer sc = 1;
-        if (Judge.isEmpty(text)) sc = NumberUtils.getIntegerFromString(text, 1);
+        if (!Judge.isEmpty(text)) sc = NumberUtils.getIntegerFromString(text, 1);
         UsersResources r = usersResourcesMapper.selectById(user.getUid());
         UsersResources r0 = usersResourcesMapper.selectById(atUser.getUid());
         JSONObject data = new JSONObject();

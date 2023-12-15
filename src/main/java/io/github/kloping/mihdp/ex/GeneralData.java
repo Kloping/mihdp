@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 import java.lang.reflect.Type;
 import java.util.Base64;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
@@ -20,6 +20,9 @@ public class GeneralData {
         return cla == this.getClass() ? (T) this : null;
     }
 
+    public String allText() {
+        return "";
+    }
     protected String type;
 
     @Override
@@ -40,6 +43,11 @@ public class GeneralData {
         @Override
         public <T extends GeneralData> T find(Class<T> cla) {
             return (Judge.isNotEmpty(content) && cla == this.getClass()) ? (T) this : null;
+        }
+
+        @Override
+        public String allText() {
+            return content;
         }
     }
 
@@ -93,16 +101,25 @@ public class GeneralData {
             return (T) data;
         }
 
-        public void filterAt(String botId) {
-            Iterator<GeneralData> iterator = list.listIterator();
-            while (iterator.hasNext()) {
-                GeneralData data = iterator.next();
-                if (data instanceof GeneralData.ResDataAt) {
-                    GeneralData.ResDataAt at = (ResDataAt) data;
-                    if (at.getId().equals(botId))
-                        iterator.remove();
+        public List<GeneralData> filterAt(String botId) {
+            List<GeneralData> d0 = new LinkedList<>();
+            for (GeneralData data : list) {
+                if (data instanceof ResDataAt) {
+                    ResDataAt at = (ResDataAt) data;
+                    if (at.getId().equals(botId)) continue;
                 }
+                d0.add(data);
             }
+            return d0;
+        }
+
+        @Override
+        public String allText() {
+            StringBuilder sb = new StringBuilder();
+            for (GeneralData data : list) {
+                sb.append(data.allText());
+            }
+            return sb.toString();
         }
     }
 }

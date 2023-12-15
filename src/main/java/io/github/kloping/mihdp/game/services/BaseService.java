@@ -48,7 +48,7 @@ public class BaseService {
             }
         } else if (generalData instanceof GeneralData.ResDataChain) {
             GeneralData.ResDataChain chain = (GeneralData.ResDataChain) generalData;
-            chain.filterAt(pack.getBot_id());
+            chain = new GeneralData.ResDataChain(chain.filterAt(pack.getBot_id()));
             if (!chain.getList().isEmpty()) {
                 GeneralData d0 = chain.getList().get(0);
                 if (d0 instanceof GeneralData.ResDataText) {

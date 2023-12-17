@@ -4,10 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.github.kloping.MySpringTool.annotations.Action;
-import io.github.kloping.MySpringTool.annotations.AutoStand;
-import io.github.kloping.MySpringTool.annotations.Before;
-import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.MySpringTool.annotations.*;
+import io.github.kloping.common.Public;
 import io.github.kloping.date.DateUtils;
 import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.dao.Characters;
@@ -315,6 +313,25 @@ public class InfoController {
                 usersResourcesMapper.updateById(r);
             }
             return lconfig.getString("Rob1Success", suc, all, suc);
+        }
+    }
+
+    @CronSchedule("21 0 0 * * ? ")
+    public void interest() {
+        for (UsersResources userScore : usersResourcesMapper.selectList(null)) {
+            Public.EXECUTOR_SERVICE.submit(() -> {
+                try {
+                    if (userScore.getScore0() <= 10000) {
+                        return;
+                    } else {
+                        int s = (int) (userScore.getScore0() / 10000 * 4);
+                        userScore.setScore0(userScore.getScore0() + s);
+                        usersResourcesMapper.updateById(userScore);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 }

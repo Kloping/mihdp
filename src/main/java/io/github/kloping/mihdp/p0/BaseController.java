@@ -1,12 +1,13 @@
-package io.github.kloping.mihdp.game.controllers;
+package io.github.kloping.mihdp.p0;
 
 import io.github.kloping.MySpringTool.annotations.*;
 import io.github.kloping.MySpringTool.entity.interfaces.Runner;
+import io.github.kloping.MySpringTool.entity.interfaces.RunnerOnThrows;
 import io.github.kloping.MySpringTool.exceptions.NoRunException;
 import io.github.kloping.MySpringTool.interfaces.QueueExecutor;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.utils.NumberSelector;
-import io.github.kloping.mihdp.game.utils.SelectorInvoke;
+import io.github.kloping.mihdp.p0.utils.NumberSelector;
+import io.github.kloping.mihdp.p0.utils.SelectorInvoke;
 import io.github.kloping.mihdp.mapper.ConfigMapper;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
@@ -19,19 +20,19 @@ import java.lang.reflect.Method;
  * @author github.kloping
  */
 @Controller
-public class BaseController implements Runner {
-    public BaseController(QueueExecutor queueExecutor) {
-        queueExecutor.setAfter(this);
-    }
-
+public class BaseController implements Runner, RunnerOnThrows {
     @AutoStand
     DrawController drawController;
 
-    @Override
-    public void run(Method method, Object t, Object[] objects) throws NoRunException {
+    public BaseController(QueueExecutor queueExecutor) {
+        queueExecutor.setAfter(this);
+        queueExecutor.setException(this);
+    }
+
+    private void dispose(Object t, Object[] args) {
         if (t == null) return;
-        GameClient client = (GameClient) objects[3];
-        ReqDataPack reqDataPack = (ReqDataPack) objects[2];
+        GameClient client = (GameClient) args[3];
+        ReqDataPack reqDataPack = (ReqDataPack) args[2];
         ResDataPack pack = new ResDataPack();
         pack.setId(reqDataPack.getId());
         pack.setBot_id(reqDataPack.getBot_id());
@@ -60,8 +61,20 @@ public class BaseController implements Runner {
         }
     }
 
+    @Override
+    public void onThrows(Throwable throwable, Object t, Object... args) {
+        if (throwable instanceof NoRunException) {
+            dispose(t, args);
+        }
+    }
+
     @AutoStand
     ConfigMapper configMapper;
+
+    @Override
+    public void run(Method method, Object t, Object[] objects) throws NoRunException {
+        dispose(t, objects);
+    }
 
     @Action("test")
     public Object getInfo(ReqDataPack dataPack, GameClient client) {

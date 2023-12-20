@@ -1,12 +1,12 @@
-package io.github.kloping.mihdp.game.v1;
+package io.github.kloping.mihdp.game.v0;
 
 import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
-import io.github.kloping.mihdp.game.services.BaseService;
-import io.github.kloping.mihdp.game.utils.NumberSelector;
+import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.p0.utils.NumberSelector;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.utils.LanguageConfig;

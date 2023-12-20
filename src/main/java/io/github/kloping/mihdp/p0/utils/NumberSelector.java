@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.utils;
+package io.github.kloping.mihdp.p0.utils;
 
 import lombok.Getter;
 
@@ -29,6 +29,10 @@ public class NumberSelector {
     }
 
     public static void clear(String id) {
+        DATA_MAP.remove(id);
+    }
+
+    public void clear() {
         DATA_MAP.remove(id);
     }
 

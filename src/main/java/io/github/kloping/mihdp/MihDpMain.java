@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.github.kloping.MySpringTool.StarterObjectApplication;
 import io.github.kloping.MySpringTool.h1.impl.component.FieldManagerImpl;
 import io.github.kloping.MySpringTool.h1.impl.component.PackageScannerImpl;
+import io.github.kloping.MySpringTool.h1.impls.component.AutomaticWiringParamsH2Impl;
 import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
 import io.github.kloping.MySpringTool.interfaces.component.FieldManager;
@@ -70,8 +71,8 @@ public class MihDpMain implements CommandLineRunner {
         ConfigurableApplicationContext context = SpringApplication.run(MihDpMain.class, args);
         APPLICATION = new StarterObjectApplication(BaseComponent.class);
         APPLICATION.setMainKey(String.class);
-        APPLICATION.setAccessTypes(ReqDataPack.class, GameClient.class, GeneralData.class);
         APPLICATION.setWaitTime(60000);
+        APPLICATION.setAccessTypes(ReqDataPack.class, GameClient.class, GeneralData.class);
         APPLICATION.logger = context.getBean(Logger.class);
         APPLICATION.INSTANCE.getPRE_SCAN_RUNNABLE().add(() -> {
             final String hostKey = "spt.redis.host";

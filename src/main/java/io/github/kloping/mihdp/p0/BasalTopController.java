@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.controllers;
+package io.github.kloping.mihdp.p0;
 
 import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.MySpringTool.entity.interfaces.Runner;

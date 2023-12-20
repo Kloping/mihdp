@@ -31,6 +31,7 @@
   "base_character": {
     "xp": 100,
     "hp": 100,
+    "hj": 100,
     "att": 10,
     "defense": 20,
     "speed": 100,

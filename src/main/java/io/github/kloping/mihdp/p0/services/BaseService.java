@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.services;
+package io.github.kloping.mihdp.p0.services;
 
 import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.mihdp.ex.GeneralData;

@@ -12,9 +12,7 @@ import io.github.kloping.mihdp.dao.Characters;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.services.BaseService;
-import io.github.kloping.mihdp.game.v1.BeginController;
-import io.github.kloping.mihdp.mapper.BagMaper;
+import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.mapper.CharactersMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
@@ -23,7 +21,6 @@ import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.number.NumberUtils;
 import io.github.kloping.rand.RandomUtils;
-import io.github.kloping.spt.RedisOperate;
 
 import java.util.List;
 
@@ -32,28 +29,18 @@ import java.util.List;
  */
 @Controller
 public class InfoController {
-
     @AutoStand(id = "defaultConfig")
     JSONObject defaultConfig;
     @AutoStand
     LanguageConfig lconfig;
-    @AutoStand(id = "language")
-    String language;
-    @AutoStand
-    public RedisOperate<String> redisOperate0;
     @AutoStand
     UserMapper userMapper;
     @AutoStand
     UsersResourcesMapper usersResourcesMapper;
     @AutoStand
-    BagMaper bagMaper;
-    @AutoStand
     CharactersMapper charactersMapper;
     @AutoStand
     BeginController beginController;
-    @Before
-    public void before(ReqDataPack dataPack) {
-    }
 
     private User getUser(ReqDataPack dataPack) {
         String sid = dataPack.getSender_id();
@@ -65,15 +52,21 @@ public class InfoController {
         return user;
     }
 
+    @Before
+    public User before(ReqDataPack dataPack) {
+        User user = getUser(dataPack);
+        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+        return user;
+    }
+
     {
         BaseService.MSG2ACTION.put("信息", "info");
         BaseService.MSG2ACTION.put("当前信息", "info");
+        BaseService.MSG2ACTION.put("个人信息", "info");
     }
 
     @Action("info")
-    public Object info(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
-        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+    public Object info(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         Integer level = user.getLevel();
         JSONArray ar = defaultConfig.getJSONArray("xp_list");
@@ -112,9 +105,7 @@ public class InfoController {
     }
 
     @Action("sign")
-    public Object sign(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
-        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+    public Object sign(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         if (resources.getDay() == DateUtils.getDay()) {
@@ -133,7 +124,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("SignSuccess", r));
             data.put("t", true);
         }
-        data.putAll((JSONObject) info(dataPack));
+        data.putAll((JSONObject) info(dataPack, user));
         return data;
     }
 
@@ -144,9 +135,7 @@ public class InfoController {
     }
 
     @Action("work0")
-    public Object work0(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
-        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+    public Object work0(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         long k0 = resources.getK();
@@ -166,7 +155,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Work0Success", f0, r));
             data.put("t", true);
         }
-        data.putAll((JSONObject) info(dataPack));
+        data.putAll((JSONObject) info(dataPack, user));
         return data;
     }
 
@@ -175,9 +164,7 @@ public class InfoController {
     }
 
     @Action("get0")
-    public Object get0(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
-        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+    public Object get0(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         Integer sc = NumberUtils.getIntegerFromString(dataPack.getContent(), 1);
@@ -191,7 +178,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Get0Fail", sc, resources.getScore0()));
             data.put("t", false);
         }
-        data.putAll((JSONObject) info(dataPack));
+        data.putAll((JSONObject) info(dataPack, user));
         return data;
     }
 
@@ -200,9 +187,7 @@ public class InfoController {
     }
 
     @Action("put0")
-    public Object put0(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
-        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+    public Object put0(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         JSONObject data = new JSONObject();
         Integer sc = NumberUtils.getIntegerFromString(dataPack.getContent(), 1);
@@ -216,7 +201,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Put0Fail", sc, resources.getScore0()));
             data.put("t", false);
         }
-        data.putAll((JSONObject) info(dataPack));
+        data.putAll((JSONObject) info(dataPack, user));
         return data;
     }
 
@@ -226,9 +211,7 @@ public class InfoController {
     }
 
     @Action("trans0")
-    public Object trans0(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
-        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+    public Object trans0(ReqDataPack dataPack, User user) {
         GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
         GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
         if (at == null) return lconfig.getString("TargetNotFoundPrompt");
@@ -252,7 +235,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Trans0Fail", sc, resources.getScore0()));
             data.put("t", false);
         }
-        data.putAll((JSONObject) info(dataPack));
+        data.putAll((JSONObject) info(dataPack, user));
         return data;
     }
 
@@ -262,9 +245,7 @@ public class InfoController {
     }
 
     @Action("rob0")
-    public Object rob0(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
-        if (user == null) user = beginController.regNow0(dataPack.getSender_id());
+    public Object rob0(ReqDataPack dataPack, User user) {
         GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
         GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
         if (at == null) return lconfig.getString("TargetNotFoundPrompt");

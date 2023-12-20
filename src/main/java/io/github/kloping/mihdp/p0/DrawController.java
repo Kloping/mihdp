@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.controllers;
+package io.github.kloping.mihdp.p0;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -96,7 +96,7 @@ public class DrawController {
             image = ImageDrawerUtils.resizeImage(image, 800, 1000);
             BufferedImage icon0;
             if (Judge.isEmpty(icon)) {
-                ClassPathResource iconr = new ClassPathResource("0.jpg");
+                ClassPathResource iconr = new ClassPathResource("sources/0.jpg");
                 icon0 = ImageIO.read(iconr.getInputStream());
                 icon0 = ImageDrawerUtils.resizeImage(icon0, 180, 180);
             } else icon0 = ImageDrawerUtils.readImage(new URL(icon), 180, 180);

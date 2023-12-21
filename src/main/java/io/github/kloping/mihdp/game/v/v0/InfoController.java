@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.v0;
+package io.github.kloping.mihdp.game.v.v0;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;

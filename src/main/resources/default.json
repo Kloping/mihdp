@@ -12,7 +12,7 @@
     "rp": 6,
     "rp_max": 3000
   },
-  "resources": [
+  "items": [
     {
       "id": 101,
       "name": "经验本",

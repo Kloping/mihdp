@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.v0;
+package io.github.kloping.mihdp.game.v.v0;
 
 import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;

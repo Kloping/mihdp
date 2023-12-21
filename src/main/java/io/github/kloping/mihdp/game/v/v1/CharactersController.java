@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.v1;
+package io.github.kloping.mihdp.game.v.v1;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -10,7 +10,7 @@ import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.v0.BeginController;
+import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.mapper.CharactersMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;

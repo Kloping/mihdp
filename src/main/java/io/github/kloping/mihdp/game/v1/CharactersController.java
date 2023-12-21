@@ -7,7 +7,7 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
-import io.github.kloping.mihdp.dao.Characters;
+import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.v0.BeginController;
@@ -15,6 +15,7 @@ import io.github.kloping.mihdp.mapper.CharactersMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.p0.utils.NumberSelector;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
@@ -62,11 +63,42 @@ public class CharactersController {
 
     @Action("characters")
     public Object characters(ReqDataPack pack, User user) {
-        QueryWrapper<Characters> qw = new QueryWrapper<>();
+        QueryWrapper<Character> qw = new QueryWrapper<>();
         qw.eq("uid", user.getUid());
-        List<Characters> characters = charactersMapper.selectList(qw);
+        List<Character> characters = charactersMapper.selectList(qw);
         if (characters.isEmpty()) return "未觉醒任何魂角";
         return JSON.toJSONString(characters);
+    }
+
+    {
+        BaseService.MSG2ACTION.put("领取魂角", "greenhorn");
+    }
+
+    @Action("greenhorn")
+    public Object greenhorn(ReqDataPack pack, User user) {
+        QueryWrapper<Character> qw = new QueryWrapper<>();
+        qw.eq("uid", user.getUid());
+        List<Character> characters = charactersMapper.selectList(qw);
+        if (characters.isEmpty()) {
+            NumberSelector.reg(pack.getSender_id()).set(1, d -> {
+                NumberSelector.clear(pack.getSender_id());
+                Character c0 = new Character();
+                c0.setUid(user.getUid())
+                        .setLevel(1).setCid(1001).setMid(0).setHp(100);
+                charactersMapper.insert(c0);
+                return "领取成功;使用'魂角列表'查看";
+            }).set(2, d -> {
+                NumberSelector.clear(pack.getSender_id());
+                NumberSelector.clear(pack.getSender_id());
+                Character c0 = new Character();
+                c0.setUid(user.getUid())
+                        .setLevel(1).setCid(1002).setMid(0).setHp(100);
+                charactersMapper.insert(c0);
+                return "领取成功;使用'魂角列表'查看";
+            });
+            return "符合领取条件;\n请选择要领取的魂角\n1.落日神弓 2.神空剑";
+        }
+        return "不符合领取条件";
     }
 
     {

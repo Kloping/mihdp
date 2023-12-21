@@ -8,7 +8,7 @@ import io.github.kloping.MySpringTool.annotations.*;
 import io.github.kloping.common.Public;
 import io.github.kloping.date.DateUtils;
 import io.github.kloping.judge.Judge;
-import io.github.kloping.mihdp.dao.Characters;
+import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
@@ -81,9 +81,9 @@ public class InfoController {
             user.setXp(0);
             userMapper.updateById(user);
         }
-        QueryWrapper<Characters> qw = new QueryWrapper<>();
+        QueryWrapper<Character> qw = new QueryWrapper<>();
         qw.eq("uid", user.getUid());
-        List<Characters> characters = charactersMapper.selectList(qw);
+        List<Character> characters = charactersMapper.selectList(qw);
 
         JSONObject data = JSONObject.parseObject(JSON.toJSONString(user));
         data.put("max", max);

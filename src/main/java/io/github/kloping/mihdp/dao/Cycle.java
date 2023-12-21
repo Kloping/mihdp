@@ -2,37 +2,27 @@ package io.github.kloping.mihdp.dao;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
- * 魂角
  * @author github.kloping
  */
 @Data
-@Accessors(chain = true)
-public class Characters {
-    /**
-     * 自增id
-     */
+@Accessors
+@AllArgsConstructor
+@NoArgsConstructor
+public class Cycle {
     @TableId(type = IdType.AUTO)
     private Integer id;
     /**
-     * 拥有者id
-     */
-    private String uid;
-    /**
-     * 角色id
+     * 对应 {@link Character#getId()}
      */
     private Integer cid;
     /**
-     * 角色等级
+     * 物id
      */
-    private Integer level;
-    /**
-     * 主武器id
-     */
-    private Integer mid;
-
-    private Integer hp;
+    private Integer oid;
 }

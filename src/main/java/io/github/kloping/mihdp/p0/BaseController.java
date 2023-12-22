@@ -1,14 +1,16 @@
 package io.github.kloping.mihdp.p0;
 
+import io.github.kloping.MySpringTool.PartUtils;
 import io.github.kloping.MySpringTool.annotations.*;
 import io.github.kloping.MySpringTool.entity.interfaces.Runner;
 import io.github.kloping.MySpringTool.entity.interfaces.RunnerOnThrows;
 import io.github.kloping.MySpringTool.exceptions.NoRunException;
+import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.MySpringTool.interfaces.QueueExecutor;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.mapper.ConfigMapper;
 import io.github.kloping.mihdp.p0.utils.NumberSelector;
 import io.github.kloping.mihdp.p0.utils.SelectorInvoke;
-import io.github.kloping.mihdp.mapper.ConfigMapper;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.mihdp.wss.data.ResDataPack;
@@ -65,9 +67,11 @@ public class BaseController implements Runner, RunnerOnThrows {
     public void onThrows(Throwable throwable, Object t, Object... args) {
         if (throwable instanceof NoRunException) {
             dispose(t, args);
-        }
+        } else logger.error(PartUtils.getExceptionLine(throwable));
     }
 
+    @AutoStand
+    Logger logger;
     @AutoStand
     ConfigMapper configMapper;
 

@@ -90,14 +90,12 @@ public class DrawController {
             User user = o.toJavaObject(User.class);
             UsersResources resources = o.toJavaObject(UsersResources.class);
 
-            ClassPathResource classPathResource = new ClassPathResource("bg3.jpg");
-            byte[] bytes = ReadUtils.readAll(classPathResource.getInputStream());
+            byte[] bytes = ReadUtils.readAll(new ClassPathResource("bg3.jpg").getInputStream());
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
             image = ImageDrawerUtils.resizeImage(image, 800, 1000);
             BufferedImage icon0;
             if (Judge.isEmpty(icon)) {
-                ClassPathResource iconr = new ClassPathResource("sources/0.jpg");
-                icon0 = ImageIO.read(iconr.getInputStream());
+                icon0 = ImageIO.read(new ClassPathResource("sources/0.jpg").getInputStream());
                 icon0 = ImageDrawerUtils.resizeImage(icon0, 180, 180);
             } else icon0 = ImageDrawerUtils.readImage(new URL(icon), 180, 180);
 

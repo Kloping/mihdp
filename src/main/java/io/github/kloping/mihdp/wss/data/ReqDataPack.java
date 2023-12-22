@@ -46,6 +46,12 @@ public class ReqDataPack {
         return null;
     }
 
+    public boolean isArgValue(String name, Object v) {
+        Object o = args.get(name);
+        if (o != null) return o.equals(v);
+        return false;
+    }
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);

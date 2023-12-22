@@ -43,21 +43,6 @@ public class Utils {
         return ts.get(RandomUtils.RANDOM.nextInt(ts.size()));
     }
 
-    public static String getExceptionLine(Throwable e) {
-        try {
-            Method method = Throwable.class.getDeclaredMethod("getOurStackTrace");
-            method.setAccessible(true);
-            Object[] objects = (Object[]) method.invoke(e);
-            StringBuilder sb = new StringBuilder("\r\n");
-            for (Object o : objects) {
-                sb.append(" at ").append(o.toString()).append("\r\n\t");
-            }
-            return sb.toString();
-        } catch (Exception e1) {
-            return "??";
-        }
-    }
-
     public static String filterOverW(Integer v) {
         if (v >= 10000) {
             float f0 = v / 10000;

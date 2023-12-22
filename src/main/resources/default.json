@@ -73,6 +73,7 @@
   "base_character": {
     "xp": 100,
     "hp": 100,
+    "hl": 100,
     "hj": 100,
     "att": 10,
     "defense": 20,
@@ -80,6 +81,19 @@
     "chc": 5,
     "che": 50,
     "efr": 5,
+    "efh": 0
+  },
+  "base_er": {
+    "xp": 100,
+    "hp": 65,
+    "hl": 40,
+    "hj": 20,
+    "att": 6,
+    "defense": 0,
+    "speed": 0,
+    "chc": 0,
+    "che": 0,
+    "efr": 0,
     "efh": 0
   },
   "characters": [

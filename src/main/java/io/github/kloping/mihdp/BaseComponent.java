@@ -16,10 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,8 +27,19 @@ import java.util.Date;
  * @date 2023-07-17
  */
 @Configuration
-@CommentScan(path = "io.github.kloping.mihdp.game")
+@CommentScan(path = "io.github.kloping.mihdp")
 public class BaseComponent implements CommandLineRunner {
+    @io.github.kloping.MySpringTool.annotations.Bean
+    public JSONObject defaultConfig() {
+        try {
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("default.json");
+            String json = ReadUtils.readAll(is, "utf-8");
+            return JSONObject.parseObject(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Bean
     public Logger getLogger() {
         Logger l = new LoggerImpl();
@@ -48,17 +57,6 @@ public class BaseComponent implements CommandLineRunner {
         JsonDeserializer<GeneralData> deserializer = new DataDeserializer();
         gsonBuilder.registerTypeAdapter(GeneralData.class, deserializer);
         return gsonBuilder.create();
-    }
-
-    @Bean
-    public JSONObject defaultConfig() {
-        try {
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream("default.json");
-            String json = ReadUtils.readAll(is, "utf-8");
-            return JSONObject.parseObject(json);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Bean

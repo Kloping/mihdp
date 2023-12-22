@@ -1,0 +1,73 @@
+package io.github.kloping.mihdp.game.impl;
+
+import io.github.kloping.MySpringTool.annotations.AutoStand;
+import io.github.kloping.MySpringTool.annotations.Entity;
+import io.github.kloping.mihdp.dao.Character;
+import io.github.kloping.mihdp.dao.Cycle;
+import io.github.kloping.mihdp.game.api.Addition;
+import io.github.kloping.mihdp.game.api.logic.LogicBase;
+import io.github.kloping.mihdp.game.s.CharactersInfo;
+import io.github.kloping.mihdp.game.s.s0.GameStaticResourceLoader;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author github.kloping
+ */
+@Entity
+public class AdditionLogic implements LogicBase {
+
+    public Map<Integer, Addition[]> ADDITION_MAP = new HashMap<>();
+
+    {
+        // 2001-2007: 魂环++
+        ADDITION_MAP.put(2001, new Addition[]{new AdditionImpl("hp", 5), new AdditionImpl("att", 5)});
+        ADDITION_MAP.put(2002, new Addition[]{new AdditionImpl("hp", 10), new AdditionImpl("att", 5), new AdditionImpl("hl", 5)});
+        ADDITION_MAP.put(2003, new Addition[]{new AdditionImpl("hp", 10), new AdditionImpl("att", 15), new AdditionImpl("hl", 5)});
+        ADDITION_MAP.put(2004, new Addition[]{new AdditionImpl("hp", 15), new AdditionImpl("att", 15), new AdditionImpl("hl", 5), new AdditionImpl("hj", 5)});
+        ADDITION_MAP.put(2005, new Addition[]{new AdditionImpl("hp", 10), new AdditionImpl("att", 20), new AdditionImpl("hl", 10), new AdditionImpl("hj", 5)});
+        ADDITION_MAP.put(2006, new Addition[]{new AdditionImpl("hp", 15), new AdditionImpl("att", 20), new AdditionImpl("hl", 15), new AdditionImpl("hj", 10)});
+        ADDITION_MAP.put(2006, new Addition[]{new AdditionImpl("hp", 20), new AdditionImpl("att", 25), new AdditionImpl("hl", 10), new AdditionImpl("hj", 15)});
+    }
+
+    /**
+     * 魂环加成获取
+     *
+     * @param cycle
+     * @return
+     */
+    public Addition[] getAddition(Cycle cycle) {
+        return ADDITION_MAP.get(cycle.getId());
+    }
+
+    @AutoStand
+    GameStaticResourceLoader resourceLoader;
+
+    /**
+     * 等级加成获取
+     *
+     * @param character
+     * @return
+     */
+    public Addition[] getAddition(Character character) {
+        List<Addition> result = new LinkedList<>();
+        int level = character.getLevel();
+        int b = level - 1;
+        if (b > 0) {
+            result.add(new AdditionImpl("xp", 1, resourceLoader.baseEr.getXp() * b));
+            result.add(new AdditionImpl("hp", 1, resourceLoader.baseEr.getHp() * b));
+            result.add(new AdditionImpl("hl", 1, resourceLoader.baseEr.getHl() * b));
+            result.add(new AdditionImpl("hj", 1, resourceLoader.baseEr.getHj() * b));
+            result.add(new AdditionImpl("att", 1, resourceLoader.baseEr.getAtt() * b));
+        }
+        int b0 = level / 10;
+        if (b0 > 0) {
+            CharactersInfo charactersInfo = resourceLoader.id2charactersInfo.get(character.getId());
+            result.add(new AdditionImpl(charactersInfo.getBt(), 2, charactersInfo.getBtv() * b0));
+        }
+        return result.toArray(new Addition[0]);
+    }
+}

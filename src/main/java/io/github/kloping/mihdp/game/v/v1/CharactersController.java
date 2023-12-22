@@ -7,11 +7,18 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.dao.Character;
+import io.github.kloping.mihdp.dao.Cycle;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.api.Addition;
+import io.github.kloping.mihdp.game.impl.AdditionLogic;
+import io.github.kloping.mihdp.game.s.CharactersInfo;
+import io.github.kloping.mihdp.game.s.s0.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.mapper.CharactersMapper;
+import io.github.kloping.mihdp.mapper.CycleMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
@@ -39,6 +46,8 @@ public class CharactersController {
     CharactersMapper charactersMapper;
     @AutoStand
     BeginController beginController;
+    @AutoStand
+    GameStaticResourceLoader resourceLoader;
 
     private User getUser(ReqDataPack dataPack) {
         String sid = dataPack.getSender_id();
@@ -105,11 +114,47 @@ public class CharactersController {
         BaseService.MSG2ACTION.put("查看", "show_character");
     }
 
+    @AutoStand
+    CycleMapper cycleMapper;
+    @AutoStand
+    AdditionLogic additionLogic;
+
     @Action("show_character")
     public Object showC0(ReqDataPack pack, User user) {
         GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
-        String text = generalData.allText();
-
-        return "查询失败!\n可能尚未拥有.";
+        String text = generalData.allText().trim();
+        if (Judge.isEmpty(text)) return null;
+        //基础的魂角属性
+        CharactersInfo charactersInfo = resourceLoader.name2charactersInfo.get(text);
+        if (charactersInfo == null) return "查询失败!\n可能尚未拥有.";
+        QueryWrapper<Character> qw0 = new QueryWrapper<>();
+        qw0.eq("uid", user.getUid());
+        qw0.eq("cid", charactersInfo.getId());
+        //用户魂角配置
+        Character character = charactersMapper.selectOne(qw0);
+        for (Addition addition : additionLogic.getAddition(character)) {
+            charactersInfo.reg(addition);
+        }
+        //魂环加成
+        QueryWrapper<Cycle> qw1 = new QueryWrapper<>();
+        qw1.eq("cid", character.getId());
+        List<Cycle> cycles = cycleMapper.selectList(qw1);
+        for (Cycle cycle : cycles) {
+            for (Addition addition : additionLogic.getAddition(cycle)) {
+                charactersInfo.reg(addition);
+            }
+        }
+        charactersInfo.setLevel(character.getLevel());
+        if (pack.isArgValue("draw", true)) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.putAll(JSON.parseObject(JSON.toJSONString(charactersInfo)));
+            jsonObject.put("cycle", cycles);
+            return jsonObject;
+        } else {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.putAll(JSON.parseObject(JSON.toJSONString(charactersInfo)));
+            jsonObject.put("cycle", cycles);
+            return jsonObject;
+        }
     }
 }

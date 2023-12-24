@@ -27,6 +27,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
+ * 启动
  * @author github.kloping
  */
 @SpringBootApplication(scanBasePackages = "io.github.kloping.mihdp")

@@ -7,6 +7,7 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.io.ReadUtils;
 import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.Cycle;
@@ -23,10 +24,16 @@ import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.p0.utils.NumberSelector;
+import io.github.kloping.mihdp.utils.ImageDrawerUtils;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
+import org.springframework.core.io.ClassPathResource;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 /**
@@ -147,10 +154,20 @@ public class CharactersController {
         }
         charactersInfo.setLevel(character.getLevel());
         if (pack.isArgValue("draw", true)) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.putAll(JSON.parseObject(JSON.toJSONString(charactersInfo)));
-            jsonObject.put("cycle", cycles);
-            return jsonObject;
+            try {
+                byte[] bytes = ReadUtils.readAll(new ClassPathResource("bg0.jpg").getInputStream());
+                BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
+                image = ImageDrawerUtils.resizeImage(image, 800, 1000);
+                BufferedImage icon0;
+                icon0 = ImageIO.read(new ClassPathResource("sources/0.jpg").getInputStream());
+                icon0 = ImageDrawerUtils.resizeImage(icon0, 180, 180);
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(image, "jpg", baos);
+                return new GeneralData.ResDataImage(baos.toByteArray());
+            } catch (Exception e) {
+                return "绘图失败." + e.getMessage();
+            }
         } else {
             JSONObject jsonObject = new JSONObject();
             jsonObject.putAll(JSON.parseObject(JSON.toJSONString(charactersInfo)));

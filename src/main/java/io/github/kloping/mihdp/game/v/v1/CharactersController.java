@@ -161,7 +161,7 @@ public class CharactersController {
                 BufferedImage icon0;
                 icon0 = ImageIO.read(new ClassPathResource("sources/0.jpg").getInputStream());
                 icon0 = ImageDrawerUtils.resizeImage(icon0, 180, 180);
-
+                
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ImageIO.write(image, "jpg", baos);
                 return new GeneralData.ResDataImage(baos.toByteArray());

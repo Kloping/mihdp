@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.dao;
+package data_migration.dao;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 
 /**
  * 魂角
+ *
  * @author github.kloping
  */
 @Data
@@ -32,8 +33,7 @@ public class Character {
     /**
      * 主武器id
      */
-    private Integer mid = 0;
+    private Integer mid;
 
-    private Integer hp = 100;
-    private Integer xp = 0;
+    private Integer hp;
 }

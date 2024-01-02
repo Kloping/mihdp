@@ -8,5 +8,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @author github.kloping
  */
 @Mapper
-public interface CharactersMapper extends BaseMapper<Character> {
+public interface CharacterMapper extends BaseMapper<Character> {
 }

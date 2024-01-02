@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameWebSocketServer extends WebSocketServer {
     public GameWebSocketServer(@Value("${wss.port:6034}") int port) {
         super(new InetSocketAddress(port));
+
     }
 
     @Autowired

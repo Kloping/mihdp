@@ -8,8 +8,12 @@ import io.github.kloping.MySpringTool.annotations.CommentScan;
 import io.github.kloping.MySpringTool.h1.impl.LoggerImpl;
 import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.io.ReadUtils;
-import io.github.kloping.mihdp.ex.DataDeserializer;
+import io.github.kloping.mihdp.ex.GeneralDataDeserializer;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.s.BaseCharacterInfo;
+import io.github.kloping.mihdp.game.s.BaseCharacterInfoDeserializer;
+import io.github.kloping.mihdp.game.s.CharacterInfo;
+import io.github.kloping.mihdp.game.s.CharacterInfoDeserializer;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,8 +59,9 @@ public class BaseComponent implements CommandLineRunner {
     @Bean
     public Gson gson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        JsonDeserializer<GeneralData> deserializer = new DataDeserializer();
-        gsonBuilder.registerTypeAdapter(GeneralData.class, deserializer);
+        gsonBuilder.registerTypeAdapter(GeneralData.class, new GeneralDataDeserializer());
+        gsonBuilder.registerTypeAdapter(BaseCharacterInfo.class, new BaseCharacterInfoDeserializer());
+        gsonBuilder.registerTypeAdapter(CharacterInfo.class, new CharacterInfoDeserializer());
         return gsonBuilder.create();
     }
 

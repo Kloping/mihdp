@@ -1,16 +1,17 @@
-package io.github.kloping.mihdp.game.s.s0;
+package io.github.kloping.mihdp.game.s;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.AutoStandAfter;
 import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.dao.Shopping;
 import io.github.kloping.mihdp.game.impl.ItemImpl;
-import io.github.kloping.mihdp.game.s.BaseCharacterInfo;
-import io.github.kloping.mihdp.game.s.CharactersInfo;
 import io.github.kloping.number.NumberUtils;
-import org.springframework.core.io.ClassPathResource;
+import lombok.Getter;
 
 import java.io.File;
 import java.net.URL;
@@ -25,16 +26,36 @@ import java.util.Map;
 @Entity
 public class GameStaticResourceLoader {
 
-    public Shopping shopping = null;
+    private Shopping shopping = null;
 
-    public Map<Integer, Item> ITEM_MAP = new HashMap<>();
+    private Map<Integer, Item> ITEM_MAP = new HashMap<>();
 
-    public BaseCharacterInfo baseCharacterInfo = null;
-    public BaseCharacterInfo baseEr = null;
+    @Getter
+    private BaseCharacterInfo baseCharacterInfo = null;
+    @Getter
+    private BaseCharacterInfo baseEr = null;
 
-    public List<CharactersInfo> charactersInfos = new LinkedList<>();
-    public Map<String, CharactersInfo> name2charactersInfo = new HashMap<>();
-    public Map<Integer, CharactersInfo> id2charactersInfo = new HashMap<>();
+    private List<CharacterInfo> charactersInfos = new LinkedList<>();
+    private Map<String, CharacterInfo> name2charactersInfo = new HashMap<>();
+
+    public CharacterInfo getCharacterInfoByName(String name) {
+        CharacterInfo characterInfo = name2charactersInfo.get(name);
+        if (characterInfo != null) {
+            return JSON.parseObject(JSON.toJSONString(characterInfo), CharacterInfo.class);
+        } else return null;
+    }
+
+    private Map<Integer, CharacterInfo> id2charactersInfo = new HashMap<>();
+
+    public CharacterInfo getCharacterInfoById(Integer id) {
+        CharacterInfo characterInfo = id2charactersInfo.get(id);
+        if (characterInfo != null) {
+            return JSON.parseObject(JSON.toJSONString(characterInfo), CharacterInfo.class);
+        } else return null;
+    }
+
+    @AutoStand
+    Gson gson;
 
     /**
      * 静态配置加载
@@ -51,14 +72,14 @@ public class GameStaticResourceLoader {
         }
 
         JSONObject baseCharacter = defaultConfig.getJSONObject("base_character");
-        baseCharacterInfo = baseCharacter.toJavaObject(BaseCharacterInfo.class);
-        baseEr = defaultConfig.getJSONObject("base_er").toJavaObject(BaseCharacterInfo.class);
+        baseCharacterInfo = gson.fromJson(baseCharacter.toJSONString(), BaseCharacterInfo.TYPE_TOKEN);
+        baseEr = gson.fromJson(defaultConfig.getJSONObject("base_er").toJSONString(), BaseCharacterInfo.TYPE_TOKEN);
 
         JSONArray array = defaultConfig.getJSONArray("characters");
         for (Object o : array) {
             JSONObject oe = (JSONObject) o;
             oe.putAll(baseCharacter);
-            CharactersInfo charactersInfo = oe.toJavaObject(CharactersInfo.class);
+            CharacterInfo charactersInfo = gson.fromJson(oe.toJSONString(), CharacterInfo.class);
             name2charactersInfo.put(charactersInfo.getName(), charactersInfo);
             id2charactersInfo.put(charactersInfo.getId(), charactersInfo);
             charactersInfos.add(charactersInfo);

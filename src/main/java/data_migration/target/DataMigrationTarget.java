@@ -1,14 +1,6 @@
 package data_migration.target;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import data_migration.Starter;
-import data_migration.dao.User;
-import data_migration.dao.UserScore;
-import data_migration.dao.UsersResources;
-import data_migration.source.DataMigration;
-import data_migration.target.mapper.UserMapper;
-import data_migration.target.mapper.UsersResourcesMapper;
-import io.github.kloping.rand.RandomUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,10 +14,11 @@ import javax.sql.DataSource;
 @MapperScan("data_migration.target.mapper")
 @Configuration
 public class DataMigrationTarget {
+
+    public static ConfigurableApplicationContext context;
+
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(DataMigrationTarget.class, args);
-        Starter.userMapper = context.getBean(UserMapper.class);
-        Starter.resourcesMapper = context.getBean(UsersResourcesMapper.class);
+        context = SpringApplication.run(DataMigrationTarget.class, args);
     }
 
     @Bean

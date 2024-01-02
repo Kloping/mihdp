@@ -1,7 +1,10 @@
 package io.github.kloping.mihdp.game.s;
 
+import com.google.gson.reflect.TypeToken;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import java.lang.reflect.Type;
 
 /**
  *
@@ -10,33 +13,37 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class BaseCharacterInfo {
-    protected Integer xp;
-    protected Integer hp;
-    protected Integer hl;
-    protected Integer hj;
-    protected Integer att;
+
+    public static final Type TYPE_TOKEN = new TypeToken<BaseCharacterInfo>() {
+    }.getType();
+
+    protected Attr xp;
+    protected Attr hp;
+    protected Attr hl;
+    protected Attr hj;
+    protected Attr att;
     /**
      * 防御
      */
-    protected Integer defense;
+    protected Attr defense;
     /**
      * 速度
      */
-    protected Integer speed;
+    protected Attr speed;
     /**
      * 爆率
      */
-    protected Integer chc;
+    protected Attr chc;
     /**
      * 爆伤
      */
-    protected Integer che;
+    protected Attr che;
     /**
      * 效果命中
      */
-    protected Integer efr;
+    protected Attr efr;
     /**
      * 效果抵抗
      */
-    protected Integer efh;
+    protected Attr efh;
 }

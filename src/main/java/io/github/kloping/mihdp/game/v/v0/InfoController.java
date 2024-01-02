@@ -13,7 +13,7 @@ import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.p0.services.BaseService;
-import io.github.kloping.mihdp.mapper.CharactersMapper;
+import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.utils.LanguageConfig;
@@ -38,7 +38,7 @@ public class InfoController {
     @AutoStand
     UsersResourcesMapper usersResourcesMapper;
     @AutoStand
-    CharactersMapper charactersMapper;
+    CharacterMapper charactersMapper;
     @AutoStand
     BeginController beginController;
 

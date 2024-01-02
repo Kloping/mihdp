@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DataDeserializer implements JsonDeserializer<GeneralData> {
+public class GeneralDataDeserializer implements JsonDeserializer<GeneralData> {
 
     @Override
     public GeneralData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {

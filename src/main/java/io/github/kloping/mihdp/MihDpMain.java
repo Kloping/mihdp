@@ -2,13 +2,11 @@ package io.github.kloping.mihdp;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.google.gson.Gson;
 import io.github.kloping.MySpringTool.StarterObjectApplication;
-import io.github.kloping.MySpringTool.h1.impl.component.FieldManagerImpl;
 import io.github.kloping.MySpringTool.h1.impl.component.PackageScannerImpl;
-import io.github.kloping.MySpringTool.h1.impls.component.AutomaticWiringParamsH2Impl;
 import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
-import io.github.kloping.MySpringTool.interfaces.component.FieldManager;
 import io.github.kloping.MySpringTool.interfaces.component.PackageScanner;
 import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.ex.GeneralData;
@@ -25,6 +23,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.util.Map;
 
 /**
  * 启动
@@ -61,7 +61,17 @@ public class MihDpMain implements CommandLineRunner {
         logger.info("tables create finished");
 
         logger.info("tables update");
-
+        boolean k0 = false;
+        for (Map<String, Object> e0 : jdbcTemplate.queryForList("pragma table_info ('character')")) {
+            String name = e0.get("name").toString();
+            if ("xp".equals(name)) {
+                k0 = true;
+            }
+        }
+        if (!k0) {
+            System.err.println("character 添加字段");
+            jdbcTemplate.update("ALTER TABLE character ADD `xp` INTEGER DEFAULT 0;");
+        }
     }
 
     public static final String[] REQUIRED_PROPERTIES = {"language"};
@@ -80,32 +90,34 @@ public class MihDpMain implements CommandLineRunner {
             final String portKey = "spt.redis.port";
             String host = context.getEnvironment().getProperty(hostKey);
             String port = context.getEnvironment().getProperty(portKey);
+            ContextManager contextManager = APPLICATION.INSTANCE.getContextManager();
             APPLICATION.INSTANCE.getContextManager().append(String.class, host, hostKey);
             APPLICATION.INSTANCE.getContextManager().append(Integer.class, Integer.valueOf(port), portKey);
+            for (String beanDefinitionName : context.getBeanDefinitionNames()) {
+                Object obj = context.getBean(beanDefinitionName);
+                if (obj == null) continue;
+                if (obj instanceof BaseMapper) {
+                    contextManager.append(obj);
+                } else if (obj instanceof JSONObject) {
+                    contextManager.append(obj, beanDefinitionName);
+                } else if (obj instanceof LanguageConfig) {
+                    contextManager.append(obj, beanDefinitionName);
+                } else if (obj instanceof Gson) {
+                    contextManager.append(obj, beanDefinitionName);
+                }
+            }
+            for (String requiredProperty : REQUIRED_PROPERTIES) {
+                String v = context.getEnvironment().getProperty(requiredProperty);
+                if (Judge.isNotEmpty(v)) contextManager.append(v, requiredProperty);
+            }
         });
         APPLICATION.run0(BaseComponent.class);
-        ContextManager contextManager = APPLICATION.INSTANCE.getContextManager();
-        for (String beanDefinitionName : context.getBeanDefinitionNames()) {
-            Object obj = context.getBean(beanDefinitionName);
-            if (obj == null) continue;
-            if (obj instanceof BaseMapper) {
-                contextManager.append(obj);
-            } else if (obj instanceof JSONObject) {
-                contextManager.append(obj, beanDefinitionName);
-            } else if (obj instanceof LanguageConfig) {
-                contextManager.append(obj, beanDefinitionName);
-            }
-        }
-        for (String requiredProperty : REQUIRED_PROPERTIES) {
-            String v = context.getEnvironment().getProperty(requiredProperty);
-            if (Judge.isNotEmpty(v)) contextManager.append(v, requiredProperty);
-        }
-        FieldManager fieldManager = APPLICATION.INSTANCE.getFieldManager();
-        if (fieldManager instanceof FieldManagerImpl) {
-            FieldManagerImpl fm = (FieldManagerImpl) fieldManager;
-            APPLICATION.logger.setLogLevel(3);
-            fm.workStand();
-            APPLICATION.logger.setLogLevel(0);
-        }
+//        FieldManager fieldManager = APPLICATION.INSTANCE.getFieldManager();
+//        if (fieldManager instanceof FieldManagerImpl) {
+//            FieldManagerImpl fm = (FieldManagerImpl) fieldManager;
+//            APPLICATION.logger.setLogLevel(3);
+//            fm.workStand();
+//            APPLICATION.logger.setLogLevel(0);
+//        }
     }
 }

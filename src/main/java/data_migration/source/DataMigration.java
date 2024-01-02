@@ -1,8 +1,6 @@
 package data_migration.source;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import data_migration.Starter;
-import data_migration.source.mapper.UserScoreMapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,9 +18,10 @@ import javax.sql.DataSource;
 @Configuration
 public class DataMigration {
 
+    public static ConfigurableApplicationContext context;
+
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(DataMigration.class, args);
-        Starter.userScoreMapper = context.getBean(UserScoreMapper.class);
+        context = SpringApplication.run(DataMigration.class, args);
     }
 
     @Bean

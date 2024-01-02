@@ -24,16 +24,12 @@ import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.p0.utils.NumberSelector;
-import io.github.kloping.mihdp.utils.ImageDrawerUtils;
+import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import org.springframework.core.io.ClassPathResource;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 /**
@@ -75,19 +71,6 @@ public class CharactersController {
     }
 
     {
-        BaseService.MSG2ACTION.put("魂角列表", "characters");
-    }
-
-    @Action("characters")
-    public Object characters(ReqDataPack pack, User user) {
-        QueryWrapper<Character> qw = new QueryWrapper<>();
-        qw.eq("uid", user.getUid());
-        List<Character> characters = charactersMapper.selectList(qw);
-        if (characters.isEmpty()) return "未觉醒任何魂角";
-        return JSON.toJSONString(characters);
-    }
-
-    {
         BaseService.MSG2ACTION.put("领取魂角", "greenhorn");
     }
 
@@ -113,9 +96,34 @@ public class CharactersController {
                 charactersMapper.insert(c0);
                 return "领取成功;使用'魂角列表'查看";
             });
-            return "符合领取条件;\n请选择要领取的魂角\n1.落日神弓 2.神空剑";
+            return "符合领取条件;\n请选择要领取的魂角(操作不可逆)\n1.落日神弓 2.神空剑";
         }
         return "不符合领取条件";
+    }
+
+    {
+        BaseService.MSG2ACTION.put("魂角列表", "characters");
+    }
+
+    @Action("characters")
+    public Object characters(ReqDataPack pack, User user) {
+        QueryWrapper<Character> qw = new QueryWrapper<>();
+        qw.eq("uid", user.getUid());
+        List<Character> characters = charactersMapper.selectList(qw);
+        if (characters.isEmpty()) return "未觉醒任何魂角,请'领取魂角'";
+        if (pack.isArgValue("draw", true)) {
+            try {
+                byte[] bytes = ReadUtils.readAll(new ClassPathResource("bg0.jpg").getInputStream());
+                ImageDrawer drawer = new ImageDrawer(bytes);
+                drawer.size(800, 1000)
+                        .draw(ReqDataPackUtils.getIcon(pack, user), 180, 180, 5, 15, 999);
+                return new GeneralData.ResDataImage(drawer.bytes());
+            } catch (Exception e) {
+                return "绘图失败." + e.getMessage();
+            }
+        } else {
+            return JSON.toJSONString(characters);
+        }
     }
 
     {
@@ -134,12 +142,13 @@ public class CharactersController {
         if (Judge.isEmpty(text)) return null;
         //基础的魂角属性
         CharactersInfo charactersInfo = resourceLoader.name2charactersInfo.get(text);
-        if (charactersInfo == null) return "查询失败!\n可能尚未拥有.";
+        if (charactersInfo == null) return "查询失败!\n可能不存在该魂角";
         QueryWrapper<Character> qw0 = new QueryWrapper<>();
         qw0.eq("uid", user.getUid());
         qw0.eq("cid", charactersInfo.getId());
         //用户魂角配置
         Character character = charactersMapper.selectOne(qw0);
+        if (character == null) return "查询失败!\n可能尚未拥有.";
         for (Addition addition : additionLogic.getAddition(character)) {
             charactersInfo.reg(addition);
         }
@@ -156,15 +165,10 @@ public class CharactersController {
         if (pack.isArgValue("draw", true)) {
             try {
                 byte[] bytes = ReadUtils.readAll(new ClassPathResource("bg0.jpg").getInputStream());
-                BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
-                image = ImageDrawerUtils.resizeImage(image, 800, 1000);
-                BufferedImage icon0;
-                icon0 = ImageIO.read(new ClassPathResource("sources/0.jpg").getInputStream());
-                icon0 = ImageDrawerUtils.resizeImage(icon0, 180, 180);
-                
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(image, "jpg", baos);
-                return new GeneralData.ResDataImage(baos.toByteArray());
+                ImageDrawer drawer = new ImageDrawer(bytes);
+                drawer.size(800, 1000)
+                        .draw(resourceLoader.id2file.get(character.getCid()), 180, 180, 5, 15);
+                return new GeneralData.ResDataImage(drawer.bytes());
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();
             }

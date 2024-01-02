@@ -93,6 +93,7 @@ public class DrawController {
             byte[] bytes = ReadUtils.readAll(new ClassPathResource("bg3.jpg").getInputStream());
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
             image = ImageDrawerUtils.resizeImage(image, 800, 1000);
+
             BufferedImage icon0;
             if (Judge.isEmpty(icon)) {
                 icon0 = ImageIO.read(new ClassPathResource("sources/0.jpg").getInputStream());

@@ -13,6 +13,7 @@ import io.github.kloping.number.NumberUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,14 +71,16 @@ public class GameStaticResourceLoader {
      * 静态图片资源加载
      */
     @AutoStandAfter
-    private void after1() {
-        String path = new ClassPathResource("sources").getPath();
-        File file = new File(path);
-        if (file.isDirectory()) {
-            for (File e : file.listFiles()) {
-                Integer id = NumberUtils.getIntegerFromString(e.getName(), -1);
-                if (id >= 0) {
-                    id2file.put(id, e);
+    private void after1() throws Exception {
+        URL enumeration = this.getClass().getClassLoader().getResource("sources/");
+        if (enumeration.getProtocol().equals("file")){
+            File file = new File(enumeration.getPath());
+            if (file.isDirectory()) {
+                for (File e : file.listFiles()) {
+                    Integer id = NumberUtils.getIntegerFromString(e.getName(), -1);
+                    if (id >= 0) {
+                        id2file.put(id, e);
+                    }
                 }
             }
         }

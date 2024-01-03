@@ -1,6 +1,7 @@
 package io.github.kloping.mihdp.ex;
 
 import com.alibaba.fastjson.JSON;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.kloping.judge.Judge;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class GeneralData {
     public String allText() {
         return "";
     }
+
     protected String type;
 
     @Override
@@ -53,6 +55,23 @@ public class GeneralData {
 
     @EqualsAndHashCode(callSuper = true)
     @Data
+    public static class ResDataSelect extends GeneralData {
+        private Integer s;
+        private String content = "";
+
+        public ResDataSelect(Integer s) {
+            this.type = "select";
+            this.s = s;
+        }
+
+        public ResDataSelect(Integer s, String content) {
+            this(s);
+            this.content = content;
+        }
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
     public static class ResDataAt extends GeneralData {
         private String id;
 
@@ -72,6 +91,12 @@ public class GeneralData {
         public ResDataImage(String data) {
             this.type = "image";
             this.data = data;
+        }
+
+        public ResDataImage(String data, String p) {
+            this.type = "image";
+            this.data = data;
+            this.p = p;
         }
 
         public ResDataImage(byte[] data) {
@@ -120,6 +145,65 @@ public class GeneralData {
                 sb.append(data.allText());
             }
             return sb.toString();
+        }
+    }
+
+    public static class GeneralDataBuilder {
+        private List<GeneralData> list = new LinkedList<>();
+
+        public static GeneralDataBuilder create(String text) {
+            return new GeneralDataBuilder().append(new ResDataText(text));
+        }
+
+        public GeneralDataBuilder append(GeneralData data) {
+            list.add(data);
+            return this;
+        }
+
+        public GeneralDataBuilder append(String text) {
+            return append(new ResDataText(text));
+        }
+
+        public GeneralDataBuilder append(Integer s, String text) {
+            return append(new ResDataSelect(s, text));
+        }
+
+        public GeneralData.ResDataChain build() {
+            return new ResDataChain(list);
+        }
+    }
+
+    public static class GeneralDataDeserializer implements JsonDeserializer<GeneralData> {
+        @Override
+        public GeneralData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            GeneralData data = null;
+            JsonObject jsonObject = json.getAsJsonObject();
+            JsonElement name = jsonObject.get("type");
+            switch (name.getAsString()) {
+                case "text":
+                    data = new GeneralData.ResDataText(jsonObject.get("content").getAsString());
+                    break;
+                case "image":
+                    String base64 = jsonObject.get("data").getAsString();
+                    data = new GeneralData.ResDataImage(base64);
+                    if (base64.startsWith("http")) ((GeneralData.ResDataImage) data).setP("http");
+                    break;
+                case "at":
+                    data = new GeneralData.ResDataAt(jsonObject.get("id").getAsString());
+                    break;
+                case "chain":
+                    List<GeneralData> list = new LinkedList<>();
+                    for (JsonElement jsonElement : jsonObject.get("list").getAsJsonArray()) {
+                        GeneralData d0 = deserialize(jsonElement, typeOfT, context);
+                        list.add(d0);
+                    }
+                    data = new GeneralData.ResDataChain(list);
+                    break;
+                case "select":
+                    data = new ResDataSelect(jsonObject.get("s").getAsInt(), jsonObject.get("content").getAsString());
+                    break;
+            }
+            return data;
         }
     }
 }

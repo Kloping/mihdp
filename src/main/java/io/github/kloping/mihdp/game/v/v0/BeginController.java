@@ -5,10 +5,11 @@ import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
-import io.github.kloping.mihdp.p0.services.BaseService;
-import io.github.kloping.mihdp.p0.utils.NumberSelector;
+import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
+import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.p0.utils.NumberSelector;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
@@ -25,7 +26,7 @@ public class BeginController {
     }
 
     @Action("reg")
-    public String reg(ReqDataPack pack, GameClient client) {
+    public Object reg(ReqDataPack pack, GameClient client) {
         if (userMapper.selectById(pack.getSender_id()) != null) return null;
         /*
         NumberSelector.reg(pack.getSender_id()).set(1,
@@ -50,7 +51,7 @@ public class BeginController {
             NumberSelector.clear(pack.getSender_id());
             return regNow(pack.getSender_id());
         });
-        return "新手教程开发中 回复此条消息附带1以完成注册\n1.确定 2.跳过";
+        return GeneralData.GeneralDataBuilder.create("新手教程开发中 回复此条消息附带1以完成注册").append(1, "确定").append(2, "跳过").build();
     }
 
     @AutoStand

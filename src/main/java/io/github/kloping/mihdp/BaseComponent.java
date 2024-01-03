@@ -3,12 +3,10 @@ package io.github.kloping.mihdp;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 import io.github.kloping.MySpringTool.annotations.CommentScan;
 import io.github.kloping.MySpringTool.h1.impl.LoggerImpl;
 import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.io.ReadUtils;
-import io.github.kloping.mihdp.ex.GeneralDataDeserializer;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.s.BaseCharacterInfo;
 import io.github.kloping.mihdp.game.s.BaseCharacterInfoDeserializer;
@@ -59,7 +57,7 @@ public class BaseComponent implements CommandLineRunner {
     @Bean
     public Gson gson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(GeneralData.class, new GeneralDataDeserializer());
+        gsonBuilder.registerTypeAdapter(GeneralData.class, new GeneralData.GeneralDataDeserializer());
         gsonBuilder.registerTypeAdapter(BaseCharacterInfo.class, new BaseCharacterInfoDeserializer());
         gsonBuilder.registerTypeAdapter(CharacterInfo.class, new CharacterInfoDeserializer());
         return gsonBuilder.create();

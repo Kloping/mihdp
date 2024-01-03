@@ -61,7 +61,7 @@ public class Starter {
                 cycle.setCid(character.getId());
                 int id0 = o1 - 200;
                 cycle.setOid(2000 + id0);
-                                                       cycleMapper.insert(cycle);
+                cycleMapper.insert(cycle);
             }
             System.out.println("完成: " + whInfo.getQid());
         }

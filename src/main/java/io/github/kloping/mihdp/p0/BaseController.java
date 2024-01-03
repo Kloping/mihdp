@@ -9,6 +9,7 @@ import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.MySpringTool.interfaces.QueueExecutor;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.mapper.ConfigMapper;
+import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.p0.utils.NumberSelector;
 import io.github.kloping.mihdp.p0.utils.SelectorInvoke;
 import io.github.kloping.mihdp.wss.GameClient;
@@ -80,9 +81,13 @@ public class BaseController implements Runner, RunnerOnThrows {
         dispose(t, objects);
     }
 
+    {
+        BaseService.MSG2ACTION.put("测试", "test");
+    }
+
     @Action("test")
     public Object getInfo(ReqDataPack dataPack, GameClient client) {
-        return dataPack.getSender_id() + " 测试通过";
+        return GeneralData.GeneralDataBuilder.create("测试按钮发送").append(1, "落日神弓").append(2, "神空剑").build();
     }
 
     @Action("s\\d")

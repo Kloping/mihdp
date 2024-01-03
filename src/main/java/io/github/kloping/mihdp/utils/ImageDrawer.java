@@ -1,6 +1,9 @@
 package io.github.kloping.mihdp.utils;
 
+import io.github.kloping.io.ReadUtils;
+import io.github.kloping.rand.RandomUtils;
 import lombok.Getter;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -35,6 +38,19 @@ public class ImageDrawer {
         this(ImageIO.read(url));
     }
 
+
+    public static final ImageDrawer createOnRandomBg() {
+        return createOnBg(RandomUtils.RANDOM.nextInt(4));
+    }
+
+    public static final ImageDrawer createOnBg(Integer id) {
+        try {
+            byte[] bytes = ReadUtils.readAll(new ClassPathResource(String.format("bg%s.jpg", id)).getInputStream());
+            return new ImageDrawer(bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     /**
      * 基图重置大小
      *
@@ -82,6 +98,22 @@ public class ImageDrawer {
 
     public ImageDrawer draw(File file, int w, int h, int x, int y, float rotate) throws IOException {
         return draw(ImageIO.read(file), w, h, x, y, -1, rotate);
+    }
+
+    public ImageDrawer fillRoundRect(Color color, int x, int y, int w, int h, int rw, int rh) {
+        Graphics graphics = getSrc().getGraphics();
+        if (color != null) graphics.setColor(color);
+        graphics.fillRoundRect(x, y, w, h, rw, rh);
+        graphics.dispose();
+        return this;
+    }
+
+    public ImageDrawer drawRoundRect(Color color, int x, int y, int w, int h, int rw, int rh) {
+        Graphics graphics = getSrc().getGraphics();
+        if (color != null) graphics.setColor(color);
+        graphics.drawRoundRect(x, y, w, h, rw, rh);
+        graphics.dispose();
+        return this;
     }
 
     public class ImageDrawerString {

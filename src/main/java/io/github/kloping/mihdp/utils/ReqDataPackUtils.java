@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.v.v1;
+package io.github.kloping.mihdp.utils;
 
 import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.dao.User;

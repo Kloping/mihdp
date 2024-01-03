@@ -7,7 +7,7 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
-import io.github.kloping.io.ReadUtils;
+import io.github.kloping.date.DateUtils;
 import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.Cycle;
@@ -17,6 +17,7 @@ import io.github.kloping.mihdp.game.api.Addition;
 import io.github.kloping.mihdp.game.impl.AdditionLogic;
 import io.github.kloping.mihdp.game.s.CharacterInfo;
 import io.github.kloping.mihdp.game.s.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.CycleMapper;
@@ -29,9 +30,10 @@ import io.github.kloping.mihdp.utils.ImageDrawerUtils;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
+import io.github.kloping.number.NumberUtils;
 import io.github.kloping.rand.RandomUtils;
-import org.springframework.core.io.ClassPathResource;
 
+import java.awt.*;
 import java.util.List;
 
 /**
@@ -54,20 +56,12 @@ public class CharactersController {
     BeginController beginController;
     @AutoStand
     GameStaticResourceLoader resourceLoader;
-
-    private User getUser(ReqDataPack dataPack) {
-        String sid = dataPack.getSender_id();
-        return getUser(sid);
-    }
-
-    private User getUser(String sid) {
-        User user = userMapper.selectById(sid);
-        return user;
-    }
+    @AutoStand
+    RedisSource redisSource;
 
     @Before
     public User before(ReqDataPack dataPack) {
-        User user = getUser(dataPack);
+        User user = userMapper.selectById(dataPack.getSender_id());
         if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         return user;
     }
@@ -98,7 +92,7 @@ public class CharactersController {
                 charactersMapper.insert(c0);
                 return "领取成功;使用'魂角列表'查看";
             });
-            return "符合领取条件;\n请选择要领取的魂角(操作不可逆)\n1.落日神弓 2.神空剑";
+            return GeneralData.GeneralDataBuilder.create("符合领取条件;\n请选择要领取的魂角(操作不可逆)").append(1, "落日神弓").append(2, "神空剑").build();
         }
         return "不符合领取条件";
     }
@@ -115,13 +109,77 @@ public class CharactersController {
         if (characters.isEmpty()) return "未觉醒任何魂角,请'领取魂角'";
         if (pack.isArgValue("draw", true)) {
             try {
-                byte[] bytes = ReadUtils.readAll(new ClassPathResource("bg0.jpg").getInputStream());
-                ImageDrawer drawer = new ImageDrawer(bytes);
-                drawer.size(800, 1000)
-                        .draw(ReqDataPackUtils.getIcon(pack, user), 180, 180, 5, 15, 999);
+                ImageDrawer drawer = ImageDrawer.createOnRandomBg();
+                drawer.size(825, 825);
+                int x = 5;
+                int y = 15;
                 for (Character character : charactersMapper.selectList(qw)) {
                     //预计展示 血量 经验 等级 图标 等..
+                    Integer maxHp = redisSource.cid2hp.getValue("cid-hp-" + character.getId());
+                    Integer maxXp = redisSource.cid2hp.getValue("cid-xp-" + character.getId());
+                    if (maxHp == null || maxXp == null) {
+                        //基础的魂角属性
+                        CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
+                        if (characterInfo == null) continue;
+                        for (Addition addition : additionLogic.getAddition(character)) {
+                            characterInfo.reg(addition);
+                        }
+                        //魂环加成
+                        QueryWrapper<Cycle> qw1 = new QueryWrapper<>();
+                        qw1.eq("cid", character.getId());
+                        List<Cycle> cycles = cycleMapper.selectList(qw1);
+                        for (Cycle cycle : cycles) {
+                            for (Addition addition : additionLogic.getAddition(cycle)) {
+                                characterInfo.reg(addition);
+                            }
+                        }
+                        characterInfo.setLevel(character.getLevel());
+                        maxHp = characterInfo.getHp().getFinalValue();
+                        maxXp = characterInfo.getXp().getFinalValue();
+                        redisSource.cid2hp.setValue("cid-hp-" + character.getId(), maxHp);
+                        redisSource.cid2xp.setValue("cid-xp-" + character.getId(), maxXp);
+                    }
+
+                    drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 400, 15, 15)
+                            .draw(resourceLoader.getFileById(character.getCid()), 180, 180, x + 10, y + 10);
+
+                    //draw xp
+                    drawer.startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "经验:", x + 5, y + 218)
+                            .drawString(character.getXp() + "/", ImageDrawerUtils.BLACK_A75)
+                            .drawString(maxXp, ImageDrawerUtils.RED_A90)
+                            .finish()
+                            .drawRoundRect(ImageDrawerUtils.WHITE_A80, x + 5, y + 225, 180, 30, 10, 10);
+
+                    int xb = NumberUtils.toPercent(character.getXp(), maxXp);
+                    int xw = NumberUtils.percentTo(xb, 180).intValue();
+                    drawer.fillRoundRect(xb < 50 ? ImageDrawerUtils.GREEN_A75 : xb < 80 ? ImageDrawerUtils.ORIGIN_A75 : ImageDrawerUtils.RED_A75
+                            , x + 5, y + 225, xw, 30, 10, 10);
+                    //=draw hp
+                    drawer.startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "血量:", x + 5, y + 278)
+                            .drawString(character.getHp() + "/", ImageDrawerUtils.BLACK_A75)
+                            .drawString(maxHp, ImageDrawerUtils.RED_A90)
+                            .finish()
+                            .drawRoundRect(ImageDrawerUtils.WHITE_A80, x + 5, y + 285, 180, 30, 10, 10);
+
+                    int hb = NumberUtils.toPercent(character.getHp(), maxHp);
+                    int hw = NumberUtils.percentTo(hb, 180).intValue();
+                    drawer.fillRoundRect(hb > 50 ? ImageDrawerUtils.GREEN_A75 : hb > 25 ? ImageDrawerUtils.ORIGIN_A75 : ImageDrawerUtils.RED_A75
+                            , x + 5, y + 285, hw, 30, 10, 10);
+
+                    //draw str
+                    drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90, "等级:", x + 5, y + 350)
+                            .drawString(character.getLevel(), ImageDrawerUtils.RED_A90)
+                            .drawString(String.format("(%s)", resourceLoader.getCharacterInfoById(character.getCid()).getName()), ImageDrawerUtils.BLACK_A90, ImageDrawerUtils.SMALL_FONT18_TYPE0)
+                            .finishAndStartDrawStringDown(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "所属uid:", x + 5, 3)
+                            .drawString(character.getUid());
+                    //draw next
+                    x += 205;
+                    if (x > 800) {
+                        x = 5;
+                        y += 405;
+                    }
                 }
+                drawer.startDrawString(ImageDrawerUtils.SMALL_FONT16, Color.BLACK, DateUtils.getFormat(), 5, 807);
                 return new GeneralData.ResDataImage(drawer.bytes());
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();
@@ -167,18 +225,26 @@ public class CharactersController {
             }
         }
         characterInfo.setLevel(character.getLevel());
+
+        redisSource.cid2hp.setValue("cid-hp-" + character.getId(), characterInfo.getHp().getFinalValue());
+        redisSource.cid2xp.setValue("cid-xp-" + character.getId(), characterInfo.getXp().getFinalValue());
+
         if (pack.isArgValue("draw", true)) {
             try {
-                byte[] bytes = ReadUtils.readAll(new ClassPathResource("bg0.jpg").getInputStream());
-                ImageDrawer drawer = new ImageDrawer(bytes);
+                ImageDrawer drawer = ImageDrawer.createOnRandomBg();
                 drawer.size(800, 1000)
                         .draw(resourceLoader.id2file.get(character.getCid()), 210, 210, 5, 35)
+                        .fillRoundRect(ImageDrawerUtils.BLACK_A35, 250, 15, 540, 400, 15, 15)
                         .execute(graphics -> {
-                            graphics.setColor(ImageDrawerUtils.BLACK_A35);
-                            graphics.fillRoundRect(250, 15, 540, 400, 15, 15);
                             graphics.setFont(ImageDrawerUtils.SMALL_FONT18);
                             graphics.setColor(ImageDrawerUtils.BLACK_A75);
                             graphics.drawString(character.getUid(), 2, graphics.getFontMetrics().getHeight());
+
+                            graphics.setFont(ImageDrawerUtils.SMALL_FONT32);
+                            graphics.setColor(ImageDrawerUtils.RED_A90);
+                            int sw = graphics.getFontMetrics().stringWidth(characterInfo.getName());
+                            int sx = (210 - sw) / 2;
+                            graphics.drawString(characterInfo.getName(), sx + 5, 300);
                         })
 
                         .startDrawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "等级  :", 255, 50)
@@ -203,6 +269,20 @@ public class CharactersController {
                         .finishAndStartDrawStringDown(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "防御  :", 255, 5)
                         .drawString(characterInfo.getDefense().getFinalValue())
                         .drawString(String.format("(+%s%%)", characterInfo.getDefense().getBv() - 100), ImageDrawerUtils.BLUE5_A75)
+
+                        .finishAndStartDrawStringDown(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "速度  :", 255, 5)
+                        .drawString(characterInfo.getSpeed().getFinalValue())
+                        .drawString(String.format("(+%s%%)", characterInfo.getSpeed().getBv() - 100), ImageDrawerUtils.BLUE5_A75)
+
+                        .finishAndStartDrawStringDown(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "爆率  :", 255, 5)
+                        .drawString(characterInfo.getChc().getFinalValue() + "%")
+                        .finishAndStartDrawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "爆伤  :", 520, 344)
+                        .drawString(characterInfo.getChe().getFinalValue() + "%")
+
+                        .finishAndStartDrawStringDown(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "命中率:", 255, 5)
+                        .drawString(characterInfo.getEfr().getFinalValue() + "%")
+                        .finishAndStartDrawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "抵抗率:", 520, 386)
+                        .drawString(characterInfo.getEfh().getFinalValue() + "%")
 
                         .finish();
                 int x = 15;

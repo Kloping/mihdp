@@ -88,6 +88,10 @@ public class GameStaticResourceLoader {
 
     public Map<Integer, File> id2file = new HashMap<>();
 
+    public File getFileById(Integer id) {
+        return id2file.get(id);
+    }
+
     /**
      * 静态图片资源加载
      */

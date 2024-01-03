@@ -1,6 +1,7 @@
 package io.github.kloping.mihdp.game.api;
 
 /**
+ * 加成
  * @author github.kloping
  */
 public interface Addition {

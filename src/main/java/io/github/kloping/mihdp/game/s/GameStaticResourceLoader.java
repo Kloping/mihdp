@@ -15,10 +15,7 @@ import lombok.Getter;
 
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author github.kloping
@@ -28,7 +25,7 @@ public class GameStaticResourceLoader {
 
     public Shopping shopping = null;
 
-    public Map<Integer, Item> ITEM_MAP = new HashMap<>();
+    public Map<Integer, Item> ITEM_MAP = new LinkedHashMap<>();
 
     @Getter
     private BaseCharacterInfo baseCharacterInfo = null;

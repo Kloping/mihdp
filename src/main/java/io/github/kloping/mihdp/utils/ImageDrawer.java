@@ -148,6 +148,13 @@ public class ImageDrawer {
             return drawer.startDrawString(font, color, s, x, y);
         }
 
+        public ImageDrawerString finishAndStartDrawStringDown(String s, int x, int gaps) {
+            int y = graphics.getFontMetrics().getHeight() + gaps + oy;
+            ImageDrawerString dr = drawer.startDrawString(graphics.getFont(), graphics.getColor(), s, x, y);
+            graphics.dispose();
+            return dr;
+        }
+
         /**
          * 写字布局 默认横 0
          *
@@ -155,7 +162,17 @@ public class ImageDrawer {
          * @return
          */
         public ImageDrawerString layout(int layout) {
+            return layout(layout, null, null);
+        }
+
+        public ImageDrawerString layout(int layout, Color color) {
+            return layout(layout, color, null);
+        }
+
+        public ImageDrawerString layout(int layout, Color color, Font font) {
             this.layout = layout;
+            if (color != null) getGraphics().setColor(color);
+            if (font != null) getGraphics().setFont(font);
             return this;
         }
 
@@ -225,6 +242,44 @@ public class ImageDrawer {
 
         public ImageDrawerString drawString(Object o) {
             return drawString(o.toString(), null, null);
+        }
+
+        /**
+         * 画字符并超过maxW换行
+         *
+         * @param text
+         * @param max
+         * @return
+         */
+        public ImageDrawerString drawString(String text, int max) {
+            Graphics graphics = getGraphics();
+            int ep;
+            if (layout == 0) {
+                ep = ox;
+            } else {
+                ep = oy;
+            }
+            for (int i = 0; i < text.length(); i++) {
+                String e = String.valueOf(text.charAt(i));
+                if (layout == 0) {
+                    int e1 = graphics.getFontMetrics().stringWidth(e);
+                    ep += e1;
+                    if (ep - ox > max) {
+                        ep = ox + e1;
+                        oy += graphics.getFontMetrics().getHeight();
+                    }
+                    graphics.drawString(e, ep - e1, oy);
+                } else {
+                    int e1 = graphics.getFontMetrics().getHeight();
+                    ep += e1;
+                    if (ep - oy > max) {
+                        ep = oy + e1;
+                        ox += graphics.getFontMetrics().stringWidth(e);
+                    }
+                    graphics.drawString(e, ox, ep - e1);
+                }
+            }
+            return this;
         }
     }
 

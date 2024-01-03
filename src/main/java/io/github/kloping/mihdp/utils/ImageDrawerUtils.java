@@ -20,13 +20,16 @@ import java.util.Iterator;
  */
 public class ImageDrawerUtils {
 
-    public static final Font SMALL_FONT28 = new Font("楷体", Font.BOLD, 28);
-    public static final Font SMALL_FONT26 = new Font("楷体", Font.BOLD, 26);
-    public static final Font SMALL_FONT24 = new Font("楷体", Font.BOLD, 24);
-    public static final Font SMALL_FONT22 = new Font("楷体", Font.BOLD, 22);
-    public static final Font SMALL_FONT20 = new Font("楷体", Font.BOLD, 20);
-    public static final Font SMALL_FONT18 = new Font("楷体", Font.BOLD, 18);
+    public static final Font SMALL_FONT13 = new Font("楷体", Font.BOLD, 13);
+    public static final Font SMALL_FONT14 = new Font("楷体", Font.BOLD, 14);
+    public static final Font SMALL_FONT15 = new Font("楷体", Font.BOLD, 15);
     public static final Font SMALL_FONT16 = new Font("楷体", Font.BOLD, 16);
+    public static final Font SMALL_FONT18 = new Font("楷体", Font.BOLD, 18);
+    public static final Font SMALL_FONT20 = new Font("楷体", Font.BOLD, 20);
+    public static final Font SMALL_FONT22 = new Font("楷体", Font.BOLD, 22);
+    public static final Font SMALL_FONT24 = new Font("楷体", Font.BOLD, 24);
+    public static final Font SMALL_FONT26 = new Font("楷体", Font.BOLD, 26);
+    public static final Font SMALL_FONT28 = new Font("楷体", Font.BOLD, 28);
     public static final Font SMALL_FONT32 = new Font("楷体", Font.BOLD, 32);
     public static final Font SMALL_FONT38 = new Font("楷体", Font.BOLD, 38);
     public static final Font SMALL_FONT40 = new Font("楷体", Font.BOLD, 40);
@@ -47,6 +50,7 @@ public class ImageDrawerUtils {
     public static final Color GREEN_A85 = new Color(0, 150, 0, 217);
     public static final Color ORIGIN_A80 = new Color(231, 96, 12, 204);
     public static final Color WHITE_A80 = new Color(211, 211, 211, 203);
+    public static final Color WHITE_A90 = new Color(232, 231, 231, 230);
     public static final Color ORIGIN_A75 = new Color(231, 129, 12, 191);
     public static final Color BLACK_A75 = new Color(0, 0, 0, 191);
     public static final Color GREEN_A75 = new Color(2, 180, 2, 191);

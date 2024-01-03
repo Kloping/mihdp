@@ -42,14 +42,8 @@ import java.util.List;
  */
 @Controller
 public class CharactersController {
-    @AutoStand(id = "defaultConfig")
-    JSONObject defaultConfig;
-    @AutoStand
-    LanguageConfig lconfig;
     @AutoStand
     UserMapper userMapper;
-    @AutoStand
-    UsersResourcesMapper usersResourcesMapper;
     @AutoStand
     CharacterMapper charactersMapper;
     @AutoStand

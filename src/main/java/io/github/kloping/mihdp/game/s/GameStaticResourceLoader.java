@@ -26,9 +26,9 @@ import java.util.Map;
 @Entity
 public class GameStaticResourceLoader {
 
-    private Shopping shopping = null;
+    public Shopping shopping = null;
 
-    private Map<Integer, Item> ITEM_MAP = new HashMap<>();
+    public Map<Integer, Item> ITEM_MAP = new HashMap<>();
 
     @Getter
     private BaseCharacterInfo baseCharacterInfo = null;

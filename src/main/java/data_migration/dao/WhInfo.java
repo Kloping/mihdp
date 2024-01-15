@@ -35,7 +35,7 @@ public class WhInfo {
     /**
      * 最大精神力
      */
-    public Long hjL = 100L;
+    public Long hjl = 100L;
     /**
      * 等级
      */

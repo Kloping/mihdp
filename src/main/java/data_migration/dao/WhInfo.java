@@ -35,7 +35,7 @@ public class WhInfo {
     /**
      * 最大精神力
      */
-    public Long hjl = 100L;
+    public Long hjL = 100L;
     /**
      * 等级
      */
@@ -52,7 +52,7 @@ public class WhInfo {
      * 经验
      */
     public Long xp = 0L;
-    public Long xpl = 100L;
+    public Long xpL = 100L;
     /**
      * 主人
      */

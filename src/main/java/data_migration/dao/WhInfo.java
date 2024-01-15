@@ -52,7 +52,7 @@ public class WhInfo {
      * 经验
      */
     public Long xp = 0L;
-    public Long xpL = 100L;
+    public Long xpl = 100L;
     /**
      * 主人
      */

@@ -48,7 +48,7 @@ public class ReqDataPack {
 
     public boolean isArgValue(String name, Object v) {
         Object o = args.get(name);
-        if (o != null) return o.equals(v);
+        if (o != null) return o.toString().equals(v.toString());
         return false;
     }
 

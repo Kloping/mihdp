@@ -1,0 +1,37 @@
+示例 action - 对应指令
+
+- shop
+  - 商城
+  - 商店
+  - 商场
+- test
+  - 测试
+- sign
+  - 打卡
+  - 签到
+- show_character
+  - 查看
+- get0
+  - 取积分
+- trans0
+  - 积分转让
+  - 转让积分
+- characters
+  - 魂角列表
+- reg
+  - 注册
+- put0
+  - 存积分
+- greenhorn
+  - 领取魂角
+- work0
+  - 干活
+  - 上班
+  - 打工
+- rob0
+  - 抢劫
+  - 打劫
+- info
+  - 信息
+  - 个人信息
+  - 当前信息

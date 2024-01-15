@@ -9,7 +9,9 @@ import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
 import io.github.kloping.MySpringTool.interfaces.component.PackageScanner;
 import io.github.kloping.judge.Judge;
+import io.github.kloping.map.MapUtils;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.utils.Utils;
 import io.github.kloping.mihdp.wss.GameClient;
@@ -24,6 +26,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -111,13 +115,18 @@ public class MihDpMain implements CommandLineRunner {
                 if (Judge.isNotEmpty(v)) contextManager.append(v, requiredProperty);
             }
         });
+        APPLICATION.STARTED_RUNNABLE.add(() -> {
+            Map<String, List<String>> map = new HashMap<>();
+            BaseService.MSG2ACTION.forEach((k, v) -> {
+                MapUtils.append(map, v, k);
+            });
+            map.forEach((k, v) -> {
+                System.out.println("- " + k);
+                for (String s : v) {
+                    System.out.println("  - " + s);
+                }
+            });
+        });
         APPLICATION.run0(BaseComponent.class);
-//        FieldManager fieldManager = APPLICATION.INSTANCE.getFieldManager();
-//        if (fieldManager instanceof FieldManagerImpl) {
-//            FieldManagerImpl fm = (FieldManagerImpl) fieldManager;
-//            APPLICATION.logger.setLogLevel(3);
-//            fm.workStand();
-//            APPLICATION.logger.setLogLevel(0);
-//        }
     }
 }

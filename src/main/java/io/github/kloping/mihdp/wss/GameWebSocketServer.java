@@ -69,8 +69,8 @@ public class GameWebSocketServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        logger.info("Error occurred on connection from " + conn.getRemoteSocketAddress() + ": " + ex.getMessage());
         CLIENT_MAP.remove(conn.getRemoteSocketAddress().toString());
+        logger.info("Error occurred on connection from " + conn + ": " + ex);
     }
 
     @Override

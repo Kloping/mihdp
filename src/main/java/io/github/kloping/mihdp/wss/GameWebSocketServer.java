@@ -1,6 +1,7 @@
 package io.github.kloping.mihdp.wss;
 
 import com.google.gson.Gson;
+import io.github.kloping.MySpringTool.PartUtils;
 import io.github.kloping.MySpringTool.interfaces.Logger;
 import org.fusesource.jansi.Ansi;
 import org.java_websocket.WebSocket;
@@ -69,8 +70,7 @@ public class GameWebSocketServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        CLIENT_MAP.remove(conn.getRemoteSocketAddress().toString());
-        logger.info("Error occurred on connection from " + conn + ": " + ex);
+        logger.info("Error occurred on connection from " + conn + ": " + PartUtils.getExceptionLine(ex));
     }
 
     @Override

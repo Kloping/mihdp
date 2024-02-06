@@ -114,9 +114,9 @@ public class BeginController {
                 MapUtils.append(map, v, k);
             });
             map.forEach((k, v) -> {
-                sb0.append("- " + k);
+                sb0.append("- " + k).append("\n");
                 for (String s : v) {
-                    sb0.append("  - " + s);
+                    sb0.append("  - " + s).append("\n");
                 }
             });
             COMMAND_ALL = sb0.toString();

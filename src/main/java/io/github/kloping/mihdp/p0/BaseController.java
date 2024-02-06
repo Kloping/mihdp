@@ -8,6 +8,7 @@ import io.github.kloping.MySpringTool.exceptions.NoRunException;
 import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.MySpringTool.interfaces.QueueExecutor;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.mapper.ConfigMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.p0.utils.NumberSelector;
@@ -85,9 +86,13 @@ public class BaseController implements Runner, RunnerOnThrows {
         BaseService.MSG2ACTION.put("测试", "test");
     }
 
+    @AutoStand
+    RedisSource redisSource;
+
     @Action("test")
     public Object getInfo(ReqDataPack dataPack, GameClient client) {
         return GeneralData.GeneralDataBuilder.create("测试按钮发送").append(1, "落日神弓").append(2, "神空剑").build();
+//        return redisSource.id2shopMax.setValue("testKey",1234);
     }
 
     @Action("s\\d")

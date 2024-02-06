@@ -100,6 +100,17 @@ public class ImageDrawer {
         return draw(ImageIO.read(file), w, h, x, y, -1, rotate);
     }
 
+    /**
+     * 填充一个圆角方形颜色
+     * @param color
+     * @param x 左下x
+     * @param y 左下y
+     * @param w
+     * @param h
+     * @param rw
+     * @param rh
+     * @return
+     */
     public ImageDrawer fillRoundRect(Color color, int x, int y, int w, int h, int rw, int rh) {
         Graphics graphics = getSrc().getGraphics();
         if (color != null) graphics.setColor(color);

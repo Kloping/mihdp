@@ -22,12 +22,10 @@ import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.CycleMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
-import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.p0.utils.NumberSelector;
 import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.mihdp.utils.ImageDrawerUtils;
-import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.number.NumberUtils;
@@ -109,8 +107,8 @@ public class CharactersController {
                 int y = 15;
                 for (Character character : charactersMapper.selectList(qw)) {
                     //预计展示 血量 经验 等级 图标 等..
-                    Integer maxHp = redisSource.cid2hp.getValue("cid-hp-" + character.getId());
-                    Integer maxXp = redisSource.cid2hp.getValue("cid-xp-" + character.getId());
+                    Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
+                    Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
                     if (maxHp == null || maxXp == null) {
                         //基础的魂角属性
                         CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
@@ -130,8 +128,8 @@ public class CharactersController {
                         characterInfo.setLevel(character.getLevel());
                         maxHp = characterInfo.getHp().getFinalValue();
                         maxXp = characterInfo.getXp().getFinalValue();
-                        redisSource.cid2hp.setValue("cid-hp-" + character.getId(), maxHp);
-                        redisSource.cid2xp.setValue("cid-xp-" + character.getId(), maxXp);
+                        redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
+                        redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
                     }
 
                     drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 400, 15, 15)
@@ -220,8 +218,8 @@ public class CharactersController {
         }
         characterInfo.setLevel(character.getLevel());
 
-        redisSource.cid2hp.setValue("cid-hp-" + character.getId(), characterInfo.getHp().getFinalValue());
-        redisSource.cid2xp.setValue("cid-xp-" + character.getId(), characterInfo.getXp().getFinalValue());
+        redisSource.str2int.setValue("cid-hp-" + character.getId(), characterInfo.getHp().getFinalValue());
+        redisSource.str2int.setValue("cid-xp-" + character.getId(), characterInfo.getXp().getFinalValue());
 
         if (pack.isArgValue("draw", true)) {
             try {

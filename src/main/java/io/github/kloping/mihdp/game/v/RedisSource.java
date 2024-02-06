@@ -9,9 +9,8 @@ import io.github.kloping.spt.RedisOperate;
  */
 @Entity
 public class RedisSource {
-    @AutoStand
-    public RedisOperate<Integer> cid2hp;
-    @AutoStand
-    public RedisOperate<Integer> cid2xp;
-
+    @AutoStand(id = "0")
+    public RedisOperate<Integer> str2int;
+    @AutoStand(id = "1")
+    public RedisOperate<Integer> id2shopMax;
 }

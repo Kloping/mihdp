@@ -3,6 +3,7 @@ package io.github.kloping.mihdp.game.v.v0;
 import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.map.MapUtils;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
@@ -14,6 +15,10 @@ import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.rand.RandomUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author github.kloping
@@ -93,4 +98,30 @@ public class BeginController {
             return null;
         }
     }
+
+    {
+        BaseService.MSG2ACTION.put("指令列表", "list-command");
+    }
+
+    private String COMMAND_ALL = null;
+
+    @Action("list-command")
+    public Object list(ReqDataPack pack, GameClient client) {
+        if (COMMAND_ALL == null) {
+            StringBuilder sb0 = new StringBuilder();
+            Map<String, List<String>> map = new HashMap<>();
+            BaseService.MSG2ACTION.forEach((k, v) -> {
+                MapUtils.append(map, v, k);
+            });
+            map.forEach((k, v) -> {
+                sb0.append("- " + k);
+                for (String s : v) {
+                    sb0.append("  - " + s);
+                }
+            });
+            COMMAND_ALL = sb0.toString();
+        }
+        return COMMAND_ALL;
+    }
+
 }

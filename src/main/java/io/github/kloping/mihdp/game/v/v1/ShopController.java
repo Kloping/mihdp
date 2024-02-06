@@ -48,6 +48,7 @@ public class ShopController {
     }
 
     private Integer index = 0, max = 10;
+    public static final Integer MAX_SHOP = 50;
     private byte[] shopBytes = null;
 
     @Action("shop")
@@ -58,6 +59,11 @@ public class ShopController {
                 drawer.size(1030, 1225);
                 int x = 5, y = 5;
                 for (Integer id : resourceLoader.ITEM_MAP.keySet()) {
+                    String key = String.format("buy-%s.%s", pack.getSender_id(), id);
+                    Integer v0 = redisSource.id2shopMax.getValue(key);
+                    if (v0 == null) {
+                        v0 = 0;
+                    }
                     Item item = resourceLoader.ITEM_MAP.get(id);
                     drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 400, 20, 20)
                             .draw(resourceLoader.getFileById(id), 200, 200, x, y)
@@ -66,8 +72,9 @@ public class ShopController {
                             .drawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLUE3_A90, item.getName(), x, y + 220)
                             .layout(0, ImageDrawerUtils.WHITE_A90, ImageDrawerUtils.SMALL_FONT22)
                             .drawString(item.getDesc(), 200)
-                            .drawString(ImageDrawerUtils.SMALL_FONT26,ImageDrawerUtils.BLACK_A75,"价格:",  x, y + 370)
+                            .drawString(ImageDrawerUtils.SMALL_FONT26, ImageDrawerUtils.BLACK_A75, "价格:", x, y + 350)
                             .drawString(item.getPrice().toString(), ImageDrawerUtils.RED_A90)
+                            .drawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A75, String.format("限:%s/%s", v0, MAX_SHOP), x, y + 380)
                             .finish();
                     x += 205;
                     if (x > 1000) {

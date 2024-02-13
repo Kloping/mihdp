@@ -80,9 +80,11 @@ public class InfoController {
         Integer n1 = Integer.valueOf(o0.split(";")[0]);
         Long t0 = Long.valueOf(o0.split(";")[1]);
         Long t1 = System.currentTimeMillis() - t0;
+        if (resources.getEnergy() >= 200) return;
         if (t1 > 360000) {
             int e1 = (int) (t1 / 360000);
             resources.setEnergy(resources.getEnergy() + e1);
+            if (resources.getEnergy() > 200) resources.setEnergy(200);
             resources.applyE(redisSource);
             usersResourcesMapper.updateById(resources);
         }

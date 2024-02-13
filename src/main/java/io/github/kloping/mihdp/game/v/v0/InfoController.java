@@ -74,8 +74,7 @@ public class InfoController {
      * @param resources
      */
     public void CalculateE(UsersResources resources) {
-        String key = resources.getUid() + ";" + resources.getEnergy();
-        String o0 = redisSource.id2ent.getValue(key);
+        String o0 = redisSource.id2ent.getValue(resources.getUid());
         if (o0 == null) return;
         Integer n1 = Integer.valueOf(o0.split(";")[0]);
         Long t0 = Long.valueOf(o0.split(";")[1]);

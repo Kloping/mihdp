@@ -77,6 +77,7 @@ public class InfoController {
         String o0 = redisSource.id2ent.getValue(resources.getUid());
         if (o0 == null) return;
         Integer n1 = Integer.valueOf(o0.split(";")[0]);
+        if (n1 != resources.getEnergy()) resources.setEnergy(n1);
         Long t0 = Long.valueOf(o0.split(";")[1]);
         Long t1 = System.currentTimeMillis() - t0;
         if (resources.getEnergy() >= 200) return;

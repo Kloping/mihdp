@@ -72,6 +72,7 @@ public class DrawController {
         ACTION2DRAWER.put("put0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
         ACTION2DRAWER.put("put0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
         ACTION2DRAWER.put("trans0", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
+        ACTION2DRAWER.put("exchange", (o, p) -> info(o, o.getString("tips"), o.getBoolean("t")));
     }
 
 

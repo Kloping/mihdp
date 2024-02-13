@@ -15,4 +15,7 @@ import java.util.List;
 public interface BagMaper extends BaseMapper<Bag> {
     @Select("SELECT * FROM `bag` WHERE `uid`=#{uid}")
     List<Bag> selectByUid(@Param("uid") String uid);
+
+    @Select("SELECT * FROM `bag` WHERE `uid`=#{uid} AND `rid`=#{rid}")
+    List<Bag> selectByUidAndRid(@Param("uid") String uid, @Param("rid") Integer rid);
 }

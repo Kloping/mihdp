@@ -28,11 +28,11 @@ public class ShopController {
     @AutoStand
     CharacterMapper charactersMapper;
     @AutoStand
-    BeginController beginController;
+    RedisSource redisSource;
     @AutoStand
     GameStaticResourceLoader resourceLoader;
     @AutoStand
-    RedisSource redisSource;
+    BeginController beginController;
 
     @Before
     public User before(ReqDataPack dataPack) {

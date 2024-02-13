@@ -12,6 +12,7 @@ import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
@@ -41,6 +42,8 @@ public class InfoController {
     CharacterMapper charactersMapper;
     @AutoStand
     BeginController beginController;
+    @AutoStand
+    RedisSource redisSource;
 
     private User getUser(ReqDataPack dataPack) {
         String sid = dataPack.getSender_id();
@@ -65,9 +68,30 @@ public class InfoController {
         BaseService.MSG2ACTION.put("个人信息", "info");
     }
 
+    /**
+     * 计算当前灵力多少 (仿计时
+     *
+     * @param resources
+     */
+    public void CalculateE(UsersResources resources) {
+        String key = resources.getUid() + ";" + resources.getEnergy();
+        String o0 = redisSource.id2ent.getValue(key);
+        if (o0 == null) return;
+        Integer n1 = Integer.valueOf(o0.split(";")[0]);
+        Long t0 = Long.valueOf(o0.split(";")[1]);
+        Long t1 = System.currentTimeMillis() - t0;
+        if (t1 > 360000) {
+            int e1 = (int) (t1 / 360000);
+            resources.setEnergy(resources.getEnergy() + e1);
+            resources.applyE(redisSource);
+            usersResourcesMapper.updateById(resources);
+        }
+    }
+
     @Action("info")
     public Object info(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+        CalculateE(resources);
         Integer level = user.getLevel();
         JSONArray ar = defaultConfig.getJSONArray("xp_list");
         Integer max;

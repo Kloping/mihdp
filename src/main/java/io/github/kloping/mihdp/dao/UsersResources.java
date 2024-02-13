@@ -1,6 +1,7 @@
 package io.github.kloping.mihdp.dao;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import io.github.kloping.mihdp.game.v.RedisSource;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -50,5 +51,9 @@ public class UsersResources {
 
     public void addFz(int i) {
         fz += i;
+    }
+
+    public void applyE(RedisSource redisSource) {
+        redisSource.id2ent.setValue(getUid(), getEnergy() + ";" + System.currentTimeMillis());
     }
 }

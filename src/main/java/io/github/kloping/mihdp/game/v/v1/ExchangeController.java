@@ -86,7 +86,7 @@ public class ExchangeController {
     public Object elist(ReqDataPack pack, User user) throws Exception {
         return "兑换特殊币<n> #使用灵力+积分按照1:10的比例兑换为特殊币;tips,灵力每6分钟回复1点\n" +
                 "兑换打劫次数<n> #使用15灵力兑换1次打劫次数\n" +
-                "兑换打工 #使用15灵力刷新一次打工";
+                "兑换打工 #使用40灵力刷新一次打工";
     }
 
     {
@@ -115,11 +115,12 @@ public class ExchangeController {
             return new AbstractMap.SimpleEntry<>("兑换成功!", true);
         });
         EXCHANGE_MAP.put("打劫", EXCHANGE_MAP.get("打劫次数"));
+        int wrm = 40;
         EXCHANGE_MAP.put("打工", (p, u) -> {
             UsersResources resources = usersResourcesMapper.selectById(u.getUid());
             infoController.CalculateE(resources);
-            if (resources.getEnergy() < 15) return new AbstractMap.SimpleEntry<>("灵力不足!", false);
-            resources.setEnergy(resources.getEnergy() - (15));
+            if (resources.getEnergy() < wrm) return new AbstractMap.SimpleEntry<>("灵力不足!", false);
+            resources.setEnergy(resources.getEnergy() - (wrm));
             resources.setK(0L);
             resources.applyE(redisSource);
             usersResourcesMapper.updateById(resources);

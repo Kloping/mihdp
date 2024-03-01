@@ -298,4 +298,82 @@ public class CharactersController {
             return jsonObject;
         }
     }
+
+    {
+        BaseService.MSG2ACTION.put("切换", "handoff");
+    }
+
+    @Action("handoff")
+    public Object handoff(ReqDataPack pack, User user) {
+        GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
+        String text = generalData.allText().trim();
+        if (Judge.isEmpty(text)) return null;
+        CharacterInfo characterInfo = resourceLoader.getCharacterInfoByName(text);
+        if (characterInfo == null) return "切换失败!\n可能不存在该魂角";
+        QueryWrapper<Character> qw0 = new QueryWrapper<>();
+        qw0.eq("uid", user.getUid());
+        qw0.eq("cid", characterInfo.getId());
+        Character character = charactersMapper.selectOne(qw0);
+        if (character == null) return "切换失败!\n可能尚未拥有.";
+        redisSource.uid2cid.setValue(user.getUid(), character.getId());
+        return "切换成功!";
+    }
+
+    {
+        BaseService.MSG2ACTION.put("修炼", "xl");
+    }
+
+    @Action("xl")
+    public Object xl(ReqDataPack pack, User user) {
+        Long cd = redisSource.uid2cd.getValue(user.getUid());
+        if (cd != null && cd > System.currentTimeMillis())
+            return "冷却中..\n大约等待(分钟):" + ((cd - System.currentTimeMillis()) / 60000);
+        Integer cid = redisSource.uid2cid.getValue(user.getUid());
+        Character character = null;
+        if (cid == null) {
+            QueryWrapper<Character> qw0 = new QueryWrapper<>();
+            qw0.eq("uid", user.getUid());
+            qw0.orderBy(true, true, "level");
+            List<Character> list = charactersMapper.selectList(qw0);
+            if (list.size() <= 0) return "暂无魂角,请先`领取魂角`";
+            character = list.get(0);
+        } else {
+            character = charactersMapper.selectById(cid);
+        }
+        if (character == null) return "暂无魂角,请先`领取魂角`";
+        else {
+            //预计展示 血量 经验 等级 图标 等..
+            Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
+            Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
+            if (maxHp == null || maxXp == null) {
+                //基础的魂角属性
+                CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
+                if (characterInfo == null) return "异常;";
+                for (Addition addition : additionLogic.getAddition(character)) {
+                    characterInfo.reg(addition);
+                }
+                //魂环加成
+                QueryWrapper<Cycle> qw1 = new QueryWrapper<>();
+                qw1.eq("cid", character.getId());
+                List<Cycle> cycles = cycleMapper.selectList(qw1);
+                for (Cycle cycle : cycles) {
+                    for (Addition addition : additionLogic.getAddition(cycle)) {
+                        characterInfo.reg(addition);
+                    }
+                }
+                characterInfo.setLevel(character.getLevel());
+                maxHp = characterInfo.getHp().getFinalValue();
+                maxXp = characterInfo.getXp().getFinalValue();
+                redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
+                redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
+            }
+            int hpa = NumberUtils.percentTo(10, maxHp).intValue();
+            character.setXp(character.getXp() + 10);
+            character.setXp(character.getXp() > (maxHp * 1.5) ? (int) (maxXp * 1.5) : character.getXp());
+            character.setHp(character.getHp() + hpa);
+            character.setHp(character.getHp() > maxHp ? maxHp : character.getHp());
+            redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
+            return "每次修炼恢复当前使用魂角10%血量并增加10点经验\n当前:" + String.format("%s;%s/%s", NumberUtils.toPercent(character.getHp(), maxHp), character.getXp(), maxHp);
+        }
+    }
 }

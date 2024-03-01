@@ -24,4 +24,14 @@ public class RedisSource {
      */
     @AutoStand(id = "2")
     public RedisOperate<String> id2ent;
+    /**
+     * 当前用户使用的魂角
+     */
+    @AutoStand(id = "3")
+    public RedisOperate<Integer> uid2cid;
+    /**
+     * 用户修炼cd
+     */
+    @AutoStand(id = "4")
+    public RedisOperate<Long> uid2cd;
 }

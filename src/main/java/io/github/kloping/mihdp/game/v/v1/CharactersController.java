@@ -373,7 +373,8 @@ public class CharactersController {
             character.setHp(character.getHp() + hpa);
             character.setHp(character.getHp() > maxHp ? maxHp : character.getHp());
             redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
-            return "每次修炼恢复当前使用魂角10%血量并增加10点经验\n当前:" + String.format("%s;%s/%s", NumberUtils.toPercent(character.getHp(), maxHp), character.getXp(), maxHp);
+            charactersMapper.updateById(character);
+            return "每次修炼恢复当前使用魂角10%血量并增加10点经验\n当前:" + String.format("%s%%;%s/%s", NumberUtils.toPercent(character.getHp(), maxHp), character.getXp(), maxHp);
         }
     }
 }

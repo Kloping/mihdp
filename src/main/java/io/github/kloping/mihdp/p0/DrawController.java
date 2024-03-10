@@ -127,7 +127,13 @@ public class DrawController {
             graphics.setFont(ImageDrawerUtils.SMALL_FONT24);
 
             graphics.setColor(ImageDrawerUtils.GREEN_A75);
-            graphics.drawString("当前积分: " + resources.getScore(), 30, y);
+            String m0 = "当前积分:";
+            graphics.drawString(m0, 30, y);
+            int w0 = graphics.getFontMetrics().stringWidth(m0);
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT32);
+            graphics.setColor(ImageDrawerUtils.BLACK_A75);
+            graphics.drawString(resources.getScore().toString(), 30 + w0, y);
+            graphics.setFont(ImageDrawerUtils.SMALL_FONT24);
 
             graphics.setColor(ImageDrawerUtils.BLUE_A75);
             graphics.drawString("存储积分: " + resources.getScore0(), 300, y);

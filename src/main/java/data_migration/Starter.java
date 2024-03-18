@@ -2,8 +2,8 @@ package data_migration;
 
 import data_migration.source.DataMigration;
 import data_migration.target.DataMigrationTarget;
+import data_migration.target.dao.Bag;
 import data_migration.target.mapper.UserMapper;
-import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.User;
 
 import java.util.concurrent.CountDownLatch;
@@ -26,7 +26,7 @@ public class Starter {
         cdl.await();
 
         data_migration.source.mapper.BagMapper bagMapper0 = DataMigration.context.getBean(data_migration.source.mapper.BagMapper.class);
-        data_migration.target.mapper.BagMaper bagMapper1 = DataMigration.context.getBean(data_migration.target.mapper.BagMaper.class);
+        data_migration.target.mapper.BagMaper bagMapper1 = DataMigrationTarget.context.getBean(data_migration.target.mapper.BagMaper.class);
         UserMapper userMapper = DataMigrationTarget.context.getBean(UserMapper.class);
         for (User user : userMapper.selectList(null)) {
             String qidStr = user.getId();

@@ -1,7 +1,7 @@
 package data_migration.target.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.github.kloping.mihdp.dao.Bag;
+import data_migration.target.dao.Bag;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

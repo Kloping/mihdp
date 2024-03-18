@@ -1,0 +1,23 @@
+{
+  "zh": {
+    "RegistrationSuccessfulTips": "注册成功!",
+    "UnregisteredPrompt": "您当前仍未'注册';请先进行'注册;",
+    "TargetUnregisteredPrompt": "选择的目标尚未'注册'",
+    "TargetNotFoundPrompt": "未选择目标",
+    "SignFail": "签到失败!今天已经签到啦.",
+    "SignSuccess": "签到成功!积分+%s",
+    "Work0Fail": "打工进行中...剩余: %s分钟",
+    "Work0Success": "打工花费%s分钟,+%s",
+    "Get0Success": "取积分成功!",
+    "Get0Fail": "存的积分不足:%s",
+    "Put0Success": "存积分成功!",
+    "Put0Fail": "当前积分不足:%s",
+    "Trans0Success": "积分转让成功!",
+    "Trans0Fail": "积分转让失败!",
+    "Rob0Success": "成功打劫了%s积分!\n增加1指数",
+    "Rob1Success": "累计成功打劫%s次共%s积分,增加%s指数",
+    "Rob0Fail0": "打劫次数上限!",
+    "TargetScoreDeficiency": "对方积分不足!",
+    "ScoreDeficiency": "积分不足!"
+  }
+}

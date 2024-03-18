@@ -18,7 +18,7 @@ public class RedisSource {
      * 每周末删
      */
     @AutoStand(id = "1")
-    public RedisOperate<Integer> id2shopMax;
+    public RedisOperate<Integer> weekDel;
     /**
      * 永久不删
      */

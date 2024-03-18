@@ -45,6 +45,7 @@ public class ImageDrawerUtils {
     public static final Font SMALL_FONT38_TYPE0 = new Font("方正舒体", Font.BOLD, 38);
 
     public static final Color BLACK_A90 = new Color(0, 0, 0, 230);
+    public static final Color BLACK_A95 = new Color(0, 0, 0, 242);
     public static final Color BLACK_A85 = new Color(0, 0, 0, 217);
     public static final Color YELLOW_A85 = new Color(150, 99, 4, 217);
     public static final Color GREEN_A85 = new Color(0, 150, 0, 217);

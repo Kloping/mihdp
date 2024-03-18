@@ -17,5 +17,5 @@ public interface BagMaper extends BaseMapper<Bag> {
     List<Bag> selectByUid(@Param("uid") String uid);
 
     @Select("SELECT * FROM `bag` WHERE `uid`=#{uid} AND `rid`=#{rid}")
-    List<Bag> selectByUidAndRid(@Param("uid") String uid, @Param("rid") Integer rid);
+    Bag selectByUidAndRid(@Param("uid") String uid, @Param("rid") Integer rid);
 }

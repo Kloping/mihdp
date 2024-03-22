@@ -41,6 +41,7 @@ public class DrawController {
         String action = dataPack.getAction();
         if (ACTION2DRAWER.containsKey(action)) {
             GeneralData.ResDataText text = dataPack.getData().find(GeneralData.ResDataText.class);
+            if (text == null) return null;
             String jsonD = text.getContent();
             JSONObject data = null;
             try {

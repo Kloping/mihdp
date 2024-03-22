@@ -110,6 +110,16 @@ public class InfoController {
 
     @Action("info")
     public Object info(ReqDataPack dataPack, User user) {
+        JSONObject data = getInfoData(dataPack, user);
+        GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
+        builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
+                .append(new GeneralData.ResDataButton("每日签到", "签到"))
+                .append(new GeneralData.ResDataButton("赚积分", "打工"))
+                .append(new GeneralData.ResDataButton("兑换列表", "兑换列表"));
+        return builder.build();
+    }
+
+    public JSONObject getInfoData(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
         CalculateE(resources);
         Integer level = user.getLevel();
@@ -142,12 +152,7 @@ public class InfoController {
         }
         data.put("tips", "信息获取成功");
         data.put("t", true);
-        GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
-        builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
-                .append(new GeneralData.ResDataButton("每日签到", "签到"))
-                .append(new GeneralData.ResDataButton("赚积分", "打工"))
-                .append(new GeneralData.ResDataButton("兑换列表", "兑换列表"));
-        return builder.build();
+        return data;
     }
 
     {
@@ -175,7 +180,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("SignSuccess", r));
             data.put("t", true);
         }
-        data.putAll((JSONObject) info(dataPack, user));
+        data.putAll(getInfoData(dataPack, user));
         GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
         builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
                 .append(new GeneralData.ResDataButton("取积分", "取积分"))
@@ -211,7 +216,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Work0Success", f0, r));
             data.put("t", true);
         }
-        data.putAll((JSONObject) info(dataPack, user));
+        data.putAll(getInfoData(dataPack, user));
         GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
         builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
                 .append(new GeneralData.ResDataButton("取积分", "取积分"))
@@ -239,7 +244,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Get0Fail", sc, resources.getScore0()));
             data.put("t", false);
         }
-        data.putAll((JSONObject) info(dataPack, user));
+        data.putAll(getInfoData(dataPack, user));
         return data;
     }
 
@@ -262,7 +267,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Put0Fail", sc, resources.getScore0()));
             data.put("t", false);
         }
-        data.putAll((JSONObject) info(dataPack, user));
+        data.putAll(getInfoData(dataPack, user));
         return data;
     }
 
@@ -296,7 +301,7 @@ public class InfoController {
             data.put("tips", lconfig.getString("Trans0Fail", sc, resources.getScore0()));
             data.put("t", false);
         }
-        data.putAll((JSONObject) info(dataPack, user));
+        data.putAll(getInfoData(dataPack, user));
         return data;
     }
 

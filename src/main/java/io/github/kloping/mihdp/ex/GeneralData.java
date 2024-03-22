@@ -106,7 +106,8 @@ public class GeneralData {
         //base64
         private String data;
         private String p = "base64";
-        private Integer w, h;
+        private Integer w;
+        private Integer h;
 
         public ResDataImage(String data, int w, int y) {
             this.type = "image";

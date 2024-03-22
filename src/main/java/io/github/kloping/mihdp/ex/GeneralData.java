@@ -109,14 +109,14 @@ public class GeneralData {
         private Integer w;
         private Integer h;
 
-        public ResDataImage(String data, int w, int y) {
+        public ResDataImage(String data, int w, int h) {
             this.type = "image";
             this.w = w;
             this.h = h;
             this.data = data;
         }
 
-        public ResDataImage(String data, String p, int w, int y) {
+        public ResDataImage(String data, String p, int w, int h) {
             this.type = "image";
             this.w = w;
             this.h = h;
@@ -124,7 +124,7 @@ public class GeneralData {
             this.data = data;
         }
 
-        public ResDataImage(byte[] data, int w, int y) {
+        public ResDataImage(byte[] data, int w, int h) {
             this.type = "image";
             this.w = w;
             this.h = h;
@@ -195,7 +195,7 @@ public class GeneralData {
             return append(new ResDataSelect(s, text));
         }
 
-        public GeneralData.ResDataChain build() {
+        public ResDataChain build() {
             return new ResDataChain(list);
         }
     }
@@ -208,15 +208,15 @@ public class GeneralData {
             JsonElement name = jsonObject.get("type");
             switch (name.getAsString()) {
                 case "text":
-                    data = new GeneralData.ResDataText(jsonObject.get("content").getAsString());
+                    data = new ResDataText(jsonObject.get("content").getAsString());
                     break;
                 case "image":
                     String base64 = jsonObject.get("data").getAsString();
-                    data = new GeneralData.ResDataImage(base64, jsonObject.get("w").getAsInt(), jsonObject.get("h").getAsInt());
-                    if (base64.startsWith("http")) ((GeneralData.ResDataImage) data).setP("http");
+                    data = new ResDataImage(base64, jsonObject.get("w").getAsInt(), jsonObject.get("h").getAsInt());
+                    if (base64.startsWith("http")) ((ResDataImage) data).setP("http");
                     break;
                 case "at":
-                    data = new GeneralData.ResDataAt(jsonObject.get("id").getAsString());
+                    data = new ResDataAt(jsonObject.get("id").getAsString());
                     break;
                 case "chain":
                     List<GeneralData> list = new LinkedList<>();
@@ -224,7 +224,7 @@ public class GeneralData {
                         GeneralData d0 = deserialize(jsonElement, typeOfT, context);
                         list.add(d0);
                     }
-                    data = new GeneralData.ResDataChain(list);
+                    data = new ResDataChain(list);
                     break;
                 case "select":
                     data = new ResDataSelect(jsonObject.get("s").getAsInt(), jsonObject.get("content").getAsString());

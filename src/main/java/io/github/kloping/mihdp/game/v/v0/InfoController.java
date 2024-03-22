@@ -111,6 +111,8 @@ public class InfoController {
     @Action("info")
     public Object info(ReqDataPack dataPack, User user) {
         JSONObject data = getInfoData(dataPack, user);
+        data.put("tips", "信息获取成功");
+        data.put("t", true);
         GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
         builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
                 .append(new GeneralData.ResDataButton("每日签到", "签到"))
@@ -150,8 +152,6 @@ public class InfoController {
         if (dataPack.containsArgs(BaseService.BASE_NAME_ARGS)) {
             data.put("name", dataPack.getArgValue(BaseService.BASE_NAME_ARGS));
         }
-        data.put("tips", "信息获取成功");
-        data.put("t", true);
         return data;
     }
 

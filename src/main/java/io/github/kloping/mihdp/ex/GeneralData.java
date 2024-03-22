@@ -106,20 +106,27 @@ public class GeneralData {
         //base64
         private String data;
         private String p = "base64";
+        private Integer w, h;
 
-        public ResDataImage(String data) {
+        public ResDataImage(String data, int w, int y) {
             this.type = "image";
+            this.w = w;
+            this.h = h;
             this.data = data;
         }
 
-        public ResDataImage(String data, String p) {
+        public ResDataImage(String data, String p, int w, int y) {
             this.type = "image";
-            this.data = data;
+            this.w = w;
+            this.h = h;
             this.p = p;
+            this.data = data;
         }
 
-        public ResDataImage(byte[] data) {
+        public ResDataImage(byte[] data, int w, int y) {
             this.type = "image";
+            this.w = w;
+            this.h = h;
             this.data = Base64.getEncoder().encodeToString(data);
         }
     }
@@ -204,7 +211,7 @@ public class GeneralData {
                     break;
                 case "image":
                     String base64 = jsonObject.get("data").getAsString();
-                    data = new GeneralData.ResDataImage(base64);
+                    data = new GeneralData.ResDataImage(base64, jsonObject.get("w").getAsInt(), jsonObject.get("h").getAsInt());
                     if (base64.startsWith("http")) ((GeneralData.ResDataImage) data).setP("http");
                     break;
                 case "at":

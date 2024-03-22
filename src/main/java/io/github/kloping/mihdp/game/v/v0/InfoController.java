@@ -100,7 +100,7 @@ public class InfoController {
             BufferedImage bi = DrawController.info(data, data.getString("tips"), data.getBoolean("t"));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(bi, "jpg", baos);
-            builder.append(new GeneralData.ResDataImage(baos.toByteArray()));
+            builder.append(new GeneralData.ResDataImage(baos.toByteArray(), bi.getWidth(), bi.getHeight()));
         } catch (Exception e) {
             e.printStackTrace();
             builder.append("绘图失败,请稍后重试;" + e.getMessage());

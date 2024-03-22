@@ -55,7 +55,7 @@ public class DrawController {
                     try {
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         ImageIO.write(image, "jpg", baos);
-                        return new GeneralData.ResDataImage(baos.toByteArray());
+                        return new GeneralData.ResDataImage(baos.toByteArray(), image.getWidth(), image.getHeight());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

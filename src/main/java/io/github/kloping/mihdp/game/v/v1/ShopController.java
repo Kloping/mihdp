@@ -83,7 +83,8 @@ public class ShopController {
     public Object shop(ReqDataPack pack, User user) throws Exception {
         if (pack.isArgValue("draw", true)) {
             ImageDrawer drawer = ImageDrawer.createOnBg(2);
-            drawer.size(1030, 1225);
+            final int w = 1030, h = 1225;
+            drawer.size(w, h);
             int x = 5, y = 5;
             for (Integer id : resourceLoader.ITEM_MAP.keySet()) {
                 Integer v0 = getCurByShopIdAndUid(user.getUid(), id);
@@ -108,7 +109,7 @@ public class ShopController {
                 }
             }
             return new GeneralData.ResDataChain.GeneralDataBuilder()
-                    .append(new GeneralData.ResDataImage(drawer.bytes()))
+                    .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
                     .append("使用积分购买商品,魂环商品共享购买上限,其余普通商品共享购买上限.购买次数每周刷新.或通过特殊方法获得购买次数")
                     .append(new GeneralData.ResDataButton("购买物品", "购买"))
                     .append(new GeneralData.ResDataButton("查看信息", "信息"))
@@ -165,6 +166,7 @@ public class ShopController {
     @Action("bag")
     public Object bag(User user) throws Exception {
         ImageDrawer drawer = ImageDrawer.createOnBg(1);
+        int w = 1060, h = 820;
         drawer.size(1060, 820);
         int x = 10, y = 30;
         drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, "uid:" + user.getUid(), 2, 17).finish();
@@ -181,6 +183,6 @@ public class ShopController {
                 y += 250;
             }
         }
-        return new GeneralData.ResDataImage(drawer.bytes());
+        return new GeneralData.ResDataImage(drawer.bytes(), w, h);
     }
 }

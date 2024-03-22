@@ -99,10 +99,11 @@ public class CharactersController {
         qw.eq("uid", user.getUid());
         List<Character> characters = charactersMapper.selectList(qw);
         if (characters.isEmpty()) return "未觉醒任何魂角,请'领取魂角'";
+        final int w = 825, h = 825;
         if (pack.isArgValue("draw", true)) {
             try {
                 ImageDrawer drawer = ImageDrawer.createOnRandomBg();
-                drawer.size(825, 825);
+                drawer.size(w, h);
                 int x = 5;
                 int y = 15;
                 for (Character character : charactersMapper.selectList(qw)) {
@@ -172,7 +173,7 @@ public class CharactersController {
                     }
                 }
                 drawer.startDrawString(ImageDrawerUtils.SMALL_FONT16, Color.BLACK, DateUtils.getFormat(), 5, 807);
-                return new GeneralData.ResDataImage(drawer.bytes());
+                return new GeneralData.ResDataImage(drawer.bytes(), w, h);
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();
             }
@@ -220,11 +221,11 @@ public class CharactersController {
 
         redisSource.str2int.setValue("cid-hp-" + character.getId(), characterInfo.getHp().getFinalValue());
         redisSource.str2int.setValue("cid-xp-" + character.getId(), characterInfo.getXp().getFinalValue());
-
+        final int w = 800, h = 1000;
         if (pack.isArgValue("draw", true)) {
             try {
                 ImageDrawer drawer = ImageDrawer.createOnRandomBg();
-                drawer.size(800, 1000)
+                drawer.size(w, h)
                         .draw(resourceLoader.id2file.get(character.getCid()), 210, 210, 5, 35)
                         .fillRoundRect(ImageDrawerUtils.BLACK_A35, 250, 15, 540, 400, 15, 15)
                         .execute(graphics -> {
@@ -287,7 +288,7 @@ public class CharactersController {
                         y += 90;
                     }
                 }
-                return new GeneralData.ResDataImage(drawer.bytes());
+                return new GeneralData.ResDataImage(drawer.bytes(), w, h);
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();
             }

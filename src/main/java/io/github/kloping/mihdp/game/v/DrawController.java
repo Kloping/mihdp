@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.p0;
+package io.github.kloping.mihdp.game.v;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -40,13 +40,13 @@ public class DrawController {
     public GeneralData.ResDataImage draw(ResDataPack dataPack) {
         String action = dataPack.getAction();
         if (ACTION2DRAWER.containsKey(action)) {
-            GeneralData.ResDataText text = (GeneralData.ResDataText) dataPack.getData();
+            GeneralData.ResDataText text = dataPack.getData().find(GeneralData.ResDataText.class);
             String jsonD = text.getContent();
             JSONObject data = null;
             try {
                 data = JSON.parseObject(jsonD);
             } catch (com.alibaba.fastjson.JSONException je) {
-                System.err.println("跳过");
+                System.err.println("跳过 for " + je.getMessage());
             }
             if (data != null) {
                 BufferedImage image = ACTION2DRAWER.get(action).draw(data, dataPack);

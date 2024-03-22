@@ -12,6 +12,7 @@ import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.v.DrawController;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
@@ -23,6 +24,9 @@ import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.number.NumberUtils;
 import io.github.kloping.rand.RandomUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 /**
@@ -90,6 +94,20 @@ public class InfoController {
         }
     }
 
+    private static GeneralData.ResDataChain.GeneralDataBuilder getGeneralDataBuilder(JSONObject data) {
+        GeneralData.ResDataChain.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder();
+        try {
+            BufferedImage bi = DrawController.info(data, data.getString("tips"), data.getBoolean("t"));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(bi, "jpg", baos);
+            builder.append(new GeneralData.ResDataImage(baos.toByteArray()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            builder.append("绘图失败,请稍后重试;" + e.getMessage());
+        }
+        return builder;
+    }
+
     @Action("info")
     public Object info(ReqDataPack dataPack, User user) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
@@ -122,7 +140,14 @@ public class InfoController {
         if (dataPack.containsArgs(BaseService.BASE_NAME_ARGS)) {
             data.put("name", dataPack.getArgValue(BaseService.BASE_NAME_ARGS));
         }
-        return data;
+        data.put("tips", "信息获取成功");
+        data.put("t", true);
+        GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
+        builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
+                .append(new GeneralData.ResDataButton("每日签到", "签到"))
+                .append(new GeneralData.ResDataButton("赚积分", "打工"))
+                .append(new GeneralData.ResDataButton("兑换列表", "兑换列表"));
+        return builder.build();
     }
 
     {
@@ -151,7 +176,12 @@ public class InfoController {
             data.put("t", true);
         }
         data.putAll((JSONObject) info(dataPack, user));
-        return data;
+        GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
+        builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
+                .append(new GeneralData.ResDataButton("取积分", "取积分"))
+                .append(new GeneralData.ResDataButton("赚积分", "打工"))
+                .append(new GeneralData.ResDataButton("兑换列表", "兑换列表"));
+        return builder.build();
     }
 
     {
@@ -182,7 +212,12 @@ public class InfoController {
             data.put("t", true);
         }
         data.putAll((JSONObject) info(dataPack, user));
-        return data;
+        GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);
+        builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
+                .append(new GeneralData.ResDataButton("取积分", "取积分"))
+                .append(new GeneralData.ResDataButton("每日签到", "签到"))
+                .append(new GeneralData.ResDataButton("兑换列表", "兑换列表"));
+        return builder.build();
     }
 
     {

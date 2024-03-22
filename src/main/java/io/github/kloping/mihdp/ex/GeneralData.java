@@ -72,6 +72,25 @@ public class GeneralData {
 
     @EqualsAndHashCode(callSuper = true)
     @Data
+    public static class ResDataButton extends GeneralData {
+        /**
+         * 显示内容
+         */
+        private String text = "按钮";
+        /**
+         * 数据内容
+         */
+        private String content = "默认数据";
+
+        public ResDataButton(String text, String content) {
+            this.type = "button";
+            this.text = text;
+            this.content = content;
+        }
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
     public static class ResDataAt extends GeneralData {
         private String id;
 
@@ -201,6 +220,12 @@ public class GeneralData {
                     break;
                 case "select":
                     data = new ResDataSelect(jsonObject.get("s").getAsInt(), jsonObject.get("content").getAsString());
+                    break;
+                case "button":
+                    data = new ResDataButton(jsonObject.get("text").getAsString(), jsonObject.get("content").getAsString());
+                    break;
+                default:
+                    System.err.println("unknown type");
                     break;
             }
             return data;

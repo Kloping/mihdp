@@ -76,9 +76,9 @@ public class ExchangeController {
         }
         if (out == null) return "兑换失败!\n未发现相关物品";
         JSONObject data = new JSONObject();
-        data.putAll(infoController.getInfoData(pack, user));
         data.put("tips", out.getKey());
         data.put("t", out.getValue());
+        data.putAll(infoController.getInfoData(pack, user));
         return data;
     }
 

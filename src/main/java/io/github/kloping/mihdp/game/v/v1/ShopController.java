@@ -112,7 +112,7 @@ public class ShopController {
                     .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
                     .append("使用积分购买商品,魂环商品共享购买上限,其余普通商品共享购买上限.购买次数每周刷新.或通过特殊方法获得购买次数")
                     .append(new GeneralData.ResDataButton("购买物品", "购买"))
-                    .append(new GeneralData.ResDataButton("查看信息", "信息"))
+                    .append(new GeneralData.ResDataButton("查看背包", "背包"))
                     .build();
         } else return JSON.toJSONString(resourceLoader.ITEM_MAP);
     }
@@ -128,7 +128,7 @@ public class ShopController {
         String name = generalData.allText().trim();
         for (Integer id : resourceLoader.ITEM_MAP.keySet()) {
             Item item = resourceLoader.ITEM_MAP.get(id);
-            if (item.getName().contains(name)) {
+            if (name.contains(item.getName())) {
                 Integer num = NumberUtils.getIntegerFromString(name, 1);
                 UsersResources resources = usersResourcesMapper.selectById(user.getUid());
                 if (getCurByShopIdAndUid(user.getUid(), id) + num > getMaxByShopId(id)) {

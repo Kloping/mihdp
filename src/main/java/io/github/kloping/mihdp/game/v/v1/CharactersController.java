@@ -194,17 +194,25 @@ public class CharactersController {
     @Action("show_character")
     public Object showC0(ReqDataPack pack, User user) {
         GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
-        String text = generalData.allText().trim();
-        if (Judge.isEmpty(text)) return null;
+        String name = generalData.allText().trim();
         //基础的魂角属性
-        CharacterInfo characterInfo = resourceLoader.getCharacterInfoByName(text);
-        if (characterInfo == null) return "查询失败!\n可能不存在该魂角";
-        QueryWrapper<Character> qw0 = new QueryWrapper<>();
-        qw0.eq("uid", user.getUid());
-        qw0.eq("cid", characterInfo.getId());
+        CharacterInfo characterInfo = null;
         //用户魂角配置
-        Character character = charactersMapper.selectOne(qw0);
-        if (character == null) return "查询失败!\n可能尚未拥有.";
+        Character character = null;
+        characterInfo = resourceLoader.getCharacterInfoByName(name);
+        if (characterInfo == null) {
+            Integer cid = redisSource.uid2cid.getValue(user.getUid());
+            if (cid == null) return "查询失败!\n可能不存在该魂角";
+            character = charactersMapper.selectById(cid);
+            characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
+        }
+        if (character == null) {
+            QueryWrapper<Character> qw0 = new QueryWrapper<>();
+            qw0.eq("uid", user.getUid());
+            qw0.eq("cid", characterInfo.getId());
+            character = charactersMapper.selectOne(qw0);
+            if (character == null) return "查询失败!\n可能尚未拥有.";
+        }
         for (Addition addition : additionLogic.getAddition(character)) {
             characterInfo.reg(addition);
         }
@@ -225,19 +233,21 @@ public class CharactersController {
         if (pack.isArgValue("draw", true)) {
             try {
                 ImageDrawer drawer = ImageDrawer.createOnRandomBg();
+                Character finalCharacter = character;
+                CharacterInfo finalCharacterInfo = characterInfo;
                 drawer.size(w, h)
                         .draw(resourceLoader.id2file.get(character.getCid()), 210, 210, 5, 35)
                         .fillRoundRect(ImageDrawerUtils.BLACK_A35, 250, 15, 540, 400, 15, 15)
                         .execute(graphics -> {
                             graphics.setFont(ImageDrawerUtils.SMALL_FONT18);
                             graphics.setColor(ImageDrawerUtils.BLACK_A75);
-                            graphics.drawString(character.getUid(), 2, graphics.getFontMetrics().getHeight());
+                            graphics.drawString(finalCharacter.getUid(), 2, graphics.getFontMetrics().getHeight());
 
                             graphics.setFont(ImageDrawerUtils.SMALL_FONT32);
                             graphics.setColor(ImageDrawerUtils.RED_A90);
-                            int sw = graphics.getFontMetrics().stringWidth(characterInfo.getName());
+                            int sw = graphics.getFontMetrics().stringWidth(finalCharacterInfo.getName());
                             int sx = (210 - sw) / 2;
-                            graphics.drawString(characterInfo.getName(), sx + 5, 300);
+                            graphics.drawString(finalCharacterInfo.getName(), sx + 5, 300);
                         })
 
                         .startDrawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "等级  :", 255, 50)
@@ -288,7 +298,11 @@ public class CharactersController {
                         y += 90;
                     }
                 }
-                return new GeneralData.ResDataImage(drawer.bytes(), w, h);
+                GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
+                        .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
+                        .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
+                        .append(new GeneralData.ResDataButton("使用(暂未实现)", "使用"));
+                return builder.build();
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();
             }
@@ -375,7 +389,11 @@ public class CharactersController {
             character.setHp(character.getHp() > maxHp ? maxHp : character.getHp());
             redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
             charactersMapper.updateById(character);
-            return "每次修炼恢复当前使用魂角10%血量并增加10点经验\n当前:" + String.format("%s%%;%s/%s", NumberUtils.toPercent(character.getHp(), maxHp), character.getXp(), maxHp);
+            GeneralData.ResDataChain.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
+                    .append("每次修炼恢复当前使用魂角10%血量并增加10点经验\n当前:" + String.format("%s%%;%s/%s", NumberUtils.toPercent(character.getHp(), maxHp), character.getXp(), maxHp))
+                    .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
+                    .append(new GeneralData.ResDataButton("查看", "查看"));
+            return builder.build();
         }
     }
 }

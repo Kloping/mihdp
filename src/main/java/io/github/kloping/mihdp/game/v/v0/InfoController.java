@@ -117,7 +117,9 @@ public class InfoController {
         builder.append(new GeneralData.ResDataButton("存积分", "存积分"))
                 .append(new GeneralData.ResDataButton("每日签到", "签到"))
                 .append(new GeneralData.ResDataButton("赚积分", "打工"))
-                .append(new GeneralData.ResDataButton("兑换列表", "兑换列表"));
+                .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
+                .append(new GeneralData.ResDataButton("商城√", "商城"))
+                .append(new GeneralData.ResDataButton("绑定QQ(自己的真实QQ号)", "绑定QQ"));
         return builder.build();
     }
 

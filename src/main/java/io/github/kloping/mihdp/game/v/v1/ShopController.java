@@ -183,6 +183,9 @@ public class ShopController {
                 y += 250;
             }
         }
-        return new GeneralData.ResDataImage(drawer.bytes(), w, h);
+        GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
+                .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
+                .append(new GeneralData.ResDataButton("商城","商城"));
+        return builder.build();
     }
 }

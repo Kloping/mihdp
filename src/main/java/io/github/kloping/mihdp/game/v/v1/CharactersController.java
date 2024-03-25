@@ -173,7 +173,11 @@ public class CharactersController {
                     }
                 }
                 drawer.startDrawString(ImageDrawerUtils.SMALL_FONT16, Color.BLACK, DateUtils.getFormat(), 5, 807);
-                return new GeneralData.ResDataImage(drawer.bytes(), w, h);
+                GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
+                        .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
+                        .append(new GeneralData.ResDataButton("查看[魂角名]", "查看"))
+                        .append(new GeneralData.ResDataButton("切换[魂角名]", "切换"));
+                return builder.build();
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();
             }

@@ -126,33 +126,40 @@ public class ShopController {
     public Object buy(ReqDataPack pack, User user) {
         GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
         String name = generalData.allText().trim();
+        Item target = null;
         for (Integer id : resourceLoader.ITEM_MAP.keySet()) {
             Item item = resourceLoader.ITEM_MAP.get(id);
             if (name.contains(item.getName())) {
-                Integer num = NumberUtils.getIntegerFromString(name, 1);
-                UsersResources resources = usersResourcesMapper.selectById(user.getUid());
-                if (getCurByShopIdAndUid(user.getUid(), id) + num > getMaxByShopId(id)) {
-                    return "购买上限!";
+                if (target == null) target = item;
+                else {
+                    if (target.getName().length() < item.getName().length()) target = item;
                 }
-                if (item.getPrice() * num > resources.getScore()) {
-                    return "积分不足!";
+            }
+        }
+        if (target != null) {
+            Integer num = NumberUtils.getIntegerFromString(name, 1);
+            UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+            if (getCurByShopIdAndUid(user.getUid(), target.getId()) + num > getMaxByShopId(target.getId())) {
+                return "购买上限!";
+            }
+            if (target.getPrice() * num > resources.getScore()) {
+                return "积分不足!";
+            } else {
+                Bag bag = bagMaper.selectByUidAndRid(user.getUid(), target.getId());
+                if (bag == null) {
+                    bag = new Bag(user.getUid(), target.getId(), num, num);
+                    bagMaper.insert(bag);
                 } else {
-                    Bag bag = bagMaper.selectByUidAndRid(user.getUid(), item.getId());
-                    if (bag == null) {
-                        bag = new Bag(user.getUid(), item.getId(), num, num);
-                        bagMaper.insert(bag);
-                    } else {
-                        bag.setNum(bag.getNum() + num).setSize(bag.getNum());
-                        QueryWrapper<Bag> queryWrapper = new QueryWrapper<>();
-                        queryWrapper.eq("uid", user.getUid());
-                        queryWrapper.eq("rid", id);
-                        bagMaper.update(bag, queryWrapper);
-                    }
-                    resources.setScore(resources.getScore() - (item.getPrice() * num));
-                    usersResourcesMapper.updateById(resources);
-                    addCurByShopIdAndUid(user.getUid(), item.getId(), num);
-                    return "购买成功!";
+                    bag.setNum(bag.getNum() + num).setSize(bag.getNum());
+                    QueryWrapper<Bag> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.eq("uid", user.getUid());
+                    queryWrapper.eq("rid", target.getId());
+                    bagMaper.update(bag, queryWrapper);
                 }
+                resources.setScore(resources.getScore() - (target.getPrice() * num));
+                usersResourcesMapper.updateById(resources);
+                addCurByShopIdAndUid(user.getUid(), target.getId(), num);
+                return "购买成功!";
             }
         }
         return "未发现相关商品";

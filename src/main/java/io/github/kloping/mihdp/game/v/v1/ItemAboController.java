@@ -22,6 +22,7 @@ import io.github.kloping.number.NumberUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author github.kloping
@@ -54,7 +55,6 @@ public class ItemAboController {
 
     public Map<String, UseItemInterface<User, Object>> useItemInterfaceMap = new HashMap<>();
 
-
     @AutoStandAfter
     public void after() {
         BaseService.MSG2ACTION.put("使用", "use");
@@ -66,14 +66,17 @@ public class ItemAboController {
             Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
             if (character == null) return "未拥有任何魂角";
             Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
+            Bag bag = bagMaper.selectByUidAndRid(user.getUid(), 102);
             int xpa = 0, levela = 0;
             for (int i = 0; i < c; i++) {
                 character.setXp(character.getXp() + 100);
                 xpa += 100;
+                bag.setNum(bag.getNum() - 1);
                 if (character.getXp() >= maxXp) {
                     if (character.getLevel() % 10 == 0) {
                         character.setXp(maxXp);
                         charactersMapper.updateById(character);
+                        bag.save(bagMaper);
                         return "经验上限喽";
                     } else {
                         character.setXp(character.getXp() - maxXp);
@@ -83,6 +86,7 @@ public class ItemAboController {
                     }
                 }
             }
+            bag.save(bagMaper);
             charactersMapper.updateById(character);
             return String.format("对魂角(%s)使用完成(%s).\n累计增加了%s经验值\n增加了%s级",
                     resourceLoader.getCharacterInfoById(character.getCid()).getName(), c, xpa, levela);
@@ -90,15 +94,18 @@ public class ItemAboController {
         useItemInterfaceMap.put(resourceLoader.ITEM_MAP.get(102).getName(), (c, user) -> {
             Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
             if (character == null) return "未拥有任何魂角";
+            Bag bag = bagMaper.selectByUidAndRid(user.getUid(), 102);
             Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
             int xpa = 0, levela = 0;
             for (int i = 0; i < c; i++) {
                 character.setXp(character.getXp() + 200);
                 xpa += 200;
+                bag.setNum(bag.getNum() - 1);
                 if (character.getXp() >= maxXp) {
                     if (character.getLevel() % 10 == 0) {
                         character.setXp(maxXp);
                         charactersMapper.updateById(character);
+                        bag.save(bagMaper);
                         return "经验上限喽";
                     } else {
                         character.setXp(character.getXp() - maxXp);
@@ -108,6 +115,7 @@ public class ItemAboController {
                     }
                 }
             }
+            bag.save(bagMaper);
             charactersMapper.updateById(character);
             return String.format("对魂角(%s)使用完成(%s).\n累计增加了%s经验值\n增加了%s级",
                     resourceLoader.getCharacterInfoById(character.getCid()).getName(), c, xpa, levela);
@@ -119,14 +127,18 @@ public class ItemAboController {
     @Action("use")
     public Object use(User user, ReqDataPack pack) {
         synchronized (useItemInterfaceMap) {
-            if (useItemInterfaceMap.isEmpty()) {
-                init();
-            }
+            if (useItemInterfaceMap.isEmpty()) init();
         }
         GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
         String name = generalData.allText().trim();
         Integer num = NumberUtils.getIntegerFromString(name, 1);
         name = name.replace(num.toString(), "");
+        AtomicBoolean enough = new AtomicBoolean(true);
+        resourceLoader.ITEM_MAP.forEach((k, v) -> {
+            Bag bag = bagMaper.selectByUidAndRid(user.getUid(), k);
+            if (bag.getNum() < num) enough.set(false);
+        });
+        if (!enough.get()) return "已拥有物品数量不足.";
         UseItemInterface<User, Object> itemInterface = useItemInterfaceMap.get(name);
         if (itemInterface == null) return "未发现相关物品或物品暂无法主动使用.";
         else {

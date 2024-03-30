@@ -1,5 +1,7 @@
 package io.github.kloping.mihdp.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import io.github.kloping.mihdp.mapper.BagMaper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +28,15 @@ public class Bag {
      * 占用大小
      */
     private Integer size;
+
+    public void save(BagMaper bagMaper) {
+        QueryWrapper<Bag> qw = new QueryWrapper<>();
+        qw.eq("uid", uid);
+        qw.eq("rid", rid);
+        if (num <= 0) {
+            bagMaper.delete(qw);
+        } else {
+            bagMaper.update(this, qw);
+        }
+    }
 }

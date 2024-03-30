@@ -1,11 +1,13 @@
 package io.github.kloping.mihdp.game.v.v1;
 
 import io.github.kloping.MySpringTool.annotations.*;
+import io.github.kloping.arr.Class2OMap;
 import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.api.UseItemInterface;
+import io.github.kloping.mihdp.game.api.ItemUseContext;
+import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.s.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
@@ -19,10 +21,10 @@ import io.github.kloping.mihdp.utils.ImageDrawerUtils;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.number.NumberUtils;
+import lombok.Data;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author github.kloping
@@ -53,104 +55,104 @@ public class ItemAboController {
         return user;
     }
 
-    public Map<String, UseItemInterface<User, Object>> useItemInterfaceMap = new HashMap<>();
-
     @AutoStandAfter
     public void after() {
         BaseService.MSG2ACTION.put("使用", "use");
     }
 
-    private void init() {
-        //使用经验石的效果
-        useItemInterfaceMap.put(resourceLoader.ITEM_MAP.get(101).getName(), (c, user) -> {
-            Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
-            if (character == null) return "未拥有任何魂角";
-            Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
-            Bag bag = bagMaper.selectByUidAndRid(user.getUid(), 102);
-            int xpa = 0, levela = 0;
-            for (int i = 0; i < c; i++) {
-                character.setXp(character.getXp() + 100);
-                xpa += 100;
-                bag.setNum(bag.getNum() - 1);
-                if (character.getXp() >= maxXp) {
-                    if (character.getLevel() % 10 == 0) {
-                        character.setXp(maxXp);
-                        charactersMapper.updateById(character);
-                        bag.save(bagMaper);
-                        return "经验上限喽";
-                    } else {
-                        character.setXp(character.getXp() - maxXp);
-                        character.setLevel(character.getLevel() + 1);
-                        maxXp = charactersController.compute(character).maxXp;
-                        levela++;
-                    }
-                }
-            }
-            bag.save(bagMaper);
-            charactersMapper.updateById(character);
-            return String.format("对魂角(%s)使用完成(%s).\n累计增加了%s经验值\n增加了%s级",
-                    resourceLoader.getCharacterInfoById(character.getCid()).getName(), c, xpa, levela);
+    public final Map<Integer, ItemUseContext> CONTEXT_MAP = new HashMap<>();
+
+    {
+        CONTEXT_MAP.put(101, cc -> {
+            return addXpOfItem(cc, 50);
         });
-        useItemInterfaceMap.put(resourceLoader.ITEM_MAP.get(102).getName(), (c, user) -> {
-            Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
-            if (character == null) return "未拥有任何魂角";
-            Bag bag = bagMaper.selectByUidAndRid(user.getUid(), 102);
-            Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
-            int xpa = 0, levela = 0;
-            for (int i = 0; i < c; i++) {
-                character.setXp(character.getXp() + 200);
-                xpa += 200;
-                bag.setNum(bag.getNum() - 1);
-                if (character.getXp() >= maxXp) {
-                    if (character.getLevel() % 10 == 0) {
-                        character.setXp(maxXp);
-                        charactersMapper.updateById(character);
-                        bag.save(bagMaper);
-                        return "经验上限喽";
-                    } else {
-                        character.setXp(character.getXp() - maxXp);
-                        character.setLevel(character.getLevel() + 1);
-                        maxXp = charactersController.compute(character).maxXp;
-                        levela++;
-                    }
-                }
-            }
-            bag.save(bagMaper);
-            charactersMapper.updateById(character);
-            return String.format("对魂角(%s)使用完成(%s).\n累计增加了%s经验值\n增加了%s级",
-                    resourceLoader.getCharacterInfoById(character.getCid()).getName(), c, xpa, levela);
+        CONTEXT_MAP.put(102, cc -> {
+            return addXpOfItem(cc, 200);
         });
     }
 
-    public static final Integer USE_STATE_OK = 0;
-
-    @Action("use")
-    public Object use(User user, ReqDataPack pack) {
-        synchronized (useItemInterfaceMap) {
-            if (useItemInterfaceMap.isEmpty()) init();
-        }
-        GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
-        String name = generalData.allText().trim();
-        Integer num = NumberUtils.getIntegerFromString(name, 1);
-        name = name.replace(num.toString(), "");
-        AtomicBoolean enough = new AtomicBoolean(true);
-        resourceLoader.ITEM_MAP.forEach((k, v) -> {
-            Bag bag = bagMaper.selectByUidAndRid(user.getUid(), k);
-            if (bag.getNum() < num) enough.set(false);
-        });
-        if (!enough.get()) return "已拥有物品数量不足.";
-        UseItemInterface<User, Object> itemInterface = useItemInterfaceMap.get(name);
-        if (itemInterface == null) return "未发现相关物品或物品暂无法主动使用.";
-        else {
-            synchronized (user.getUid()) {
-                try {
-                    return itemInterface.execute(num, user);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return "使用途中.发生异常.\n" + e.getMessage();
+    private UseState addXpOfItem(Class2OMap cc, int x) {
+        User user = cc.get(User.class);
+        Integer c = cc.get(Integer.class);
+        Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
+        if (character == null) return new UseState(false, "未拥有任何魂角", 0);
+        Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
+        int xpa = 0, levela = 0;
+        int c0 = 0;
+        for (int i = 0; i < c; i++) {
+            character.setXp(character.getXp() + x);
+            xpa += x;
+            c0++;
+            if (character.getXp() >= maxXp) {
+                if (character.getLevel() % 10 == 0) {
+                    character.setXp(maxXp);
+                    charactersMapper.updateById(character);
+                    return new UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
+                } else {
+                    character.setXp(character.getXp() - maxXp);
+                    character.setLevel(character.getLevel() + 1);
+                    maxXp = charactersController.compute(character).maxXp;
+                    levela++;
                 }
             }
         }
+        charactersMapper.updateById(character);
+        return new UseState(true, String.format("对魂角(%s)使用完成(%s).\n累计增加了%s经验值\n增加了%s级",
+                resourceLoader.getCharacterInfoById(character.getCid()).getName(), c, xpa, levela), c);
+    }
+
+    @Action("use")
+    public Object use(User user, ReqDataPack pack) {
+        GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
+        String name = generalData.allText().trim();
+        //过滤数量
+        Integer num = NumberUtils.getIntegerFromString(name, 1);
+        //寻找物品对象
+        Item item = null;
+        for (Item value : resourceLoader.ITEM_MAP.values()) {
+            if (name.contains(value.getName())) {
+                if (item == null)
+                    item = value;
+                else if (value.getName().length() > item.getName().length())
+                    item = value;
+                else continue;
+            }
+        }
+        if (item == null) return null;
+        //判断数量是否足够
+        Bag bag = bagMaper.selectByUidAndRid(user.getUid(), item.getId());
+        if (bag == null || bag.getNum() < num) return "已拥有物品数量不足.";
+        Class2OMap map = Class2OMap.create(user, pack, bag, item, num, generalData.allText());
+        if (CONTEXT_MAP.containsKey(item.getId())) {
+            UseState state = CONTEXT_MAP.get(item.getId()).execute(map);
+            if (state.ok) {
+                bag.setNum(bag.getNum() - state.c);
+                bag.save(bagMaper);
+                return state.out;
+            } else return "使用失败!\n" + (state.out == null ? "" : state.out);
+        } else return "相关物品无法使用或暂无法主动使用";
+    }
+
+    @Data
+    public static class UseState {
+        public UseState(boolean ok, Object out, Integer c) {
+            this.ok = ok;
+            this.out = out;
+            this.c = c;
+        }
+
+        /**
+         * 是否执行成功
+         */
+        private boolean ok = false;
+        /**
+         * 输出数据
+         */
+        private Object out;
+        /**
+         * 成功次数计数
+         */
+        private Integer c = 0;
     }
 
 
@@ -165,7 +167,7 @@ public class ItemAboController {
         int w = 1060, h = 820;
         drawer.size(1060, 820);
         int x = 10, y = 30;
-        drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, "uid:" + user.getUid(), 2, 17).finish();
+        drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, "uid:" + user.getUid(), 2, 22).finish();
         for (Bag bag : bagMaper.selectByUid(user.getUid())) {
             drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 250, 15, 15)
                     .draw(resourceLoader.getFileById(bag.getRid()), 200, 200, x, y)

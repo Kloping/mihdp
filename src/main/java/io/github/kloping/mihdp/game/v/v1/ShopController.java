@@ -165,34 +165,4 @@ public class ShopController {
         return "未发现相关商品";
     }
 
-    {
-        BaseService.MSG2ACTION.put("背包", "bag");
-        BaseService.MSG2ACTION.put("我的背包", "bag");
-    }
-
-    @Action("bag")
-    public Object bag(User user) throws Exception {
-        ImageDrawer drawer = ImageDrawer.createOnBg(1);
-        int w = 1060, h = 820;
-        drawer.size(1060, 820);
-        int x = 10, y = 30;
-        drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, "uid:" + user.getUid(), 2, 17).finish();
-        for (Bag bag : bagMaper.selectByUid(user.getUid())) {
-            drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 250, 15, 15)
-                    .draw(resourceLoader.getFileById(bag.getRid()), 200, 200, x, y)
-                    .startDrawString().layout(1)
-                    .drawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90, resourceLoader.ITEM_MAP.get(bag.getRid()).getName(), x, y + 200)
-                    .drawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A95, bag.getNum().toString(), x, y + 230)
-                    .finish();
-            x += 200;
-            if (x >= 1000) {
-                x = 10;
-                y += 250;
-            }
-        }
-        GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
-                .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
-                .append(new GeneralData.ResDataButton("商城","商城"));
-        return builder.build();
-    }
 }

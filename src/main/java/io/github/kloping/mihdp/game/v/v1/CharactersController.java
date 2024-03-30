@@ -111,26 +111,10 @@ public class CharactersController {
                     Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
                     Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
                     if (maxHp == null || maxXp == null) {
-                        //基础的魂角属性
-                        CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
-                        if (characterInfo == null) continue;
-                        for (Addition addition : additionLogic.getAddition(character)) {
-                            characterInfo.reg(addition);
-                        }
-                        //魂环加成
-                        QueryWrapper<Cycle> qw1 = new QueryWrapper<>();
-                        qw1.eq("cid", character.getId());
-                        List<Cycle> cycles = cycleMapper.selectList(qw1);
-                        for (Cycle cycle : cycles) {
-                            for (Addition addition : additionLogic.getAddition(cycle)) {
-                                characterInfo.reg(addition);
-                            }
-                        }
-                        characterInfo.setLevel(character.getLevel());
-                        maxHp = characterInfo.getHp().getFinalValue();
-                        maxXp = characterInfo.getXp().getFinalValue();
-                        redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
-                        redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
+                        CharacterOutResult result = compute(character);
+                        if (result == null) return "未知错误 code:-201.";
+                        maxHp = result.maxHp;
+                        maxXp = result.maxXp;
                     }
 
                     drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 400, 15, 15)
@@ -183,6 +167,40 @@ public class CharactersController {
             }
         } else {
             return JSON.toJSONString(characters);
+        }
+    }
+
+    public CharacterOutResult compute(Character character) {
+        //基础的魂角属性
+        CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
+        if (characterInfo == null) return null;
+        for (Addition addition : additionLogic.getAddition(character)) {
+            characterInfo.reg(addition);
+        }
+        //魂环加成
+        QueryWrapper<Cycle> qw1 = new QueryWrapper<>();
+        qw1.eq("cid", character.getId());
+        List<Cycle> cycles = cycleMapper.selectList(qw1);
+        for (Cycle cycle : cycles) {
+            for (Addition addition : additionLogic.getAddition(cycle)) {
+                characterInfo.reg(addition);
+            }
+        }
+        characterInfo.setLevel(character.getLevel());
+        int maxHp = characterInfo.getHp().getFinalValue();
+        int maxXp = characterInfo.getXp().getFinalValue();
+        redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
+        redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
+        return new CharacterOutResult(maxHp, maxXp);
+    }
+
+    public static class CharacterOutResult {
+        public final Integer maxHp;
+        public final Integer maxXp;
+
+        public CharacterOutResult(Integer maxHp, Integer maxXp) {
+            this.maxHp = maxHp;
+            this.maxXp = maxXp;
         }
     }
 
@@ -347,18 +365,7 @@ public class CharactersController {
         Long cd = redisSource.uid2cd.getValue(user.getUid());
         if (cd != null && cd > System.currentTimeMillis())
             return "冷却中..\n大约等待(分钟):" + ((cd - System.currentTimeMillis()) / 60000);
-        Integer cid = redisSource.uid2cid.getValue(user.getUid());
-        Character character = null;
-        if (cid == null) {
-            QueryWrapper<Character> qw0 = new QueryWrapper<>();
-            qw0.eq("uid", user.getUid());
-            qw0.orderBy(true, true, "level");
-            List<Character> list = charactersMapper.selectList(qw0);
-            if (list.size() <= 0) return "暂无魂角,请先`领取魂角`";
-            character = list.get(0);
-        } else {
-            character = charactersMapper.selectById(cid);
-        }
+        Character character = getCharacterOrLowestLevel(user.getUid());
         if (character == null) return "暂无魂角,请先`领取魂角`";
         else {
             //预计展示 血量 经验 等级 图标 等..
@@ -398,6 +405,21 @@ public class CharactersController {
                     .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
                     .append(new GeneralData.ResDataButton("查看", "查看"));
             return builder.build();
+        }
+    }
+
+
+    public Character getCharacterOrLowestLevel(String uid) {
+        Integer cid = redisSource.uid2cid.getValue(uid);
+        if (cid == null) {
+            QueryWrapper<Character> qw0 = new QueryWrapper<>();
+            qw0.eq("uid", uid);
+            qw0.orderBy(true, true, "level");
+            List<Character> list = charactersMapper.selectList(qw0);
+            if (list.isEmpty()) return null;
+            return list.get(0);
+        } else {
+            return charactersMapper.selectById(cid);
         }
     }
 }

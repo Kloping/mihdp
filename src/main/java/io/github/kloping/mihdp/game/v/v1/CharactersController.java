@@ -160,7 +160,9 @@ public class CharactersController {
                 GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
                         .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
                         .append(new GeneralData.ResDataButton("查看[魂角名]", "查看"))
-                        .append(new GeneralData.ResDataButton("切换[魂角名]", "切换"));
+                        .append(new GeneralData.ResDataButton("切换[魂角名]", "切换"))
+                        .append(new GeneralData.ResDataButton("使用[物品名]", "使用"))
+                        .append(new GeneralData.ResDataButton("修炼", "修炼"));
                 return builder.build();
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();

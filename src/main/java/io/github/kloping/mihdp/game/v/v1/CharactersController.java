@@ -323,7 +323,7 @@ public class CharactersController {
                 GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
                         .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
                         .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
-                        .append(new GeneralData.ResDataButton("使用(暂未实现)", "使用"));
+                        .append(new GeneralData.ResDataButton("使用", "使用"));
                 return builder.build();
             } catch (Exception e) {
                 return "绘图失败." + e.getMessage();

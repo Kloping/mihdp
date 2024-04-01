@@ -377,26 +377,12 @@ public class CharactersController {
             Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
             Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
             if (maxHp == null || maxXp == null) {
-                //基础的魂角属性
-                CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
-                if (characterInfo == null) return "异常;";
-                for (Addition addition : additionLogic.getAddition(character)) {
-                    characterInfo.reg(addition);
+                C0MaxResult result = computeCharacterMax(character);
+                if (result == null) {
+                    return "计算加成异常.";
                 }
-                //魂环加成
-                QueryWrapper<Cycle> qw1 = new QueryWrapper<>();
-                qw1.eq("cid", character.getId());
-                List<Cycle> cycles = cycleMapper.selectList(qw1);
-                for (Cycle cycle : cycles) {
-                    for (Addition addition : additionLogic.getAddition(cycle)) {
-                        characterInfo.reg(addition);
-                    }
-                }
-                characterInfo.setLevel(character.getLevel());
-                maxHp = characterInfo.getHp().getFinalValue();
-                maxXp = characterInfo.getXp().getFinalValue();
-                redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
-                redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
+                maxXp = result.maxXp;
+                maxHp = result.maxHp;
             }
             //设置cd
             redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
@@ -413,10 +399,17 @@ public class CharactersController {
             character.setXp(character.getXp() > (maxHp * 1.5) ? (int) (maxXp * 1.5) : character.getXp());
             if (character.getXp() >= maxXp) {
                 if (!itemAboController.testForC(character, maxXp)) {
-                    builder.append("等级限制,经验上限无法升级.再次升级需要吸收魂环.");
+                    builder.append("\n等级限制,经验上限无法升级.再次升级需要吸收魂环.");
+                } else {
+                    C0MaxResult result = computeCharacterMax(character);
+                    if (result == null) {
+                        return "计算加成异常.";
+                    }
+                    maxXp = result.maxXp;
+                    maxHp = result.maxHp;
                 }
             }
-            builder.append("当前:血量" + String.format("%s%%;等级:%s;经验:%s/%s"
+            builder.append("\n当前:血量" + String.format("%s%%;等级:%s;经验:%s/%s"
                     , NumberUtils.toPercent(character.getHp(), maxHp)
                     , character.getLevel()
                     , character.getXp()
@@ -424,6 +417,41 @@ public class CharactersController {
             builder.append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
                     .append(new GeneralData.ResDataButton("查看", "查看"));
             return builder.build();
+        }
+    }
+
+    public C0MaxResult computeCharacterMax(Character character) {
+        //基础的魂角属性
+        CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
+        if (characterInfo == null) return null;
+        for (Addition addition : additionLogic.getAddition(character)) {
+            characterInfo.reg(addition);
+        }
+        //魂环加成
+        QueryWrapper<Cycle> qw1 = new QueryWrapper<>();
+        qw1.eq("cid", character.getId());
+        List<Cycle> cycles = cycleMapper.selectList(qw1);
+        for (Cycle cycle : cycles) {
+            for (Addition addition : additionLogic.getAddition(cycle)) {
+                characterInfo.reg(addition);
+            }
+        }
+        characterInfo.setLevel(character.getLevel());
+        Integer maxHp = characterInfo.getHp().getFinalValue();
+        Integer maxXp = characterInfo.getXp().getFinalValue();
+        redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
+        redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
+        C0MaxResult result = new C0MaxResult(maxHp, maxXp);
+        return result;
+    }
+
+    public static class C0MaxResult {
+        public final Integer maxHp;
+        public final Integer maxXp;
+
+        public C0MaxResult(Integer maxHp, Integer maxXp) {
+            this.maxHp = maxHp;
+            this.maxXp = maxXp;
         }
     }
 

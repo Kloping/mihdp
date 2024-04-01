@@ -407,6 +407,7 @@ public class CharactersController {
                     }
                     maxXp = result.maxXp;
                     maxHp = result.maxHp;
+                    charactersMapper.updateById(character);
                 }
             }
             builder.append("\n当前:血量" + String.format("%s%%;等级:%s;经验:%s/%s"

@@ -80,25 +80,34 @@ public class ItemAboController {
         int xpa = 0, levela = 0;
         int c0 = 0;
         for (int i = 0; i < c; i++) {
-            character.setXp(character.getXp() + x);
             xpa += x;
             c0++;
+            character.setXp(character.getXp() + x);
             if (character.getXp() >= maxXp) {
-                if (character.getLevel() % 10 == 0) {
-                    character.setXp(maxXp);
-                    charactersMapper.updateById(character);
-                    return new UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
-                } else {
-                    character.setXp(character.getXp() - maxXp);
-                    character.setLevel(character.getLevel() + 1);
+                boolean k = testForC(character, maxXp);
+                if (true) {
                     maxXp = charactersController.compute(character).maxXp;
                     levela++;
+                } else {
+                    return new UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
                 }
             }
         }
         charactersMapper.updateById(character);
         return new UseState(true, String.format("对魂角(%s)使用完成(%s).\n累计增加了%s经验值\n增加了%s级",
                 resourceLoader.getCharacterInfoById(character.getCid()).getName(), c, xpa, levela), c);
+    }
+
+    public boolean testForC(Character character, Integer maxXp) {
+        if (character.getLevel() % 10 == 0) {
+            character.setXp(maxXp);
+            charactersMapper.updateById(character);
+            return false;
+        } else {
+            character.setXp(character.getXp() - maxXp);
+            character.setLevel(character.getLevel() + 1);
+            return true;
+        }
     }
 
     @Action("use")

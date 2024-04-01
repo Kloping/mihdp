@@ -362,6 +362,9 @@ public class CharactersController {
         BaseService.MSG2ACTION.put("修炼", "xl");
     }
 
+    @AutoStand
+    ItemAboController itemAboController;
+
     @Action("xl")
     public Object xl(ReqDataPack pack, User user) {
         Long cd = redisSource.uid2cd.getValue(user.getUid());
@@ -395,16 +398,30 @@ public class CharactersController {
                 redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
                 redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
             }
+            //设置cd
+            redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
+
+            GeneralData.ResDataChain.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder();
+            builder.append("每次修炼恢复当前使用魂角10%血量并增加10点经验");
             int hpa = NumberUtils.percentTo(10, maxHp).intValue();
-            character.setXp(character.getXp() + 10);
-            character.setXp(character.getXp() > (maxHp * 1.5) ? (int) (maxXp * 1.5) : character.getXp());
+
             character.setHp(character.getHp() + hpa);
             character.setHp(character.getHp() > maxHp ? maxHp : character.getHp());
-            redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
             charactersMapper.updateById(character);
-            GeneralData.ResDataChain.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
-                    .append("每次修炼恢复当前使用魂角10%血量并增加10点经验\n当前:" + String.format("%s%%;%s/%s", NumberUtils.toPercent(character.getHp(), maxHp), character.getXp(), maxHp))
-                    .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
+
+            character.setXp(character.getXp() + 10);
+            character.setXp(character.getXp() > (maxHp * 1.5) ? (int) (maxXp * 1.5) : character.getXp());
+            if (character.getXp() >= maxXp) {
+                if (!itemAboController.testForC(character, maxXp)) {
+                    builder.append("等级限制,经验上限无法升级.再次升级需要吸收魂环.");
+                }
+            }
+            builder.append("当前:血量" + String.format("%s%%;等级:%s;经验:%s/%s"
+                    , NumberUtils.toPercent(character.getHp(), maxHp)
+                    , character.getLevel()
+                    , character.getXp()
+                    , maxHp));
+            builder.append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
                     .append(new GeneralData.ResDataButton("查看", "查看"));
             return builder.build();
         }

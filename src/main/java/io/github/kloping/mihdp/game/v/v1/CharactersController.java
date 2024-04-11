@@ -32,6 +32,7 @@ import io.github.kloping.number.NumberUtils;
 import io.github.kloping.rand.RandomUtils;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -117,38 +118,7 @@ public class CharactersController {
                         maxXp = result.maxXp;
                     }
 
-                    drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 400, 15, 15)
-                            .draw(resourceLoader.getFileById(character.getCid()), 180, 180, x + 10, y + 10);
-
-                    //draw xp
-                    drawer.startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "经验:", x + 5, y + 218)
-                            .drawString(character.getXp() + "/", ImageDrawerUtils.BLACK_A75)
-                            .drawString(maxXp, ImageDrawerUtils.RED_A90)
-                            .finish()
-                            .drawRoundRect(ImageDrawerUtils.WHITE_A80, x + 5, y + 225, 180, 30, 10, 10);
-
-                    int xb = NumberUtils.toPercent(character.getXp(), maxXp);
-                    int xw = NumberUtils.percentTo(xb, 180).intValue();
-                    drawer.fillRoundRect(xb < 50 ? ImageDrawerUtils.GREEN_A75 : xb < 80 ? ImageDrawerUtils.ORIGIN_A75 : ImageDrawerUtils.RED_A75
-                            , x + 5, y + 225, xw, 30, 10, 10);
-                    //=draw hp
-                    drawer.startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "血量:", x + 5, y + 278)
-                            .drawString(character.getHp() + "/", ImageDrawerUtils.BLACK_A75)
-                            .drawString(maxHp, ImageDrawerUtils.RED_A90)
-                            .finish()
-                            .drawRoundRect(ImageDrawerUtils.WHITE_A80, x + 5, y + 285, 180, 30, 10, 10);
-
-                    int hb = NumberUtils.toPercent(character.getHp(), maxHp);
-                    int hw = NumberUtils.percentTo(hb, 180).intValue();
-                    drawer.fillRoundRect(hb > 50 ? ImageDrawerUtils.GREEN_A75 : hb > 25 ? ImageDrawerUtils.ORIGIN_A75 : ImageDrawerUtils.RED_A75
-                            , x + 5, y + 285, hw, 30, 10, 10);
-
-                    //draw str
-                    drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90, "等级:", x + 5, y + 350)
-                            .drawString(character.getLevel(), ImageDrawerUtils.RED_A90)
-                            .drawString(String.format("(%s)", resourceLoader.getCharacterInfoById(character.getCid()).getName()), ImageDrawerUtils.BLACK_A90, ImageDrawerUtils.SMALL_FONT18_TYPE0)
-                            .finishAndStartDrawStringDown(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "所属uid:", x + 5, 3)
-                            .drawString(character.getUid());
+                    drawerOneCharacter(drawer, x, y, character, maxXp, maxHp);
                     //draw next
                     x += 205;
                     if (x > 800) {
@@ -387,6 +357,7 @@ public class CharactersController {
             //设置cd
             redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
 
+
             GeneralData.ResDataChain.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder();
             builder.append("每次修炼恢复当前使用魂角10%血量并增加10点经验");
             int hpa = NumberUtils.percentTo(10, maxHp).intValue();
@@ -415,10 +386,57 @@ public class CharactersController {
                     , character.getLevel()
                     , character.getXp()
                     , maxHp));
+
+            try {
+                int x = 10, y = 10;
+                int w = 220, h = 420;
+                ImageDrawer drawer = ImageDrawer.createOnRandomBg();
+                drawer.size(w, h);
+                drawerOneCharacter(drawer, x, y, character, maxXp, maxHp);
+                builder.append(new GeneralData.ResDataImage(drawer.bytes(), w, h));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             builder.append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
                     .append(new GeneralData.ResDataButton("查看", "查看"));
             return builder.build();
         }
+    }
+
+    private void drawerOneCharacter(ImageDrawer drawer, int x, int y, Character character, Integer maxXp, Integer maxHp) throws IOException {
+        drawer.fillRoundRect(ImageDrawerUtils.WHITE_A35, x, y, 200, 400, 15, 15)
+                .draw(resourceLoader.getFileById(character.getCid()), 180, 180, x + 10, y + 10);
+
+        //draw xp
+        drawer.startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "经验:", x + 5, y + 218)
+                .drawString(character.getXp() + "/", ImageDrawerUtils.BLACK_A75)
+                .drawString(maxXp, ImageDrawerUtils.RED_A90)
+                .finish()
+                .drawRoundRect(ImageDrawerUtils.WHITE_A80, x + 5, y + 225, 180, 30, 10, 10);
+
+        int xb = NumberUtils.toPercent(character.getXp(), maxXp);
+        int xw = NumberUtils.percentTo(xb, 180).intValue();
+        drawer.fillRoundRect(xb < 50 ? ImageDrawerUtils.GREEN_A75 : xb < 80 ? ImageDrawerUtils.ORIGIN_A75 : ImageDrawerUtils.RED_A75
+                , x + 5, y + 225, xw, 30, 10, 10);
+        //=draw hp
+        drawer.startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "血量:", x + 5, y + 278)
+                .drawString(character.getHp() + "/", ImageDrawerUtils.BLACK_A75)
+                .drawString(maxHp, ImageDrawerUtils.RED_A90)
+                .finish()
+                .drawRoundRect(ImageDrawerUtils.WHITE_A80, x + 5, y + 285, 180, 30, 10, 10);
+
+        int hb = NumberUtils.toPercent(character.getHp(), maxHp);
+        int hw = NumberUtils.percentTo(hb, 180).intValue();
+        drawer.fillRoundRect(hb > 50 ? ImageDrawerUtils.GREEN_A75 : hb > 25 ? ImageDrawerUtils.ORIGIN_A75 : ImageDrawerUtils.RED_A75
+                , x + 5, y + 285, hw, 30, 10, 10);
+
+        //draw str
+        drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90, "等级:", x + 5, y + 350)
+                .drawString(character.getLevel(), ImageDrawerUtils.RED_A90)
+                .drawString(String.format("(%s)", resourceLoader.getCharacterInfoById(character.getCid()).getName()), ImageDrawerUtils.BLACK_A90, ImageDrawerUtils.SMALL_FONT18_TYPE0)
+                .finishAndStartDrawStringDown(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90, "所属uid:", x + 5, 3)
+                .drawString(character.getUid());
     }
 
     public C0MaxResult computeCharacterMax(Character character) {

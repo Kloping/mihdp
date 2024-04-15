@@ -26,4 +26,32 @@ a game nothing for now
 - > add 爆率(5) 爆伤(50) 魂力恢复效率(100%) 治疗效果(100%) 效果抵抗(5%)
 - > 探索地区(星斗,极北,落日) 获得金币/物品(材料)/遇到魂兽 _____制
 
+<details>
+<summary>action指令映射表</summary>
 
+| action | 指令1  | 指令2 | 指令3 
+|:-------|------|-----|-----|
+| shop | 商城   |商店 |商场  |
+| test | 测试   |
+| list-command | 指令列表 |
+| use | 使用   |
+| buy | 买    |购买  |
+| sign | 打卡   |签到  |
+| show_character | 查看   |
+| bag | 我的背包 |背包  |
+| get0 | 取积分  |
+| update-log | 更新日志 |
+| handoff | 切换   |
+| trans0 | 积分转让 |转让积分  |
+| characters | 魂角列表 |
+| xl | 修炼   |
+| reg | 注册   |
+| put0 | 存积分  |
+| greenhorn | 领取魂角 |
+| exchange | 兑换   |
+| exchange-list | 兑换列表 |
+| work0 | 干活   |上班 |打工  |
+| rob0 | 抢劫   |打劫  |
+| info | 个人信息 |当前信息 |信息  |
+
+</details>

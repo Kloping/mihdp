@@ -115,18 +115,21 @@ public class MihDpMain implements CommandLineRunner {
                 if (Judge.isNotEmpty(v)) contextManager.append(v, requiredProperty);
             }
         });
-//        APPLICATION.STARTED_RUNNABLE.add(() -> {
-//            Map<String, List<String>> map = new HashMap<>();
-//            BaseService.MSG2ACTION.forEach((k, v) -> {
-//                MapUtils.append(map, v, k);
-//            });
-//            map.forEach((k, v) -> {
-//                System.out.println("- " + k);
-//                for (String s : v) {
-//                    System.out.println("  - " + s);
-//                }
-//            });
-//        });
+
+        boolean p = false;
+        if (p) APPLICATION.STARTED_RUNNABLE.add(() -> {
+            Map<String, List<String>> map = new HashMap<>();
+            BaseService.MSG2ACTION.forEach((k, v) -> {
+                MapUtils.append(map, v, k);
+            });
+            map.forEach((k, v) -> {
+                System.out.print("| " + k);
+                for (String s : v) {
+                    System.out.print(" |" + s);
+                }
+                System.out.println("  |");
+            });
+        });
         APPLICATION.run0(BaseComponent.class);
     }
 }

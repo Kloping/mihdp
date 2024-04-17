@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.s;
+package io.github.kloping.mihdp.game.dao;
 
 import com.google.gson.reflect.TypeToken;
 import lombok.Data;

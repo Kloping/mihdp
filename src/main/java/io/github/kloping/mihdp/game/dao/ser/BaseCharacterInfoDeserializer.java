@@ -1,6 +1,8 @@
-package io.github.kloping.mihdp.game.s;
+package io.github.kloping.mihdp.game.dao.ser;
 
 import com.google.gson.*;
+import io.github.kloping.mihdp.game.dao.Attr;
+import io.github.kloping.mihdp.game.dao.BaseCharacterInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;

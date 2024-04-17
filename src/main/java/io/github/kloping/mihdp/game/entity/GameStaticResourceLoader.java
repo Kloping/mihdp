@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.s;
+package io.github.kloping.mihdp.game.entity;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.AutoStandAfter;
 import io.github.kloping.MySpringTool.annotations.Entity;
+import io.github.kloping.mihdp.game.dao.BaseCharacterInfo;
+import io.github.kloping.mihdp.game.dao.CharacterInfo;
 import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.dao.Shopping;
 import io.github.kloping.mihdp.game.impl.ItemImpl;
@@ -25,7 +27,7 @@ public class GameStaticResourceLoader {
 
     public Shopping shopping = null;
 
-    public Map<Integer, Item> ITEM_MAP = new LinkedHashMap<>();
+    public Map<Integer, Item> itemMap = new LinkedHashMap<>();
 
     @Getter
     private BaseCharacterInfo baseCharacterInfo = null;
@@ -65,7 +67,7 @@ public class GameStaticResourceLoader {
         List<ItemImpl> items = defaultConfig.getJSONArray("items").toJavaList(ItemImpl.class);
 
         for (ItemImpl item : items) {
-            ITEM_MAP.put(item.getId(), item);
+            itemMap.put(item.getId(), item);
         }
 
         JSONObject baseCharacter = defaultConfig.getJSONObject("base_character");

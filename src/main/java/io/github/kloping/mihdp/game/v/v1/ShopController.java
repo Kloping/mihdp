@@ -11,7 +11,7 @@ import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.dao.Item;
-import io.github.kloping.mihdp.game.s.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.mapper.BagMaper;
@@ -86,10 +86,10 @@ public class ShopController {
             final int w = 1030, h = 1225;
             drawer.size(w, h);
             int x = 5, y = 5;
-            for (Integer id : resourceLoader.ITEM_MAP.keySet()) {
+            for (Integer id : resourceLoader.itemMap.keySet()) {
                 Integer v0 = getCurByShopIdAndUid(user.getUid(), id);
                 if (v0 == null) v0 = 0;
-                Item item = resourceLoader.ITEM_MAP.get(id);
+                Item item = resourceLoader.itemMap.get(id);
                 if (item.getPrice() == null || item.getPrice() <= 0) continue;
                 drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 400, 20, 20)
                         .draw(resourceLoader.getFileById(id), 200, 200, x, y)
@@ -114,7 +114,7 @@ public class ShopController {
                     .append(new GeneralData.ResDataButton("购买物品", "购买"))
                     .append(new GeneralData.ResDataButton("查看背包", "背包"))
                     .build();
-        } else return JSON.toJSONString(resourceLoader.ITEM_MAP);
+        } else return JSON.toJSONString(resourceLoader.itemMap);
     }
 
     {
@@ -127,8 +127,8 @@ public class ShopController {
         GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
         String name = generalData.allText().trim();
         Item target = null;
-        for (Integer id : resourceLoader.ITEM_MAP.keySet()) {
-            Item item = resourceLoader.ITEM_MAP.get(id);
+        for (Integer id : resourceLoader.itemMap.keySet()) {
+            Item item = resourceLoader.itemMap.get(id);
             if (name.contains(item.getName())) {
                 if (target == null) target = item;
                 else {

@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.s;
+package io.github.kloping.mihdp.game.dao;
 
 import io.github.kloping.number.NumberUtils;
 import lombok.Data;

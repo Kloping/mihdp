@@ -6,8 +6,8 @@ import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.Cycle;
 import io.github.kloping.mihdp.game.api.Addition;
 import io.github.kloping.mihdp.game.api.logic.LogicBase;
-import io.github.kloping.mihdp.game.s.CharacterInfo;
-import io.github.kloping.mihdp.game.s.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.dao.CharacterInfo;
+import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
 
 import java.util.HashMap;
 import java.util.LinkedList;

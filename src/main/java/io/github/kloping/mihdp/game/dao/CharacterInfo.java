@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.s;
+package io.github.kloping.mihdp.game.dao;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.gson.reflect.TypeToken;

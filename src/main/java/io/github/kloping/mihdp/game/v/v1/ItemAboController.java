@@ -3,14 +3,13 @@ package io.github.kloping.mihdp.game.v.v1;
 import io.github.kloping.MySpringTool.annotations.*;
 import io.github.kloping.arr.Class2OMap;
 import io.github.kloping.mihdp.dao.Bag;
-import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.api.ItemUseContext;
 import io.github.kloping.mihdp.game.dao.Item;
-import io.github.kloping.mihdp.game.s.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
+import io.github.kloping.mihdp.game.v.v1.service.ItemOf;
 import io.github.kloping.mihdp.mapper.BagMaper;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
@@ -22,9 +21,6 @@ import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.number.NumberUtils;
 import lombok.Data;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author github.kloping
@@ -60,55 +56,9 @@ public class ItemAboController {
         BaseService.MSG2ACTION.put("使用", "use");
     }
 
-    public final Map<Integer, ItemUseContext> CONTEXT_MAP = new HashMap<>();
 
-    {
-        CONTEXT_MAP.put(101, cc -> {
-            return addXpOfItem(cc, 50);
-        });
-        CONTEXT_MAP.put(102, cc -> {
-            return addXpOfItem(cc, 200);
-        });
-    }
-
-    private UseState addXpOfItem(Class2OMap cc, int x) {
-        User user = cc.get(User.class);
-        Integer c = cc.get(Integer.class);
-        Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
-        if (character == null) return new UseState(false, "未拥有任何魂角", 0);
-        Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
-        int xpa = 0, levela = 0;
-        int c0 = 0;
-        for (int i = 0; i < c; i++) {
-            xpa += x;
-            c0++;
-            character.setXp(character.getXp() + x);
-            if (character.getXp() >= maxXp) {
-                boolean k = testForC(character, maxXp);
-                if (true) {
-                    maxXp = charactersController.compute(character).maxXp;
-                    levela++;
-                } else {
-                    return new UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
-                }
-            }
-        }
-        charactersMapper.updateById(character);
-        return new UseState(true, String.format("对魂角(%s)使用完成(%s).\n累计增加了%s经验值\n增加了%s级",
-                resourceLoader.getCharacterInfoById(character.getCid()).getName(), c, xpa, levela), c);
-    }
-
-    public boolean testForC(Character character, Integer maxXp) {
-        if (character.getLevel() % 10 == 0) {
-            character.setXp(maxXp);
-            charactersMapper.updateById(character);
-            return false;
-        } else {
-            character.setXp(character.getXp() - maxXp);
-            character.setLevel(character.getLevel() + 1);
-            return true;
-        }
-    }
+    @AutoStand
+    ItemOf itemOf;
 
     @Action("use")
     public Object use(User user, ReqDataPack pack) {
@@ -118,7 +68,7 @@ public class ItemAboController {
         Integer num = NumberUtils.getIntegerFromString(name, 1);
         //寻找物品对象
         Item item = null;
-        for (Item value : resourceLoader.ITEM_MAP.values()) {
+        for (Item value : resourceLoader.itemMap.values()) {
             if (name.contains(value.getName())) {
                 if (item == null)
                     item = value;
@@ -132,8 +82,8 @@ public class ItemAboController {
         Bag bag = bagMaper.selectByUidAndRid(user.getUid(), item.getId());
         if (bag == null || bag.getNum() < num) return "已拥有物品数量不足.";
         Class2OMap map = Class2OMap.create(user, pack, bag, item, num, generalData.allText());
-        if (CONTEXT_MAP.containsKey(item.getId())) {
-            UseState state = CONTEXT_MAP.get(item.getId()).execute(map);
+        if (itemOf.CONTEXT_MAP.containsKey(item.getId())) {
+            UseState state = itemOf.CONTEXT_MAP.get(item.getId()).execute(map);
             if (state.ok) {
                 bag.setNum(bag.getNum() - state.c);
                 bag.save(bagMaper);
@@ -181,7 +131,7 @@ public class ItemAboController {
             drawer.fillRoundRect(ImageDrawerUtils.BLACK_A35, x, y, 200, 250, 15, 15)
                     .draw(resourceLoader.getFileById(bag.getRid()), 200, 200, x, y)
                     .startDrawString().layout(1)
-                    .drawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90, resourceLoader.ITEM_MAP.get(bag.getRid()).getName(), x, y + 200)
+                    .drawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90, resourceLoader.itemMap.get(bag.getRid()).getName(), x, y + 200)
                     .drawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A95, bag.getNum().toString(), x, y + 230)
                     .finish();
             x += 200;

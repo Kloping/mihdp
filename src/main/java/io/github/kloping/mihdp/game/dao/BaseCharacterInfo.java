@@ -18,9 +18,9 @@ public class BaseCharacterInfo {
     }.getType();
 
     protected Attr xp;
-    protected Attr hp;
     protected Attr hl;
     protected Attr hj;
+    protected Attr hp;
     protected Attr att;
     /**
      * 防御

@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * 预览魂角信息类
  * @author github.kloping
  */
 @EqualsAndHashCode(callSuper = true)

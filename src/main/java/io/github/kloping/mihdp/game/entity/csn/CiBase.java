@@ -1,8 +1,8 @@
 package io.github.kloping.mihdp.game.entity.csn;
 
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
-import io.github.kloping.mihdp.game.entity.Damage;
-import io.github.kloping.mihdp.game.entity.DamageResult;
+import io.github.kloping.mihdp.game.entity.Eff;
+import io.github.kloping.mihdp.game.entity.EffResult;
 import io.github.kloping.mihdp.game.entity.LivingEntity;
 
 /**
@@ -14,7 +14,12 @@ public class CiBase extends LivingEntity {
     private CharacterInfo characterInfo;
 
     @Override
-    public DamageResult ack(Damage damage, LivingEntity entity) {
+    public EffResult ack(Eff damage, LivingEntity entity) {
+        if (entity == null || entity.getHp() <= 0) {
+            return new EffResult(damage.getType(), damage.getValue(), damage.getValue(), 1);
+        } else if (damage.getValue() > 0) {
+
+        }
         return null;
     }
 

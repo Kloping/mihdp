@@ -1,5 +1,6 @@
 package io.github.kloping.mihdp.game.entity;
 
+import io.github.kloping.mihdp.game.dao.Attr;
 import lombok.Getter;
 
 /**
@@ -9,16 +10,39 @@ import lombok.Getter;
  */
 @Getter
 public abstract class LivingEntity {
+    /**
+     * 0.默认 正常状态 1.被眩晕 2.被冰冻
+     */
+    private Integer state = 0;
+
     private Integer hp;
-    private Integer state;
+
+    protected Attr maxHp;
+    protected Attr att;
+    /**
+     * 防御
+     */
+    protected Attr defense;
+    /**
+     * 速度
+     */
+    protected Attr speed;
+    /**
+     * 效果命中
+     */
+    protected Attr efr;
+    /**
+     * 效果抵抗
+     */
+    protected Attr efh;
     /**
      * 对指定
      *
-     * @param damage
+     * @param eff
      * @param entity
      * @return
      */
-    public abstract DamageResult ack(Damage damage, LivingEntity entity);
+    public abstract EffResult ack(Eff eff, LivingEntity entity);
 
     /**
      * 附加负面

@@ -1,12 +1,16 @@
 package data_migration;
 
-import data_migration.source.DataMigration;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import data_migration.target.DataMigrationTarget;
-import data_migration.target.dao.Bag;
-import data_migration.target.mapper.UserMapper;
+import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
+import io.github.kloping.mihdp.mapper.CharacterMapper;
+import io.github.kloping.mihdp.mapper.UserMapper;
 
-import java.util.concurrent.CountDownLatch;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.List;
 
 /**
  * @author github.kloping
@@ -14,34 +18,72 @@ import java.util.concurrent.CountDownLatch;
 public class Starter {
 
     public static void main(String[] args) throws Exception{
-        CountDownLatch cdl = new CountDownLatch(2);
-        new Thread(() -> {
-            DataMigration.main(args);
-            cdl.countDown();
-        }).start();
-        new Thread(() -> {
-            DataMigrationTarget.main(args);
-            cdl.countDown();
-        }).start();
-        cdl.await();
+//        CountDownLatch cdl = new CountDownLatch(2);
+//        new Thread(() -> {
+//            DataMigration.main(args);
+//            cdl.countDown();
+//        }).start();
+//        new Thread(() -> {
+//            DataMigrationTarget.main(args);
+//            cdl.countDown();
+//        }).start();
+//        cdl.await();
 
-        data_migration.source.mapper.BagMapper bagMapper0 = DataMigration.context.getBean(data_migration.source.mapper.BagMapper.class);
-        data_migration.target.mapper.BagMaper bagMapper1 = DataMigrationTarget.context.getBean(data_migration.target.mapper.BagMaper.class);
+        DataMigrationTarget.main(args);
+
+        CharacterMapper characterMapper = DataMigrationTarget.context.getBean(CharacterMapper.class);
         UserMapper userMapper = DataMigrationTarget.context.getBean(UserMapper.class);
-        for (User user : userMapper.selectList(null)) {
-            String qidStr = user.getId();
-            try {
-                Long qid = Long.valueOf(qidStr);
-                int num = 0;
-                for (Integer i : bagMapper0.selectAll(qid)) {
-                    if (i == 103) num++;
+        BufferedReader reader = new BufferedReader(new FileReader(new File("./libs/temp.csv")));
+        while (true) {
+            String line = reader.readLine();
+            if (line != null) {
+                String[] sss = line.split(";");
+                String qid = sss[0];
+                String wh = sss[1];
+                String p = sss[2];
+                User user = userMapper.selectById(qid);
+                if (user == null) continue;
+                if ("1".equals(p)) {
+                    QueryWrapper<Character> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.eq("uid", user.getUid());
+                    int i = 0;
+                    List<Character> list = characterMapper.selectList(queryWrapper);
+                    if (list == null || list.isEmpty()) continue;
+                    for (Character character : list) {
+                        if (i == 0) {
+                            character.setCid(1000 + Integer.valueOf(wh));
+                            queryWrapper.eq("cid", character.getId());
+                            characterMapper.updateById(character);
+                            System.out.println("ok for " + character.getId() + " of " + qid);
+                        } else {
+                            System.err.println("2 for " + character.getId() + "to");
+                        }
+                        i++;
+                    }
+                } else {
+                    System.err.println(line + "for" + user.getUid());
                 }
-                bagMapper1.insert(new Bag(user.getUid(), 101, num, num));
-                System.out.format("qid(%s) o103 to n101 %s\n", qid, user.getUid(), num);
-            } catch (NumberFormatException e) {
-                System.err.println(e);
-            }
+            } else break;
         }
+//
+//        data_migration.source.mapper.BagMapper bagMapper0 = DataMigration.context.getBean(data_migration.source.mapper.BagMapper.class);
+//        data_migration.target.mapper.BagMaper bagMapper1 = DataMigrationTarget.context.getBean(data_migration.target.mapper.BagMaper.class);
+//        UserMapper userMapper = DataMigrationTarget.context.getBean(UserMapper.class);
+//        for (User user : userMapper.selectList(null)) {
+//            String qidStr = user.getId();
+//            try {
+//                Long qid = Long.valueOf(qidStr);
+//                int num = 0;
+//                for (Integer i : bagMapper0.selectAll(qid)) {
+//                    if (i == 103) num++;
+//                }
+//                bagMapper1.insert(new Bag(user.getUid(), 101, num, num));
+//                System.out.format("qid(%s) o103 to n101 %s\n", qid, user.getUid(), num);
+//            } catch (NumberFormatException e) {
+//                System.err.println(e);
+//            }
+//        }
+
     }
 
 //    private static void extractedWhHh() {

@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
-@SpringBootApplication(scanBasePackages = {"data_migration.target.mapper"})
-@MapperScan("data_migration.target.mapper")
+@SpringBootApplication(scanBasePackages = {"io.github.kloping.mihdp.mapper"})
+@MapperScan("io.github.kloping.mihdp.mapper")
 @Configuration
 public class DataMigrationTarget {
 

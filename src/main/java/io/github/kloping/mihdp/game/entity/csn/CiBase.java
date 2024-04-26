@@ -14,10 +14,10 @@ public class CiBase extends LivingEntity {
     private CharacterInfo characterInfo;
 
     @Override
-    public EffResult ack(Eff damage, LivingEntity entity) {
+    public EffResult ack(Eff eff, LivingEntity entity) {
         if (entity == null || entity.getHp() <= 0) {
-            return new EffResult(damage.getType(), damage.getValue(), damage.getValue(), 1);
-        } else if (damage.getValue() > 0) {
+            return new EffResult(eff.getType(), eff.getValue(), eff.getValue(), 1);
+        } else if (eff.getValue() > 0) {
 
         }
         return null;

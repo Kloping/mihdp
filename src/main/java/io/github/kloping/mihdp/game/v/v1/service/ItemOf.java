@@ -54,7 +54,7 @@ public class ItemOf {
             xpa += x;
             c0++;
             character.setXp(character.getXp() + x);
-            if (character.getXp() >= maxXp) {
+            if (character.getLevel() < 151 && character.getXp() >= maxXp) {
                 boolean k = baseCi.testForC(character, maxXp);
                 if (true) {
                     maxXp = baseCi.compute(character).maxXp;

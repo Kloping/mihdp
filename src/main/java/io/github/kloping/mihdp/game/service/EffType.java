@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.entity;
+package io.github.kloping.mihdp.game.service;
 
 /**
  * 效果类型

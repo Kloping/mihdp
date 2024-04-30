@@ -7,7 +7,7 @@ import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
-import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v0.InfoController;
@@ -32,11 +32,7 @@ public class ExchangeController {
     @AutoStand
     UserMapper userMapper;
     @AutoStand
-    CharacterMapper charactersMapper;
-    @AutoStand
     RedisSource redisSource;
-    @AutoStand
-    GameStaticResourceLoader resourceLoader;
     @AutoStand
     InfoController infoController;
     @AutoStand

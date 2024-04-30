@@ -13,10 +13,10 @@ import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.Cycle;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.api.Addition;
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
-import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
-import io.github.kloping.mihdp.game.impl.AdditionLogic;
+import io.github.kloping.mihdp.game.service.AdditionLogic;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v1.service.BaseCi;
@@ -24,7 +24,6 @@ import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.CycleMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
-import io.github.kloping.mihdp.p0.utils.NumberSelector;
 import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.mihdp.utils.ImageDrawerUtils;
 import io.github.kloping.mihdp.wss.GameClient;
@@ -70,23 +69,10 @@ public class CharactersController {
         qw.eq("uid", user.getUid());
         List<Character> characters = charactersMapper.selectList(qw);
         if (characters.isEmpty()) {
-            NumberSelector.reg(pack.getSender_id()).set(1, d -> {
-                NumberSelector.clear(pack.getSender_id());
-                Character c0 = new Character();
-                c0.setUid(user.getUid())
-                        .setLevel(1).setCid(1001).setMid(0).setHp(100);
-                charactersMapper.insert(c0);
-                return "领取成功;使用'魂角列表'查看";
-            }).set(2, d -> {
-                NumberSelector.clear(pack.getSender_id());
-                NumberSelector.clear(pack.getSender_id());
-                Character c0 = new Character();
-                c0.setUid(user.getUid())
-                        .setLevel(1).setCid(1002).setMid(0).setHp(100);
-                charactersMapper.insert(c0);
-                return "领取成功;使用'魂角列表'查看";
-            });
-            return GeneralData.GeneralDataBuilder.create("符合领取条件;\n请选择要领取的魂角(操作不可逆)").append(1, "落日神弓").append(2, "神空剑").build();
+            Character c0 = new Character();
+            c0.setUid(user.getUid()).setLevel(1).setCid(10 + RandomUtils.RANDOM.nextInt(32) + 1).setMid(0).setHp(100);
+            charactersMapper.insert(c0);
+            return GeneralData.GeneralDataBuilder.create("符合领取条件;领取成功");
         }
         return "不符合领取条件";
     }
@@ -160,20 +146,16 @@ public class CharactersController {
         CharacterInfo characterInfo = null;
         //用户魂角配置
         Character character = null;
+        //根据名字判断 cid
         characterInfo = resourceLoader.getCharacterInfoByName(name);
+        //如果没有名字
         if (characterInfo == null) {
-            Integer cid = redisSource.uid2cid.getValue(user.getUid());
-            if (cid == null) return "查询失败!\n可能不存在该魂角";
-            character = charactersMapper.selectById(cid);
+            character = getCurrentCharacterOrLowestLevel(user.getUid());
             characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
+        } else {
+            character = charactersMapper.getOne(user.getUid(), characterInfo.getId());
         }
-        if (character == null) {
-            QueryWrapper<Character> qw0 = new QueryWrapper<>();
-            qw0.eq("uid", user.getUid());
-            qw0.eq("cid", characterInfo.getId());
-            character = charactersMapper.selectOne(qw0);
-            if (character == null) return "查询失败!\n可能尚未拥有.";
-        }
+        if (character == null) return "查询失败!\n可能尚未拥有.";
         for (Addition addition : additionLogic.getAddition(character)) {
             characterInfo.reg(addition);
         }
@@ -301,7 +283,6 @@ public class CharactersController {
                     if (character.getId().equals(id)) {
                         k = true;
                     }
-
                 }
                 if (k) id = characters.get(0).getId();
             } else {
@@ -322,12 +303,12 @@ public class CharactersController {
         return "切换成功!";
     }
 
+    @AutoStand
+    BaseCi baseCi;
+
     {
         BaseService.MSG2ACTION.put("修炼", "xl");
     }
-
-    @AutoStand
-    BaseCi baseCi;
 
     @Action("xl")
     public Object xl(ReqDataPack pack, User user) {
@@ -441,6 +422,15 @@ public class CharactersController {
             List<Character> list = charactersMapper.selectList(qw0);
             if (list.isEmpty()) return null;
             return list.get(0);
+        } else {
+            return charactersMapper.selectById(cid);
+        }
+    }
+
+    public Character getCurrentCharacterOrLowestLevel(String uid) {
+        Integer cid = redisSource.uid2cid.getValue(uid);
+        if (cid == null) {
+            return getCharacterOrLowestLevel(uid);
         } else {
             return charactersMapper.selectById(cid);
         }

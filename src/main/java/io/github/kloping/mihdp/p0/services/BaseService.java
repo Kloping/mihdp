@@ -11,7 +11,6 @@ import java.util.Map;
 /**
  * @author github.kloping
  */
-@Entity
 public class BaseService {
     public static final Map<String, String> MSG2ACTION = new HashMap<>();
 

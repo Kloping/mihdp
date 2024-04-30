@@ -56,7 +56,9 @@ public class BeginController {
             NumberSelector.clear(pack.getSender_id());
             return regNow(pack.getSender_id());
         });
-        return GeneralData.GeneralDataBuilder.create("新手教程开发中 回复此条消息附带1以完成注册").append(1, "确定").append(2, "跳过").build();
+        return GeneralData.GeneralDataBuilder.create("新手教程开发中 回复此条消息附带1以完成注册")
+                .append(new GeneralData.ResDataButton("确定", "1")).append(new GeneralData.ResDataButton("跳过", "2"))
+                .build();
     }
 
     @AutoStand

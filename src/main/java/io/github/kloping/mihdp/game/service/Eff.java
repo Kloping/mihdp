@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.entity;
+package io.github.kloping.mihdp.game.service;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @author github.kloping
  */
 @Data
-public class Eff {
+public abstract class Eff {
     private Integer type;
     private Integer value;
 
@@ -16,4 +16,6 @@ public class Eff {
         this.type = type;
         this.value = value;
     }
+
+    public abstract EffResult fun(LivingEntity entity0, LivingEntity entity1);
 }

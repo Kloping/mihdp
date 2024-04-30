@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.entity;
+package io.github.kloping.mihdp.game;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -11,7 +11,6 @@ import io.github.kloping.mihdp.game.dao.BaseCharacterInfo;
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
 import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.dao.Shopping;
-import io.github.kloping.mihdp.game.impl.ItemImpl;
 import io.github.kloping.number.NumberUtils;
 import lombok.Getter;
 
@@ -64,9 +63,9 @@ public class GameStaticResourceLoader {
         if (defaultConfig == null) return;
         shopping = defaultConfig.getJSONObject("shopping").toJavaObject(Shopping.class);
 
-        List<ItemImpl> items = defaultConfig.getJSONArray("items").toJavaList(ItemImpl.class);
+        List<Item> items = defaultConfig.getJSONArray("items").toJavaList(Item.class);
 
-        for (ItemImpl item : items) {
+        for (Item item : items) {
             itemMap.put(item.getId(), item);
         }
 

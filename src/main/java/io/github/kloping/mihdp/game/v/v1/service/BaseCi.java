@@ -5,10 +5,10 @@ import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.Cycle;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.api.Addition;
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
-import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
-import io.github.kloping.mihdp.game.impl.AdditionLogic;
+import io.github.kloping.mihdp.game.service.AdditionLogic;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.CycleMapper;
@@ -24,15 +24,18 @@ public class BaseCi {
     CharacterMapper charactersMapper;
 
     public boolean testForC(Character character, Integer maxXp) {
-        if (character.getLevel() % 10 == 0) {
-            character.setXp(maxXp);
-            charactersMapper.updateById(character);
-            return false;
-        } else {
-            character.setXp(character.getXp() - maxXp);
-            character.setLevel(character.getLevel() + 1);
-            return true;
+        if (character.getLevel() < 151 && character.getXp() >= maxXp) {
+            if (character.getLevel() % 10 == 0) {
+                character.setXp(maxXp);
+                charactersMapper.updateById(character);
+                return false;
+            } else {
+                character.setXp(character.getXp() - maxXp);
+                character.setLevel(character.getLevel() + 1);
+                return true;
+            }
         }
+        return false;
     }
 
 

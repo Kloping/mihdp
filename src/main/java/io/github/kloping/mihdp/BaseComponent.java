@@ -31,6 +31,7 @@ import java.util.Date;
 @Configuration
 @CommentScan(path = "io.github.kloping.mihdp")
 public class BaseComponent implements CommandLineRunner {
+
     @io.github.kloping.MySpringTool.annotations.Bean
     @Bean
     public JSONObject defaultConfig() {

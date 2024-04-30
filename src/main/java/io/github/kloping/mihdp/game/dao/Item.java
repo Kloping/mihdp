@@ -7,7 +7,7 @@ import lombok.Data;
  * @author github.kloping
  */
 @Data
-public abstract class Item implements Usable {
+public class Item  {
     private Integer id;
     private String name;
     private String src;

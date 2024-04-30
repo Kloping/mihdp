@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.entity;
+package io.github.kloping.mihdp.game.service;
 
 import io.github.kloping.mihdp.game.dao.Attr;
 import lombok.Getter;
@@ -42,7 +42,7 @@ public abstract class LivingEntity {
      * @param entity
      * @return
      */
-    public abstract EffResult ack(Eff eff, LivingEntity entity);
+    public abstract EffResult eff(Eff eff, LivingEntity entity);
 
     /**
      * 附加负面

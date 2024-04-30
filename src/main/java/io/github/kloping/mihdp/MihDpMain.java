@@ -83,17 +83,21 @@ public class MihDpMain implements CommandLineRunner {
     public static StarterObjectApplication APPLICATION = null;
 
     public static void main(String[] args) {
+        //运行springboot 并获取其 context
         ConfigurableApplicationContext context = SpringApplication.run(MihDpMain.class, args);
+        //运行 spt from kloping
         APPLICATION = new StarterObjectApplication(BaseComponent.class);
         APPLICATION.setMainKey(String.class);
         APPLICATION.setWaitTime(60000);
         APPLICATION.setAccessTypes(ReqDataPack.class, GameClient.class, GeneralData.class);
         APPLICATION.logger = context.getBean(Logger.class);
+        //在 spt 扫描包之前
         APPLICATION.INSTANCE.getPRE_SCAN_RUNNABLE().add(() -> {
             final String hostKey = "spt.redis.host";
             final String portKey = "spt.redis.port";
             String host = context.getEnvironment().getProperty(hostKey);
             String port = context.getEnvironment().getProperty(portKey);
+            //获取指定springboot的值
             ContextManager contextManager = APPLICATION.INSTANCE.getContextManager();
             APPLICATION.INSTANCE.getContextManager().append(String.class, host, hostKey);
             APPLICATION.INSTANCE.getContextManager().append(Integer.class, Integer.valueOf(port), portKey);
@@ -110,10 +114,13 @@ public class MihDpMain implements CommandLineRunner {
                     contextManager.append(obj, beanDefinitionName);
                 }
             }
+            //和将指定类型的bean
             for (String requiredProperty : REQUIRED_PROPERTIES) {
                 String v = context.getEnvironment().getProperty(requiredProperty);
                 if (Judge.isNotEmpty(v)) contextManager.append(v, requiredProperty);
             }
+            //和指定名的配置项
+            //装载到spt中
         });
 
         boolean p = false;

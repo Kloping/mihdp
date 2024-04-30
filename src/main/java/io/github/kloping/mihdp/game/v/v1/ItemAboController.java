@@ -6,7 +6,7 @@ import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.dao.Item;
-import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v1.service.ItemOf;
@@ -30,19 +30,11 @@ public class ItemAboController {
     @AutoStand
     UserMapper userMapper;
     @AutoStand
-    RedisSource redisSource;
-    @AutoStand
-    UsersResourcesMapper usersResourcesMapper;
-    @AutoStand
     GameStaticResourceLoader resourceLoader;
     @AutoStand
     BeginController beginController;
     @AutoStand
     BagMaper bagMaper;
-    @AutoStand
-    CharacterMapper charactersMapper;
-    @AutoStand
-    CharactersController charactersController;
 
     @Before
     public User before(ReqDataPack dataPack) {

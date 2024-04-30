@@ -11,7 +11,7 @@ import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.dao.Item;
-import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.mapper.BagMaper;
@@ -48,7 +48,6 @@ public class ShopController {
         if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         return user;
     }
-
 
     private Integer getMaxByShopId(Integer id) {
         return id >= 2001 && id <= 2007 ? 10 : 100;

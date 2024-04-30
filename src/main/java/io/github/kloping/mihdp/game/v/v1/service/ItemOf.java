@@ -5,8 +5,8 @@ import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.arr.Class2OMap;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.api.ItemUseContext;
-import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v1.CharactersController;
 import io.github.kloping.mihdp.game.v.v1.ItemAboController;
@@ -54,14 +54,11 @@ public class ItemOf {
             xpa += x;
             c0++;
             character.setXp(character.getXp() + x);
-            if (character.getLevel() < 151 && character.getXp() >= maxXp) {
-                boolean k = baseCi.testForC(character, maxXp);
-                if (true) {
-                    maxXp = baseCi.compute(character).maxXp;
-                    levela++;
-                } else {
-                    return new ItemAboController.UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
-                }
+            if (baseCi.testForC(character, maxXp)) {
+                maxXp = baseCi.compute(character).maxXp;
+                levela++;
+            } else {
+                return new ItemAboController.UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
             }
         }
         charactersMapper.updateById(character);

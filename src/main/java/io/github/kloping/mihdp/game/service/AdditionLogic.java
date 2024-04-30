@@ -1,4 +1,4 @@
-package io.github.kloping.mihdp.game.impl;
+package io.github.kloping.mihdp.game.service;
 
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Entity;
@@ -7,7 +7,8 @@ import io.github.kloping.mihdp.dao.Cycle;
 import io.github.kloping.mihdp.game.api.Addition;
 import io.github.kloping.mihdp.game.api.logic.LogicBase;
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
-import io.github.kloping.mihdp.game.entity.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.impl.AdditionImpl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 属性加成
  * @author github.kloping
  */
 @Entity

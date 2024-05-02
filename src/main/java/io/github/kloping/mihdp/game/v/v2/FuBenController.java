@@ -8,6 +8,7 @@ import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v1.CharactersController;
 import io.github.kloping.mihdp.mapper.UserMapper;
+import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,4 +31,7 @@ public class FuBenController {
         return charactersController.getCurrentCharacterOrLowestLevel(user.getUid());
     }
 
+    {
+        BaseService.MSG2ACTION.put("副本列表", "fb-list");
+    }
 }

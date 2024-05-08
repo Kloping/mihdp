@@ -1,6 +1,7 @@
 package io.github.kloping.mihdp.game.service;
 
 import io.github.kloping.mihdp.game.dao.Attr;
+import io.github.kloping.mihdp.game.scenario.ScenarioImpl;
 import lombok.Getter;
 
 /**
@@ -36,6 +37,10 @@ public abstract class LivingEntity {
      */
     protected Attr efh;
     /**
+     * 距离仅场景中使用
+     */
+    public Integer distance = 0;
+    /**
      * 对指定
      *
      * @param eff
@@ -52,4 +57,11 @@ public abstract class LivingEntity {
      * @return
      */
     public abstract boolean attach(Integer type, LivingEntity entity);
+
+    /**
+     * 行动中
+     *
+     * @param scenario
+     */
+    public abstract void letDo(ScenarioImpl scenario);
 }

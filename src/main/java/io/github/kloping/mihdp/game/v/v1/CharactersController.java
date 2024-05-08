@@ -355,7 +355,7 @@ public class CharactersController {
                     maxHp = result.maxHp;
                     charactersMapper.updateById(character);
                 }
-            }
+            } else charactersMapper.updateById(character);
             builder.append("\n当前:血量" + String.format("%s%%;等级:%s;经验:%s/%s"
                     , NumberUtils.toPercent(character.getHp(), maxHp)
                     , character.getLevel()

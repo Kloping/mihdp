@@ -3,7 +3,7 @@ package io.github.kloping.mihdp.game.service;
 import lombok.Data;
 
 /**
- * 一个效果
+ * 一个效果 可以是攻击 可以是控制 提速 或 减速
  *
  * @author github.kloping
  */

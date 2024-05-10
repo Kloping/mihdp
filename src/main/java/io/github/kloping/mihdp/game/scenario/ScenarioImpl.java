@@ -23,12 +23,43 @@ public class ScenarioImpl implements Scenario {
     public void run() {
         //循环 直至下一个实体行动
         while (true) {
-
+            allV1();
         }
     }
 
+    private void step(LivingEntity e) {
+        e.distance = e.distance - e.getSpeed().getFinalValue();
+        if (e.distance == 0) {
+            e.letDo(this);
+            e.distance = MAX_JOURNEY;
+        }
+    }
+
+    private boolean hasNv() {
+        for (LivingEntity a : as) {
+            if (a.getDistance() < a.getSpeed().getFinalValue()) {
+                return true;
+            }
+        }
+        for (LivingEntity b : bs) {
+            if (b.getDistance() < b.getSpeed().getFinalValue()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void allV1() {
-      
+        if (hasNv()) {
+
+        } else {
+            for (LivingEntity e : as) {
+                step(e);
+            }
+            for (LivingEntity e : bs) {
+                step(e);
+            }
+        }
     }
 
     @Override

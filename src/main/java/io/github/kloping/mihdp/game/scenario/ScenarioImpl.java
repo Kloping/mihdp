@@ -1,6 +1,7 @@
 package io.github.kloping.mihdp.game.scenario;
 
 import io.github.kloping.mihdp.game.service.LivingEntity;
+import io.github.kloping.number.NumberUtils;
 
 /**
  * @author github.kloping
@@ -28,37 +29,43 @@ public class ScenarioImpl implements Scenario {
     }
 
     private void step(LivingEntity e) {
-        e.distance = e.distance - e.getSpeed().getFinalValue();
+        step(e, 100);
+    }
+
+    private void step(LivingEntity e, Integer bv) {
+        int d0 = NumberUtils.percentTo(bv, e.getSpeed().getFinalValue()).intValue();
+        e.distance = e.distance - d0;
         if (e.distance == 0) {
             e.letDo(this);
             e.distance = MAX_JOURNEY;
         }
     }
 
-    private boolean hasNv() {
-        for (LivingEntity a : as) {
-            if (a.getDistance() < a.getSpeed().getFinalValue()) {
-                return true;
+    private LivingEntity hasNv() {
+        for (LivingEntity e : as) {
+            if (e.getDistance() < e.getSpeed().getFinalValue()) {
+                return e;
             }
         }
-        for (LivingEntity b : bs) {
-            if (b.getDistance() < b.getSpeed().getFinalValue()) {
-                return true;
+        for (LivingEntity e : bs) {
+            if (e.getDistance() < e.getSpeed().getFinalValue()) {
+                return e;
             }
         }
-        return false;
+        return null;
     }
 
     public void allV1() {
-        if (hasNv()) {
-
-        } else {
-            for (LivingEntity e : as) {
-                step(e);
-            }
-            for (LivingEntity e : bs) {
-                step(e);
-            }
+        LivingEntity e0 = hasNv();
+        int bv = 100;
+        if (e0 != null) {
+            bv = NumberUtils.toPercent(e0.getDistance(), e0.getSpeed().getFinalValue());
+        }
+        for (LivingEntity e : as) {
+            step(e, bv);
+        }
+        for (LivingEntity e : bs) {
+            step(e, bv);
         }
     }
 

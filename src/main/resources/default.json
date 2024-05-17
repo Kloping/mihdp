@@ -134,8 +134,8 @@
       "id": 1006,
       "name": "柔骨兔",
       "star": 5,
-      "bt": "att",
-      "btv": 5
+      "bt": "speed",
+      "btv": 3
     },
     {
       "id": 1007,
@@ -226,21 +226,21 @@
       "name": "蓝银花",
       "star": 5,
       "bt": "att",
-      "btv": 5
+      "btv": 4
     },
     {
       "id": 1020,
       "name": "玄龟",
       "star": 5,
-      "bt": "att",
+      "bt": "defense",
       "btv": 5
     },
     {
       "id": 1021,
       "name": "幽冥灵猫",
       "star": 5,
-      "bt": "att",
-      "btv": 5
+      "bt": "speed",
+      "btv": 2
     },
     {
       "id": 1022,
@@ -281,7 +281,7 @@
       "id": 1027,
       "name": "九心海棠",
       "star": 5,
-      "bt": "att",
+      "bt": "hp",
       "btv": 5
     },
     {

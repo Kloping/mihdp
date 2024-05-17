@@ -1,9 +1,11 @@
 package io.github.kloping.mihdp.game.service.csn;
 
-import io.github.kloping.mihdp.game.dao.CharacterInfo;
+import io.github.kloping.mihdp.game.scenario.ScenarioImpl;
 import io.github.kloping.mihdp.game.service.Eff;
 import io.github.kloping.mihdp.game.service.EffResult;
 import io.github.kloping.mihdp.game.service.LivingEntity;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 魂角作战 基础
@@ -20,6 +22,16 @@ public class CiBase extends LivingEntity {
             return eff.fun(this, entity);
         }
         return null;
+    }
+
+    @Override
+    public void letDo(ScenarioImpl scenario) {
+        CountDownLatch cdl = new CountDownLatch(1);
+        try {
+            cdl.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

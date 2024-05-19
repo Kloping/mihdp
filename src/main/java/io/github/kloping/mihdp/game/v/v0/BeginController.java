@@ -7,6 +7,7 @@ import io.github.kloping.map.MapUtils;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.ex.GeneralData.GeneralDataBuilder;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
@@ -56,7 +57,7 @@ public class BeginController {
             NumberSelector.clear(pack.getSender_id());
             return regNow(pack.getSender_id());
         });
-        return GeneralData.GeneralDataBuilder.create("新手教程开发中 回复此条消息附带1以完成注册")
+        return GeneralDataBuilder.create("新手教程开发中 回复此条消息附带1以完成注册")
                 .append(new GeneralData.ResDataButton("确定", "1")).append(new GeneralData.ResDataButton("跳过", "2"))
                 .build();
     }
@@ -106,9 +107,11 @@ public class BeginController {
     }
 
     private String COMMAND_ALL = null;
+    private GeneralDataBuilder builder;
 
     @Action("list-command")
     public Object list(ReqDataPack pack, GameClient client) {
+        builder = new GeneralDataBuilder();
         if (COMMAND_ALL == null) {
             StringBuilder sb0 = new StringBuilder();
             Map<String, List<String>> map = new HashMap<>();
@@ -119,11 +122,13 @@ public class BeginController {
                 sb0.append("- " + k).append("\n");
                 for (String s : v) {
                     sb0.append("  - " + s).append("\n");
+                    builder.append(new GeneralData.ResDataButton(s, s));
                 }
             });
             COMMAND_ALL = sb0.toString();
+            builder.append(COMMAND_ALL);
         }
-        return COMMAND_ALL;
+        return builder.build();
     }
 
 }

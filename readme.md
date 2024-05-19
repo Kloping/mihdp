@@ -1,5 +1,6 @@
 a game nothing for now
 
+运行需要 redis-server 配置与application.yml
 
 
 > ### 内容绘制

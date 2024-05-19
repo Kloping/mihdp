@@ -330,7 +330,7 @@ public class InfoController {
             if (r.getScore() > 60) {
                 if (r0.getScore() > 60) {
                     if (r.getFz() < 12) {
-                        int l = RandomUtils.RANDOM.nextInt(20) + 40;
+                        int l = RandomUtils.RANDOM.nextInt(30) + 50;
                         r.setScore(r.getScore() + l);
                         r0.setScore(r0.getScore() - l);
                         r.addFz(1);

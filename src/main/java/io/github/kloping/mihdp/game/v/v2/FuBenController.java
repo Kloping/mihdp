@@ -8,12 +8,13 @@ import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.scenario.ScenarioManager;
+import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v1.CharactersController;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
@@ -31,10 +32,13 @@ public class FuBenController {
     CharactersController charactersController;
 
     @Before
-    public Character before(ReqDataPack dataPack) {
+    public Object before(ReqDataPack dataPack) {
         User user = userMapper.selectById(dataPack.getSender_id());
         if (user == null) user = beginController.regNow0(dataPack.getSender_id());
-        return charactersController.getCurrentCharacterOrLowestLevel(user.getUid());
+        return new Object[]{
+                charactersController.getCurrentCharacterOrLowestLevel(user.getUid())
+                , dataPack.getSender_id(), userMapper.selectById(dataPack.getSender_id())
+        };
     }
 
     {
@@ -64,8 +68,16 @@ public class FuBenController {
         BaseService.MSG2ACTION.put("进入副本", "join-fb");
     }
 
+
+    @AutoStand
+    ScenarioManager manager;
+
+    @AutoStand
+    RedisSource redisSource;
+
     @Action("join-fb")
-    public Object joinFb(Character character, String qid) {
+    public Object joinFb(Character character, String qid, User user) {
+
         return null;
     }
 }

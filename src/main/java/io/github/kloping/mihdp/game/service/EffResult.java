@@ -8,6 +8,8 @@ import lombok.Data;
  */
 @Data
 public class EffResult {
+    public static final EffResult RESULT0 = new EffResult(0, 0, 0, 1);
+
     private Integer type;
     /**
      * 原始值
@@ -28,4 +30,6 @@ public class EffResult {
         this.value = value;
         this.state = state;
     }
+
+    private String tips = "";
 }

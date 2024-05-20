@@ -19,7 +19,7 @@ import io.github.kloping.mihdp.game.dao.CharacterInfo;
 import io.github.kloping.mihdp.game.service.AdditionLogic;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
-import io.github.kloping.mihdp.game.v.v1.service.BaseCi;
+import io.github.kloping.mihdp.game.v.v1.service.BaseCo;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.CycleMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
@@ -99,7 +99,7 @@ public class CharactersController {
                     Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
                     Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
                     if (maxHp == null || maxXp == null) {
-                        BaseCi.CharacterOutResult result = baseCi.compute(character);
+                        BaseCo.CharacterOutResult result = baseCi.compute(character);
                         if (result == null) return "未知错误 code:-201.";
                         maxHp = result.maxHp;
                         maxXp = result.maxXp;
@@ -304,7 +304,7 @@ public class CharactersController {
     }
 
     @AutoStand
-    BaseCi baseCi;
+    BaseCo baseCi;
 
     {
         BaseService.MSG2ACTION.put("修炼", "xl");
@@ -322,7 +322,7 @@ public class CharactersController {
             Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
             Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
             if (maxHp == null || maxXp == null) {
-                BaseCi.CharacterOutResult result = baseCi.compute(character);
+                BaseCo.CharacterOutResult result = baseCi.compute(character);
                 if (result == null) {
                     return "计算加成异常.";
                 }
@@ -347,7 +347,7 @@ public class CharactersController {
                 if (!baseCi.testForC(character, maxXp)) {
                     builder.append("\n等级限制,经验上限无法升级.再次升级需要吸收魂环.");
                 } else {
-                    BaseCi.CharacterOutResult result = baseCi.compute(character);
+                    BaseCo.CharacterOutResult result = baseCi.compute(character);
                     if (result == null) {
                         return "计算加成异常.";
                     }

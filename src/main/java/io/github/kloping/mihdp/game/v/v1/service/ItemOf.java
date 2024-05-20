@@ -29,7 +29,7 @@ public class ItemOf {
     @AutoStand
     GameStaticResourceLoader resourceLoader;
     @AutoStand
-    BaseCi baseCi;
+    BaseCo baseCi;
 
     public final Map<Integer, ItemUseContext> CONTEXT_MAP = new HashMap<>();
 

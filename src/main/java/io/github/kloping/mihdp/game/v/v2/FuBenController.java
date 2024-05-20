@@ -8,16 +8,24 @@ import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.scenario.Scenario;
+import io.github.kloping.mihdp.game.scenario.ScenarioImpl;
 import io.github.kloping.mihdp.game.scenario.ScenarioManager;
+import io.github.kloping.mihdp.game.service.LivingEntity;
+import io.github.kloping.mihdp.game.service.csn.CiBase;
+import io.github.kloping.mihdp.game.service.fb.FbService;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v1.CharactersController;
+import io.github.kloping.mihdp.game.v.v1.service.BaseCo;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author github.kloping
@@ -36,9 +44,8 @@ public class FuBenController {
         User user = userMapper.selectById(dataPack.getSender_id());
         if (user == null) user = beginController.regNow0(dataPack.getSender_id());
         return new Object[]{
-                charactersController.getCurrentCharacterOrLowestLevel(user.getUid())
-                , dataPack.getSender_id(), userMapper.selectById(dataPack.getSender_id())
-        };
+                charactersController.getCurrentCharacterOrLowestLevel(user.getUid()),
+                dataPack.getSender_id(), userMapper.selectById(dataPack.getSender_id())};
     }
 
     {
@@ -50,6 +57,7 @@ public class FuBenController {
         try {
             byte[] bytes = ReadUtils.readAll(new ClassPathResource("fb-list.jpg").getInputStream());
             return new GeneralData.ResDataChain.GeneralDataBuilder()
+                    .append("每次进入副本消耗30灵力")
                     .append(new GeneralData.ResDataImage(bytes, 215, 350))
                     .append(new GeneralData.ResDataButton("原始森林","进入副本原始森林"))
                     .append(new GeneralData.ResDataButton("荒野森林","进入副本荒野森林"))
@@ -75,9 +83,38 @@ public class FuBenController {
     @AutoStand
     RedisSource redisSource;
 
-    @Action("join-fb")
-    public Object joinFb(Character character, String qid, User user) {
+    @AutoStand
+    ExecutorService executorService;
 
-        return null;
+    @AutoStand
+    BaseCo baseCi;
+
+    @AutoStand
+    FbService fbService;
+
+    @Action("join-fb")
+    public Object joinFb(Character character, String qid, User user, ReqDataPack pack) {
+        if (manager.id2scenario.containsKey(qid)) {
+            return "未结束副本状态";
+        } else {
+            GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
+            String name = generalData.allText().trim();
+            LivingEntity[] es = fbService.generationLivingEntity(name);
+            if (es == null) return "不存在该副本";
+            Scenario scenario = new ScenarioImpl(new LivingEntity[]{CiBase.create(baseCi.compute(character))}, es,manager);
+            manager.id2scenario.put(qid, scenario);
+            executorService.submit(scenario);
+            return scenario.out();
+        }
+    }
+
+    @Action("att")
+    public Object att(String qid) {
+        if (!manager.id2scenario.containsKey(qid)) {
+            return "未处于副本状态";
+        } else {
+            Scenario scenario = manager.id2scenario.get(qid);
+            return scenario.out();
+        }
     }
 }

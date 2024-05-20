@@ -2,11 +2,13 @@ package io.github.kloping.mihdp.game.dao;
 
 import io.github.kloping.number.NumberUtils;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @author github.kloping
  */
 @Data
+@Accessors(chain = true)
 public class Attr {
     /**
      * 属性名
@@ -19,7 +21,7 @@ public class Attr {
     /**
      * 百分比加成
      */
-    private Integer bv;
+    private Integer bv = 100;
     /**
      * 基础值
      */
@@ -38,5 +40,12 @@ public class Attr {
 
     public Integer getFinalValue() {
         return NumberUtils.percentTo(baseValue, bv).intValue();
+    }
+
+    public Attr copy() {
+        Attr attr = new Attr(name, value);
+        attr.bv = bv;
+        attr.baseValue = baseValue;
+        return attr;
     }
 }

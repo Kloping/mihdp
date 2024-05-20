@@ -4,6 +4,7 @@ import io.github.kloping.MySpringTool.annotations.Entity;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 场景基础管理器
@@ -13,4 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Entity
 public class ScenarioManager {
     public Map<String, Scenario> id2scenario = new ConcurrentHashMap<>();
+
+    public void remove(Scenario scenario) {
+        AtomicReference<String> id = null;
+        id2scenario.forEach((k, v) -> {
+            id.set(k);
+        });
+        if (id.get() != null) id2scenario.remove(id.get());
+    }
 }

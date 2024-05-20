@@ -16,10 +16,11 @@ import io.github.kloping.mihdp.mapper.CycleMapper;
 import java.util.List;
 
 /**
+ * 基本的计算服务
  * @author github.kloping
  */
 @Entity
-public class BaseCi {
+public class BaseCo {
     @AutoStand
     CharacterMapper charactersMapper;
 
@@ -75,16 +76,18 @@ public class BaseCi {
         int maxXp = characterInfo.getXp().getFinalValue();
         redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
         redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
-        return new CharacterOutResult(maxHp, maxXp);
+        return new CharacterOutResult(maxHp, maxXp, characterInfo);
     }
 
     public static class CharacterOutResult {
         public final Integer maxHp;
         public final Integer maxXp;
+        public final CharacterInfo characterInfo;
 
-        public CharacterOutResult(Integer maxHp, Integer maxXp) {
+        public CharacterOutResult(Integer maxHp, Integer maxXp, CharacterInfo characterInfo) {
             this.maxHp = maxHp;
             this.maxXp = maxXp;
+            this.characterInfo = characterInfo;
         }
     }
 }

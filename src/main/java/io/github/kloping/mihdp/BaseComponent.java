@@ -9,8 +9,8 @@ import io.github.kloping.MySpringTool.interfaces.Logger;
 import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.dao.BaseCharacterInfo;
-import io.github.kloping.mihdp.game.dao.ser.BaseCharacterInfoDeserializer;
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
+import io.github.kloping.mihdp.game.dao.ser.BaseCharacterInfoDeserializer;
 import io.github.kloping.mihdp.game.dao.ser.CharacterInfoDeserializer;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
@@ -23,6 +23,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author github-kloping
@@ -31,6 +35,11 @@ import java.util.Date;
 @Configuration
 @CommentScan(path = "io.github.kloping.mihdp")
 public class BaseComponent implements CommandLineRunner {
+
+    @io.github.kloping.MySpringTool.annotations.Bean
+    public ExecutorService executorService() {
+        return new ThreadPoolExecutor(10, 10, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10));
+    }
 
     @io.github.kloping.MySpringTool.annotations.Bean
     @Bean

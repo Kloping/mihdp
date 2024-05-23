@@ -3,6 +3,7 @@ package io.github.kloping.mihdp.game.scenario;
 import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.service.LivingEntity;
+import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.number.NumberUtils;
 
 import java.util.concurrent.CountDownLatch;
@@ -157,7 +158,6 @@ public class ScenarioImpl implements Scenario {
     }
 
     private GeneralData drawScenario() {
-
         return null;
     }
 }

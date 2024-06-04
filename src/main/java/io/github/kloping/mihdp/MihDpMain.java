@@ -12,6 +12,7 @@ import io.github.kloping.judge.Judge;
 import io.github.kloping.map.MapUtils;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.utils.DefConfig;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.utils.Utils;
 import io.github.kloping.mihdp.wss.GameClient;
@@ -111,6 +112,8 @@ public class MihDpMain implements CommandLineRunner {
                 } else if (obj instanceof LanguageConfig) {
                     contextManager.append(obj, beanDefinitionName);
                 } else if (obj instanceof Gson) {
+                    contextManager.append(obj, beanDefinitionName);
+                } else if (obj instanceof DefConfig) {
                     contextManager.append(obj, beanDefinitionName);
                 }
             }

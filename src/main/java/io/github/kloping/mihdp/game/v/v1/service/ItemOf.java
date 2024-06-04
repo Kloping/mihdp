@@ -5,12 +5,15 @@ import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.arr.Class2OMap;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
+import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.api.ItemUseContext;
 import io.github.kloping.mihdp.game.v.RedisSource;
+import io.github.kloping.mihdp.game.v.v0.InfoController;
 import io.github.kloping.mihdp.game.v.v1.CharactersController;
 import io.github.kloping.mihdp.game.v.v1.ItemAboController;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
+import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +32,11 @@ public class ItemOf {
     @AutoStand
     GameStaticResourceLoader resourceLoader;
     @AutoStand
+    UsersResourcesMapper usersResourcesMapper;
+    @AutoStand
     BaseCo baseCi;
+    @AutoStand
+    InfoController infoController;
 
     public final Map<Integer, ItemUseContext> CONTEXT_MAP = new HashMap<>();
 
@@ -39,6 +46,17 @@ public class ItemOf {
         });
         CONTEXT_MAP.put(102, cc -> {
             return addXpOfItem(cc, 200);
+        });
+        CONTEXT_MAP.put(103, cc -> {
+            Integer c = cc.get(Integer.class);
+            User user = cc.get(User.class);
+            UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+            for (Integer i = 0; i < c; i++) {
+                resources.setEnergy(resources.getEnergy() + 160);
+            }
+            resources.applyE(redisSource);
+            usersResourcesMapper.updateById(resources);
+            return new ItemAboController.UseState(true, "成功,请查看信息.tips:灵力大于等于上限不在回复", 1);
         });
     }
 

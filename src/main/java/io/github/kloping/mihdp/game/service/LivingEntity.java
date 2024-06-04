@@ -13,6 +13,25 @@ import java.util.concurrent.CountDownLatch;
  */
 @Getter
 public abstract class LivingEntity {
+    private static Integer idx = 1;
+
+    public synchronized static Integer getId() {
+        return idx++;
+    }
+    /**
+     * 全局id
+     */
+    public final Integer id;
+    /**
+     * 扮演id
+     */
+    public final Integer cid;
+
+    public LivingEntity(Integer id, Integer cid) {
+        this.id = id;
+        this.cid = cid;
+    }
+
     /**
      * 0.默认 正常状态 1.被眩晕 2.被冰冻 -1 over
      */

@@ -10,14 +10,15 @@ import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.mapper.BagMaper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.utils.DefConfig;
 import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.mihdp.utils.ImageDrawerUtils;
 import io.github.kloping.mihdp.wss.GameClient;
@@ -50,7 +51,7 @@ public class ShopController {
     }
 
     private Integer getMaxByShopId(Integer id) {
-        return id >= 2001 && id <= 2007 ? 10 : 100;
+        return id >= 2001 && id <= 2007 ? 10 : id == 103 ? 2 : 100;
     }
 
     private Integer getCurByShopIdAndUid(String sid, Integer id) {
@@ -62,6 +63,9 @@ public class ShopController {
         if (id >= 2001 && id <= 2007) {
             //魂环1限制
             key = String.format("buy-%s.%s", sid, "1");
+        } else if (id == 103) {
+            //灵石2限制
+            key = String.format("buy-%s.%s", sid, "3");
         } else {
             //暂时 其余2限制
             key = String.format("buy-%s.%s", sid, "2");
@@ -109,7 +113,7 @@ public class ShopController {
             }
             return new GeneralData.ResDataChain.GeneralDataBuilder()
                     .append(new GeneralData.ResDataImage(drawer.bytes(), w, h))
-                    .append("使用积分购买商品,魂环商品共享购买上限,其余普通商品共享购买上限.购买次数每周刷新.或通过特殊方法获得购买次数")
+                    .append("使用积分购买商品,魂环商品共享购买上限,特殊物品独享上限,其余普通商品共享购买上限.\r购买次数每周刷新.或通过特殊方法获得购买次数")
                     .append(new GeneralData.ResDataButton("购买物品", "购买"))
                     .append(new GeneralData.ResDataButton("查看背包", "背包"))
                     .build();

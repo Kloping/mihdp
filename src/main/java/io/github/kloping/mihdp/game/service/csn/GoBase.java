@@ -18,8 +18,12 @@ import java.util.concurrent.CountDownLatch;
  */
 public class GoBase extends LivingEntity {
 
+    public GoBase(Integer id, Integer cid) {
+        super(id, cid);
+    }
+
     public static GoBase create(Integer level, Integer id) {
-        GoBase base = new GoBase();
+        GoBase base = new GoBase(getId(),id);
 
         base.maxHp = new Attr("hp", level * 100).setBaseValue(level * 100);
         base.att = new Attr("att", 10).setBaseValue(10);
@@ -50,7 +54,6 @@ public class GoBase extends LivingEntity {
         LivingEntity entity = RandomUtils.getRand(as);
         Integer avl = NumberUtils.percentTo(this.getAtt().getFinalValue(), 60).intValue();
         EffResult result = eff(new AttEff(avl), entity);
-        cdl.countDown();
         return String.format("NPC使用了普通撞击对指定造成%s点伤害(%s)", avl, result.getState() == 0 ? "生效" : "未生效");
     }
 }

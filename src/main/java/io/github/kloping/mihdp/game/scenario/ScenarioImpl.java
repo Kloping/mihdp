@@ -1,11 +1,20 @@
 package io.github.kloping.mihdp.game.scenario;
 
+import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
+import io.github.kloping.io.ReadUtils;
 import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.service.LivingEntity;
+import io.github.kloping.mihdp.game.service.csn.CiBase;
 import io.github.kloping.mihdp.utils.ImageDrawer;
+import io.github.kloping.mihdp.utils.ImageDrawerUtils;
 import io.github.kloping.number.NumberUtils;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -21,9 +30,15 @@ public class ScenarioImpl implements Scenario {
      */
     LivingEntity[] bs;
     /**
+     * 全部
+     */
+    LivingEntity[] als;
+    /**
      * 默认场景距离1w m
      */
+
     public static final Integer MAX_JOURNEY = 10000;
+
 
     private Boolean run = true;
     private ScenarioManager manager;
@@ -32,6 +47,16 @@ public class ScenarioImpl implements Scenario {
         this.as = as;
         this.bs = bs;
         this.manager = manager;
+        List<LivingEntity> list = new LinkedList<>();
+        for (LivingEntity e : bs) {
+            list.add(e);
+        }
+
+        for (LivingEntity e : as) {
+            list.add(e);
+        }
+
+        als = list.toArray(new LivingEntity[0]);
     }
 
     @Override
@@ -60,68 +85,65 @@ public class ScenarioImpl implements Scenario {
         if (!k) destroy(bs);
     }
 
-    private void step(LivingEntity e, Integer bv, LivingEntity[] as) {
-        int d0 = NumberUtils.percentTo(bv, e.getSpeed().getFinalValue()).intValue();
-        e.distance = e.distance - d0;
-        if (e.distance == 0) {
-
-            Object o = e.letDoPre(this, cdl, as);
-            if (o instanceof String) {
-                if (Judge.isNotEmpty(o.toString())) {
-                    builder.append("\n").append(o.toString());
-                }
-            } else if (o instanceof GeneralData) {
-                builder.append((GeneralData) o);
-            }
-
-
-            o = e.letDo(this, cdl, as);
-            if (o instanceof String) {
-                if (Judge.isNotEmpty(o.toString())) {
-                    builder.append("\n").append(o.toString());
-                }
-            } else if (o instanceof GeneralData) {
-                builder.append((GeneralData) o);
-            }
-
-            e.distance = MAX_JOURNEY;
-        }
-    }
-
-    private LivingEntity hasNv() {
-        for (LivingEntity e : as) {
-            try {
-                if (e.getDistance() < e.getSpeed().getFinalValue()) {
-                    return e;
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        for (LivingEntity e : bs) {
-            try {
-                if (e.getDistance() < e.getSpeed().getFinalValue()) {
-                    return e;
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        return null;
+    private void step(LivingEntity e) {
+        e.distance = e.distance - e.getSpeed().getFinalValue();
     }
 
     public void allV1() {
-        LivingEntity e0 = hasNv();
-        int bv = 100;
-        if (e0 != null) bv = NumberUtils.toPercent(e0.getDistance(), e0.getSpeed().getFinalValue());
-        for (LivingEntity e : as) {
-            step(e, bv, bs);
-            p = as;
+        for (LivingEntity e : als) {
+            step(e);
         }
-        for (LivingEntity e : bs) {
-            step(e, bv, as);
-            p = bs;
+        letg();
+    }
+
+    private void letg() {
+        LivingEntity min = null;
+        boolean next = false;
+        for (LivingEntity al : als) {
+            if (al.distance <= 0) {
+                if (min == null) min = al;
+                else {
+                    next = true;
+                    if (al.distance < min.distance) {
+                        min = al;
+
+                    }
+                }
+            }
         }
+        if (min != null) {
+            Object o = min.letDoPre(this, cdl, getOrs(min));
+            if (o instanceof String) {
+                if (Judge.isNotEmpty(o.toString())) {
+                    builder.append("\n").append(o.toString());
+                }
+            } else if (o instanceof GeneralData) {
+                builder.append((GeneralData) o);
+            }
+
+            if (min instanceof CiBase) {
+                pcdl.countDown();
+            }
+
+            o = min.letDo(this, cdl, getOrs(min));
+            if (o instanceof String) {
+                if (Judge.isNotEmpty(o.toString())) {
+                    builder.append("\n").append(o.toString());
+                }
+            } else if (o instanceof GeneralData) {
+                builder.append((GeneralData) o);
+            }
+
+            min.distance = MAX_JOURNEY;
+        }
+        if (next) letg();
+    }
+
+    private LivingEntity[] getOrs(LivingEntity min) {
+        for (LivingEntity a : as) {
+            if (a == min) return bs;
+        }
+        return as;
     }
 
     @Override
@@ -130,34 +152,91 @@ public class ScenarioImpl implements Scenario {
         manager.remove(this);
     }
 
-    private LivingEntity[] p = null;
 
     private GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder();
 
+    /**
+     * 进程cdl
+     */
     public CountDownLatch cdl = new CountDownLatch(1);
+    /**
+     * 玩家cdl 当有玩家开始阻塞式行动时countDown()
+     */
+    public CountDownLatch pcdl = new CountDownLatch(1);
 
     @Override
-    public Object out() {
+    public Object out(ContextManager context) {
         try {
             cdl.await();
-            cdl = new CountDownLatch(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return builder.build().getList().add(drawScenario());
+        return getTips(context);
     }
 
     @Override
-    public Object getTips() {
-        return builder.build();
+    public Object getTips(ContextManager context) {
+        try {
+            pcdl.await();
+            pcdl = new CountDownLatch(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        GeneralData.ResDataChain chain = builder.build();
+        chain.getList().add(drawScenario(context));
+        return chain;
     }
 
     @Override
-    public LivingEntity[] getCurrentEntities() {
-        return p;
+    public LivingEntity[] getCurrentEntities(String id) {
+        for (LivingEntity a : as) {
+            if (a instanceof CiBase) {
+                CiBase base = (CiBase) a;
+                if (base.fid.equals(id)) return as;
+            }
+        }
+        for (LivingEntity a : bs) {
+            if (a instanceof CiBase) {
+                CiBase base = (CiBase) a;
+                if (base.fid.equals(id)) return bs;
+            }
+        }
+        return new LivingEntity[0];
     }
 
-    private GeneralData drawScenario() {
+    @Override
+    public LivingEntity getCurrentEntity(String id) {
+        for (LivingEntity al : als) {
+            if (al instanceof CiBase) {
+                CiBase base = (CiBase) al;
+                if (base.fid.equals(id)) return al;
+            }
+        }
         return null;
+    }
+
+    private GeneralData drawScenario(ContextManager context) {
+        try {
+            GameStaticResourceLoader resourceLoader = context.getContextEntity(GameStaticResourceLoader.class);
+            byte[] bytes = ReadUtils.readAll(new ClassPathResource(String.format("static.png")).getInputStream());
+            ImageDrawer drawer = new ImageDrawer(bytes);
+            int x = 50;
+            for (LivingEntity a : as) {
+                drawer.draw(resourceLoader.getFileById(a.getCid()), 200, 200, x, 300);
+                int hbv = NumberUtils.toPercent(a.getHp(), a.getMaxHp().getFinalValue());
+                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80, x + 200 - 20, 300, 20, 200, 5, 5);
+                drawer.fillRoundRect(ImageDrawerUtils.GREEN_A75, x + 200 - 20, 300, 20, 2 * hbv, 5, 5);
+                x += 200;
+            }
+            //80-240
+            GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
+                    .append(new GeneralData.ResDataImage(drawer.bytes(), 900, 600))
+                    .append(new GeneralData.ResDataButton("行动:攻击", "攻击"))
+                    .append(new GeneralData.ResDataButton("行动:撤离", "撤离"));
+            return builder.build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new GeneralData.ResDataText("绘图失败;" + e.getMessage());
+        }
     }
 }

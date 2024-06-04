@@ -4,7 +4,10 @@ import io.github.kloping.mihdp.game.scenario.Scenario;
 import io.github.kloping.mihdp.game.service.Eff;
 import io.github.kloping.mihdp.game.service.EffResult;
 import io.github.kloping.mihdp.game.service.LivingEntity;
+import io.github.kloping.mihdp.game.service.effs.AttEff;
 import io.github.kloping.mihdp.game.v.v1.service.BaseCo;
+import io.github.kloping.number.NumberUtils;
+import io.github.kloping.rand.RandomUtils;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -15,8 +18,27 @@ import java.util.concurrent.CountDownLatch;
  */
 public class CiBase extends LivingEntity {
 
+    /**
+     * 控制者id
+     */
+    public String fid;
+
+    private boolean prep = false;
+    /**
+     * 操作码 -1 等于无
+     * 0 攻击
+     * 1 撤离
+     */
+    public int op = -1;
+
+    public CountDownLatch cdl = null;
+
+    public CiBase(Integer id, Integer cid) {
+        super(id, cid);
+    }
+
     public static CiBase create(BaseCo.CharacterOutResult result) {
-        CiBase base = new CiBase();
+        CiBase base = new CiBase(getId(), result.characterInfo.getId());
         base.maxHp = result.characterInfo.getHp().copy();
         base.hp = base.maxHp.getFinalValue();
         base.att = result.characterInfo.getAtt().copy();
@@ -42,11 +64,27 @@ public class CiBase extends LivingEntity {
 
     @Override
     public Object letDo(Scenario scenario, CountDownLatch cdl, LivingEntity[] as) {
-        return "";
+        this.cdl = cdl;
+        try {
+            cdl.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Object r = null;
+        switch (op) {
+            case 0:
+                LivingEntity entity = RandomUtils.getRand(as);
+                Integer avl = NumberUtils.percentTo(this.getAtt().getFinalValue(), 60).intValue();
+                EffResult result = eff(new AttEff(avl), entity);
+                r = String.format("玩家使用了普通撞击对指定造成%s点伤害(%s)", avl, result.getState() == 0 ? "生效" : "未生效");
+        }
+        prep = false;
+        return r;
     }
 
     @Override
     public Object letDoPre(Scenario scenario, CountDownLatch cdl, LivingEntity[] as) {
+        prep = true;
         return "请操作!";
     }
 }

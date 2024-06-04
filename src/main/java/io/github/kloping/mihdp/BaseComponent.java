@@ -12,6 +12,7 @@ import io.github.kloping.mihdp.game.dao.BaseCharacterInfo;
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
 import io.github.kloping.mihdp.game.dao.ser.BaseCharacterInfoDeserializer;
 import io.github.kloping.mihdp.game.dao.ser.CharacterInfoDeserializer;
+import io.github.kloping.mihdp.utils.DefConfig;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +52,12 @@ public class BaseComponent implements CommandLineRunner {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Bean
+    public DefConfig defConfig(JSONObject jo) {
+        JSONObject data = jo.getJSONObject("config");
+        return new DefConfig(data);
     }
 
     @Bean

@@ -18,6 +18,7 @@ import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.utils.DefConfig;
 import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
@@ -72,6 +73,9 @@ public class InfoController {
         BaseService.MSG2ACTION.put("个人信息", "info");
     }
 
+    @AutoStand
+    DefConfig config;
+
     /**
      * 计算当前灵力多少 (仿计时
      *
@@ -83,10 +87,15 @@ public class InfoController {
         Integer n1 = Integer.valueOf(o0.split(";")[0]);
         if (n1 != resources.getEnergy()) resources.setEnergy(n1);
         Long t0 = Long.valueOf(o0.split(";")[1]);
+        //从redis获取数据 n1 代表记录的灵力值 t0 代表灵力值对应的时间戳
         Long t1 = System.currentTimeMillis() - t0;
-        if (resources.getEnergy() >= 200) return;
-        if (t1 > 360000) {
-            int e1 = (int) (t1 / 360000);
+        if (resources.getEnergy() >= 200) {
+            resources.applyE(redisSource);
+            return;
+        }
+        Integer ncd = config.getObj("ling-li.eve", Integer.class, 300000);
+        if (t1 > ncd) {
+            int e1 = (int) (t1 / ncd);
             resources.setEnergy(resources.getEnergy() + e1);
             if (resources.getEnergy() > 200) resources.setEnergy(200);
             resources.applyE(redisSource);

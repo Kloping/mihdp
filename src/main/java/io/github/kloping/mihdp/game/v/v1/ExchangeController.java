@@ -77,7 +77,7 @@ public class ExchangeController {
 
     @Action("exchange-list")
     public Object elist(ReqDataPack pack, User user) throws Exception {
-        return "\ntips,灵力每6分钟回复1点\n" +
+        return "\ntips,灵力每5分钟回复1点\n" +
                 "兑换特殊币<n> #使用灵力+积分按照1:5的比例兑换为特殊币,上限2000\n" +
                 "兑换打劫次数<n> #使用15灵力兑换1次打劫次数\n" +
                 "兑换灵力<n> #使用1特殊币兑换1点灵力\n" +

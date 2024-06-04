@@ -19,6 +19,7 @@ public class TopInfoController {
         return new GeneralData.GeneralDataBuilder().append(
                         "独立式响应互动程序 开源于 github@Kloping/mihdp 正在复刻先前非独立程序并兼容数据" +
                                 "\n更新日志:" +
+                                "\n2024-6-4 :兑换列表更新,灵力修改5分钟,商城新增灵石" +
                                 "\n2024-5-20:兑换列表更新" +
                                 "\n2024-5-19:调整'打劫'积分,'副本列表'" +
                                 "\n2024-4-17:'切换'自动,代码加注重构" +

@@ -4,6 +4,7 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
 import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
@@ -49,7 +50,10 @@ public class FuBenController {
     }
 
     {
-        BaseService.MSG2ACTION.put("副本列表", "fb-list");
+//        BaseService.MSG2ACTION.put("进入副本", "join-fb");
+//        BaseService.MSG2ACTION.put("攻击", "att");
+//        BaseService.MSG2ACTION.put("撤离", "evacuate");
+//        BaseService.MSG2ACTION.put("副本列表", "fb-list");
     }
 
     @Action("fb-list")
@@ -72,11 +76,6 @@ public class FuBenController {
         return null;
     }
 
-    {
-        BaseService.MSG2ACTION.put("进入副本", "join-fb");
-    }
-
-
     @AutoStand
     ScenarioManager manager;
 
@@ -92,6 +91,9 @@ public class FuBenController {
     @AutoStand
     FbService fbService;
 
+    @AutoStand
+    ContextManager contextManager;
+
     @Action("join-fb")
     public Object joinFb(Character character, String qid, User user, ReqDataPack pack) {
         if (manager.id2scenario.containsKey(qid)) {
@@ -99,12 +101,16 @@ public class FuBenController {
         } else {
             GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
             String name = generalData.allText().trim();
+
             LivingEntity[] es = fbService.generationLivingEntity(name);
             if (es == null) return "不存在该副本";
-            Scenario scenario = new ScenarioImpl(new LivingEntity[]{CiBase.create(baseCi.compute(character))}, es,manager);
+
+            CiBase ciBase = CiBase.create(baseCi.compute(character));
+            ciBase.fid = qid;
+            Scenario scenario = new ScenarioImpl(new LivingEntity[]{ciBase}, es, manager);
             manager.id2scenario.put(qid, scenario);
             executorService.submit(scenario);
-            return scenario.out();
+            return scenario.getTips(contextManager);
         }
     }
 
@@ -114,7 +120,26 @@ public class FuBenController {
             return "未处于副本状态";
         } else {
             Scenario scenario = manager.id2scenario.get(qid);
-            return scenario.out();
+            LivingEntity currentEntity = scenario.getCurrentEntity(qid);
+            if (currentEntity instanceof CiBase) {
+                CiBase ciBase = (CiBase) currentEntity;
+                if (ciBase.fid.equals(qid)) {
+                    ciBase.op = 1;
+                    ciBase.cdl.countDown();
+                }
+            }
+            return scenario.getTips(contextManager);
+        }
+    }
+
+    @Action("evacuate")
+    public Object evacuate(String qid) {
+        if (!manager.id2scenario.containsKey(qid)) {
+            return "未处于副本状态";
+        } else {
+            Scenario scenario = manager.id2scenario.get(qid);
+            scenario.destroy(scenario.getCurrentEntities(qid));
+            return "完成";
         }
     }
 }

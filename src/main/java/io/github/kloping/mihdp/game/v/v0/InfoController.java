@@ -55,8 +55,19 @@ public class InfoController {
         return getUser(sid);
     }
 
-    private User getUser(String sid) {
+    public User getUser(String sid) {
         User user = userMapper.selectById(sid);
+        if (user == null) {
+            if (sid.startsWith("@")) return getUserByUid(sid.substring(1));
+            else return getUserByUid(sid);
+        }
+        return user;
+    }
+
+    private User getUserByUid(String uid) {
+        QueryWrapper<User> qw0 = new QueryWrapper<>();
+        qw0.eq("uid", uid);
+        User user = userMapper.selectOne(qw0);
         return user;
     }
 
@@ -284,17 +295,18 @@ public class InfoController {
 
     {
         BaseService.MSG2ACTION.put("积分转让", "trans0");
-        BaseService.MSG2ACTION.put("转让积分", "trans0");
     }
 
     @Action("trans0")
     public Object trans0(ReqDataPack dataPack, User user) {
         GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
+
         GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
         if (at == null) return lconfig.getString("TargetNotFoundPrompt");
         String aid = at.getId();
         User atUser = getUser(aid);
         if (atUser == null) return lconfig.getString("TargetUnregisteredPrompt");
+
         GeneralData.ResDataText text = generalData.find(GeneralData.ResDataText.class);
         Integer sc = 1;
         if (text != null) sc = NumberUtils.getIntegerFromString(text.getContent(), 1);
@@ -324,11 +336,13 @@ public class InfoController {
     @Action("rob0")
     public Object rob0(ReqDataPack dataPack, User user) {
         GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
+
         GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
         if (at == null) return lconfig.getString("TargetNotFoundPrompt");
         String aid = at.getId();
         User atUser = getUser(aid);
         if (atUser == null) return lconfig.getString("TargetUnregisteredPrompt");
+
         String text = generalData.allText();
         Integer sc = 1;
         if (!Judge.isEmpty(text)) sc = NumberUtils.getIntegerFromString(text, 1);

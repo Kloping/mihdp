@@ -1,6 +1,7 @@
 package io.github.kloping.mihdp.ex;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import io.github.kloping.judge.Judge;
@@ -11,6 +12,8 @@ import java.lang.reflect.Type;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Data
 public class GeneralData {
@@ -35,6 +38,9 @@ public class GeneralData {
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static class ResDataText extends GeneralData {
+        @JSONField(deserialize = false, serialize = false)
+        public static final Pattern PATTERN = Pattern.compile("@.+");
+
         private String content;
 
         public ResDataText(String text) {
@@ -44,7 +50,15 @@ public class GeneralData {
 
         @Override
         public <T extends GeneralData> T find(Class<T> cla) {
-            return (Judge.isNotEmpty(content) && cla == this.getClass()) ? (T) this : null;
+            if (cla == GeneralData.ResDataAt.class) {
+                Matcher matcher = PATTERN.matcher(content);
+                if (matcher.find()) {
+                    String g = matcher.group();
+                    content = content.replace(g, "");
+                    return (T) new ResDataAt(g);
+                }
+            } else if (Judge.isNotEmpty(content) && cla == this.getClass()) return (T) this;
+            return null;
         }
 
         @Override

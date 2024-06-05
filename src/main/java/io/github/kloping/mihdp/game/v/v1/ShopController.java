@@ -148,17 +148,7 @@ public class ShopController {
             if (target.getPrice() * num > resources.getScore()) {
                 return "积分不足!";
             } else {
-                Bag bag = bagMaper.selectByUidAndRid(user.getUid(), target.getId());
-                if (bag == null) {
-                    bag = new Bag(user.getUid(), target.getId(), num, num);
-                    bagMaper.insert(bag);
-                } else {
-                    bag.setNum(bag.getNum() + num).setSize(bag.getNum());
-                    QueryWrapper<Bag> queryWrapper = new QueryWrapper<>();
-                    queryWrapper.eq("uid", user.getUid());
-                    queryWrapper.eq("rid", target.getId());
-                    bagMaper.update(bag, queryWrapper);
-                }
+                appendItemToBag(user, target, num);
                 resources.setScore(resources.getScore() - (target.getPrice() * num));
                 usersResourcesMapper.updateById(resources);
                 addCurByShopIdAndUid(user.getUid(), target.getId(), num);
@@ -166,6 +156,20 @@ public class ShopController {
             }
         }
         return "未发现相关商品";
+    }
+
+    public void appendItemToBag(User user, Item target, Integer num) {
+        Bag bag = bagMaper.selectByUidAndRid(user.getUid(), target.getId());
+        if (bag == null) {
+            bag = new Bag(user.getUid(), target.getId(), num, num);
+            bagMaper.insert(bag);
+        } else {
+            bag.setNum(bag.getNum() + num).setSize(bag.getNum());
+            QueryWrapper<Bag> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("uid", user.getUid());
+            queryWrapper.eq("rid", target.getId());
+            bagMaper.update(bag, queryWrapper);
+        }
     }
 
 }

@@ -2,21 +2,21 @@ package io.github.kloping.mihdp.game.v.v1;
 
 import io.github.kloping.MySpringTool.annotations.*;
 import io.github.kloping.arr.Class2OMap;
+import io.github.kloping.judge.Judge;
 import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.GameStaticResourceLoader;
-import io.github.kloping.mihdp.game.v.RedisSource;
+import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
+import io.github.kloping.mihdp.game.v.v0.InfoController;
 import io.github.kloping.mihdp.game.v.v1.service.ItemOf;
 import io.github.kloping.mihdp.mapper.BagMaper;
-import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
-import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.mihdp.utils.ImageDrawerUtils;
+import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.number.NumberUtils;
@@ -136,5 +136,52 @@ public class ItemAboController {
                 .append(new GeneralData.ResDataButton("商城", "商城"))
                 .append(new GeneralData.ResDataButton("使用", "使用"));
         return builder.build();
+    }
+
+    @AutoStand
+    ShopController shopController;
+    @AutoStand
+    LanguageConfig lconfig;
+    @AutoStand
+    InfoController infoController;
+
+    {
+        BaseService.MSG2ACTION.put("转让", "trans1");
+    }
+
+    @Action("trans1")
+    public Object trans1(ReqDataPack dataPack, User user) throws Exception {
+        GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
+
+        GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
+        if (at == null) return lconfig.getString("TargetNotFoundPrompt");
+        String aid = at.getId();
+        User atUser = infoController.getUser(aid);
+        if (atUser == null) return lconfig.getString("TargetUnregisteredPrompt");
+
+        String text = generalData.allText();
+        if (text.contains("积分")) return infoController.trans0(dataPack, user);
+        Integer sc = 1;
+        if (!Judge.isEmpty(text)) sc = NumberUtils.getIntegerFromString(text, 1);
+        String name = text.replace(sc.toString(), "");
+        //寻找物品对象
+        Item item = null;
+        for (Item value : resourceLoader.itemMap.values()) {
+            if (name.contains(value.getName())) {
+                if (item == null)
+                    item = value;
+                else if (value.getName().length() > item.getName().length())
+                    item = value;
+                else continue;
+            }
+        }
+        if (item == null) return null;
+        //判断数量是否足够
+        Bag bag = bagMaper.selectByUidAndRid(user.getUid(), item.getId());
+        if (bag == null || bag.getNum() < sc) return "已拥有物品数量不足.";
+        shopController.appendItemToBag(atUser, item, sc);
+        bag.setNum(bag.getNum() - sc);
+        bag.save(bagMaper);
+        return bag(user);
     }
 }

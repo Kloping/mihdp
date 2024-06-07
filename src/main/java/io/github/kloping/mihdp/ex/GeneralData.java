@@ -50,6 +50,7 @@ public class GeneralData {
 
         @Override
         public <T extends GeneralData> T find(Class<T> cla) {
+            if (Judge.isEmpty(content)) return null;
             if (cla == GeneralData.ResDataAt.class) {
                 Matcher matcher = PATTERN.matcher(content);
                 if (matcher.find()) {
@@ -57,7 +58,7 @@ public class GeneralData {
                     content = content.replace(g, "");
                     return (T) new ResDataAt(g);
                 }
-            } else if (Judge.isNotEmpty(content) && cla == this.getClass()) return (T) this;
+            } else if (cla == this.getClass()) return (T) this;
             return null;
         }
 

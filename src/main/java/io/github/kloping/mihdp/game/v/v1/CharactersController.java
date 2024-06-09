@@ -70,7 +70,9 @@ public class CharactersController {
         List<Character> characters = charactersMapper.selectList(qw);
         if (characters.isEmpty()) {
             Character c0 = new Character();
-            c0.setUid(user.getUid()).setLevel(1).setCid(10 + RandomUtils.RANDOM.nextInt(32) + 1).setMid(0).setHp(100);
+            c0.setUid(user.getUid()).setLevel(1).setCid(
+                    Integer.valueOf("10" + RandomUtils.RANDOM.nextInt(32))
+            ).setMid(0).setHp(100);
             charactersMapper.insert(c0);
             return GeneralData.GeneralDataBuilder.create("符合领取条件;领取成功");
         }

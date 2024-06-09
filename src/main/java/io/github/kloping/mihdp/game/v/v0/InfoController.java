@@ -232,16 +232,22 @@ public class InfoController {
             if (user.getUid() == "189696825" || user.getUid() == "2898304046") {
                 int r = 10000;
                 r = (int) (r + (NumberUtils.percentTo(user.getLevel(), r)));
+                user.addXp(1);
+                resources.setScore(r + resources.getScore());
+                usersResourcesMapper.updateById(resources);
+                userMapper.updateById(user);
+                data.put("tips", lconfig.getString("Work0Success", f0, r));
+                data.put("t", true);
             } else {
                 int r = 300;
                 r = (int) (r + (NumberUtils.percentTo(user.getLevel(), r)));
+                user.addXp(1);
+                resources.setScore(r + resources.getScore());
+                usersResourcesMapper.updateById(resources);
+                userMapper.updateById(user);
+                data.put("tips", lconfig.getString("Work0Success", f0, r));
+                data.put("t", true);
             }
-            user.addXp(1);
-            resources.setScore(r + resources.getScore());
-            usersResourcesMapper.updateById(resources);
-            userMapper.updateById(user);
-            data.put("tips", lconfig.getString("Work0Success", f0, r));
-            data.put("t", true);
         }
         data.putAll(getInfoData(dataPack, user));
         GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);

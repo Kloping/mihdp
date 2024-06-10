@@ -119,30 +119,5 @@
             <artifactId>animated-gif-lib</artifactId>
             <version>1.2</version>
         </dependency>
-
-        <dependency>
-            <groupId>net.mamoe</groupId>
-            <artifactId>mirai-core-jvm</artifactId>
-            <version>2.16.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.mamoe</groupId>
-            <artifactId>mirai-console</artifactId>
-            <version>2.16.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.mamoe</groupId>
-            <artifactId>mirai-console-terminal</artifactId>
-            <version>2.16.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-spi</artifactId>
-            <version>1.7.3</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

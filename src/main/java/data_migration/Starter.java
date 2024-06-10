@@ -39,11 +39,13 @@ public class Starter {
                 Long qid = Long.valueOf(qidStr);
                 Map<Integer, Integer> id2n = new HashMap<>();
                 for (Integer id : bagMapper0.selectAll(qid)) {
-                    if (id2n.containsKey(id)) {
-                        Integer n = id2n.get(id);
-                        n++;
-                        id2n.put(id, n);
-                    } else id2n.put(id, 1);
+                    if (id >= 200 && id <= 210) {
+                        if (id2n.containsKey(id)) {
+                            Integer n = id2n.get(id);
+                            n++;
+                            id2n.put(id, n);
+                        } else id2n.put(id, 1);
+                    }
                 }
                 id2n.forEach((id, n) -> {
                     Integer ide = id + 1800;

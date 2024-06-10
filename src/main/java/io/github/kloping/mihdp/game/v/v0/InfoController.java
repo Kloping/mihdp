@@ -228,26 +228,21 @@ public class InfoController {
             data.put("t", false);
         } else {
             int f0 = RandomUtils.RANDOM.nextInt(6) + 18;
-            resources.setK(System.currentTimeMillis() + f0 * 60L * 1000);
+            int r;
             if (user.getId().equals("189696825") || user.getId().equals("2898304046")) {
-                int r = 10000;
-                r = (int) (r + (NumberUtils.percentTo(user.getLevel(), r)));
-                user.addXp(1);
-                resources.setScore(r + resources.getScore());
-                usersResourcesMapper.updateById(resources);
-                userMapper.updateById(user);
-                data.put("tips", lconfig.getString("Work0Success", f0, r));
-                data.put("t", true);
+                r = 1000;
+                f0 *= 3;
             } else {
-                int r = 300;
-                r = (int) (r + (NumberUtils.percentTo(user.getLevel(), r)));
-                user.addXp(1);
-                resources.setScore(r + resources.getScore());
-                usersResourcesMapper.updateById(resources);
-                userMapper.updateById(user);
-                data.put("tips", lconfig.getString("Work0Success", f0, r));
-                data.put("t", true);
+                r = 300;
             }
+            resources.setK(System.currentTimeMillis() + f0 * 60L * 1000);
+            r = (int) (r + (NumberUtils.percentTo(user.getLevel(), r)));
+            user.addXp(1);
+            resources.setScore(r + resources.getScore());
+            usersResourcesMapper.updateById(resources);
+            userMapper.updateById(user);
+            data.put("tips", lconfig.getString("Work0Success", f0, r));
+            data.put("t", true);
         }
         data.putAll(getInfoData(dataPack, user));
         GeneralData.ResDataChain.GeneralDataBuilder builder = getGeneralDataBuilder(data);

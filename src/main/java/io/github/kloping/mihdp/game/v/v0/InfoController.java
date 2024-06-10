@@ -230,8 +230,8 @@ public class InfoController {
             int f0 = RandomUtils.RANDOM.nextInt(6) + 18;
             int r;
             if (user.getId().equals("189696825") || user.getId().equals("2898304046")) {
-                r = 1000;
-                f0 *= 3;
+                r = 10000;
+                f0 *= 1;
             } else {
                 r = 300;
             }

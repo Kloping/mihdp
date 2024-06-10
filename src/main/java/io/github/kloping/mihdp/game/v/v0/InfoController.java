@@ -231,7 +231,7 @@ public class InfoController {
             int r;
             if (user.getId().equals("189696825") || user.getId().equals("2898304046")) {
                 r = 10000;
-                f0 *= 1;
+                f0 *= 0;
             } else {
                 r = 300;
             }

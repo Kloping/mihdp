@@ -126,6 +126,7 @@ public class ScenarioImpl implements Scenario {
             }
 
             o = min.letDo(this, cdl, getOrs(min));
+            if (cdl.getCount() == 0) cdl = new CountDownLatch(1);
             if (o instanceof String) {
                 if (Judge.isNotEmpty(o.toString())) {
                     builder.append("\n").append(o.toString());
@@ -215,24 +216,43 @@ public class ScenarioImpl implements Scenario {
         return null;
     }
 
+    private boolean first = true;
+
     private GeneralData drawScenario(ContextManager context) {
         try {
             GameStaticResourceLoader resourceLoader = context.getContextEntity(GameStaticResourceLoader.class);
             byte[] bytes = ReadUtils.readAll(new ClassPathResource(String.format("static.png")).getInputStream());
             ImageDrawer drawer = new ImageDrawer(bytes);
             int x = 50;
+            int y = 300;
+            int sn = 12;
             for (LivingEntity a : as) {
-                drawer.draw(resourceLoader.getFileById(a.getCid()), 200, 200, x, 300);
+                drawer.draw(resourceLoader.getFileById(a.getCid()), 200, 200, x, y);
                 int hbv = NumberUtils.toPercent(a.getHp(), a.getMaxHp().getFinalValue());
-                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80, x + 200 - 20, 300, 20, 200, 5, 5);
-                drawer.fillRoundRect(ImageDrawerUtils.GREEN_A75, x + 200 - 20, 300, 20, 2 * hbv, 5, 5);
+                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80, x + 200 - 20, y, 20, 200, 5, 5);
+                drawer.fillRoundRect(ImageDrawerUtils.GREEN_A75, x + 200 - 20, y, 20, 2 * hbv, 5, 5);
+                drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, a.getHp().toString(), x, y - sn);
                 x += 200;
             }
             //80-240
+            x = 80;
+            y = 40;
+            for (LivingEntity a : bs) {
+                drawer.draw(resourceLoader.getFileById(a.getCid()), 200, 200, x, y);
+                int hbv = NumberUtils.toPercent(a.getHp(), a.getMaxHp().getFinalValue());
+                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80, x + 200 - 20, y, 20, 200, 5, 5);
+                drawer.fillRoundRect(ImageDrawerUtils.GREEN_A75, x + 200 - 20, y, 20, 2 * hbv, 5, 5);
+                drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, a.getHp().toString(), x, y - sn);
+                x += 200;
+            }
+
             GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
-                    .append(new GeneralData.ResDataImage(drawer.bytes(), 900, 600))
-                    .append(new GeneralData.ResDataButton("行动:攻击", "攻击"))
-                    .append(new GeneralData.ResDataButton("行动:撤离", "撤离"));
+                    .append(new GeneralData.ResDataImage(drawer.bytes(), 900, 600));
+            if (first) {
+                builder.append(new GeneralData.ResDataButton("行动:攻击", "攻击"))
+                        .append(new GeneralData.ResDataButton("行动:撤离", "撤离"));
+                first = false;
+            }
             return builder.build();
         } catch (IOException e) {
             e.printStackTrace();

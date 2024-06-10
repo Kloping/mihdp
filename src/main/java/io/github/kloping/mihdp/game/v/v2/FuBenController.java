@@ -14,6 +14,7 @@ import io.github.kloping.mihdp.game.scenario.ScenarioImpl;
 import io.github.kloping.mihdp.game.scenario.ScenarioManager;
 import io.github.kloping.mihdp.game.service.LivingEntity;
 import io.github.kloping.mihdp.game.service.csn.CiBase;
+import io.github.kloping.mihdp.game.service.effs.AttEff;
 import io.github.kloping.mihdp.game.service.fb.FbService;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
@@ -49,12 +50,12 @@ public class FuBenController {
                 dataPack.getSender_id(), userMapper.selectById(dataPack.getSender_id())};
     }
 
-    {
+//    {
 //        BaseService.MSG2ACTION.put("进入副本", "join-fb");
 //        BaseService.MSG2ACTION.put("攻击", "att");
 //        BaseService.MSG2ACTION.put("撤离", "evacuate");
 //        BaseService.MSG2ACTION.put("副本列表", "fb-list");
-    }
+//    }
 
     @Action("fb-list")
     public Object fbList(Character character, String qid) {
@@ -124,7 +125,7 @@ public class FuBenController {
             if (currentEntity instanceof CiBase) {
                 CiBase ciBase = (CiBase) currentEntity;
                 if (ciBase.fid.equals(qid)) {
-                    ciBase.op = 1;
+                    ciBase.op = AttEff.TYPE;
                     ciBase.cdl.countDown();
                 }
             }

@@ -1,16 +1,14 @@
 package data_migration;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import data_migration.source.DataMigration;
 import data_migration.target.DataMigrationTarget;
-import io.github.kloping.mihdp.dao.Character;
+import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.User;
-import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author github.kloping
@@ -18,71 +16,44 @@ import java.util.List;
 public class Starter {
 
     public static void main(String[] args) throws Exception{
-//        CountDownLatch cdl = new CountDownLatch(2);
-//        new Thread(() -> {
-//            DataMigration.main(args);
-//            cdl.countDown();
-//        }).start();
-//        new Thread(() -> {
-//            DataMigrationTarget.main(args);
-//            cdl.countDown();
-//        }).start();
-//        cdl.await();
+        CountDownLatch cdl = new CountDownLatch(2);
+        new Thread(() -> {
+            DataMigration.main(args);
+            cdl.countDown();
+        }).start();
+        new Thread(() -> {
+            DataMigrationTarget.main(args);
+            cdl.countDown();
+        }).start();
+        cdl.await();
 
-        DataMigrationTarget.main(args);
+//        DataMigrationTarget.main(args);
 
-        CharacterMapper characterMapper = DataMigrationTarget.context.getBean(CharacterMapper.class);
+
+        data_migration.source.mapper.BagMapper bagMapper0 = DataMigration.context.getBean(data_migration.source.mapper.BagMapper.class);
+        io.github.kloping.mihdp.mapper.BagMaper bagMapper1 = DataMigrationTarget.context.getBean(io.github.kloping.mihdp.mapper.BagMaper.class);
         UserMapper userMapper = DataMigrationTarget.context.getBean(UserMapper.class);
-        BufferedReader reader = new BufferedReader(new FileReader(new File("./libs/temp.csv")));
-        while (true) {
-            String line = reader.readLine();
-            if (line != null) {
-                String[] sss = line.split(";");
-                String qid = sss[0];
-                String wh = sss[1];
-                String p = sss[2];
-                User user = userMapper.selectById(qid);
-                if (user == null) continue;
-                if ("1".equals(p)) {
-                    QueryWrapper<Character> queryWrapper = new QueryWrapper<>();
-                    queryWrapper.eq("uid", user.getUid());
-                    int i = 0;
-                    List<Character> list = characterMapper.selectList(queryWrapper);
-                    if (list == null || list.isEmpty()) continue;
-                    for (Character character : list) {
-                        if (i == 0) {
-                            character.setCid(1000 + Integer.valueOf(wh));
-                            queryWrapper.eq("cid", character.getId());
-                            characterMapper.updateById(character);
-                            System.out.println("ok for " + character.getId() + " of " + qid);
-                        } else {
-                            System.err.println("2 for " + character.getId() + "to");
-                        }
-                        i++;
-                    }
-                } else {
-                    System.err.println(line + "for" + user.getUid());
+        for (User user : userMapper.selectList(null)) {
+            String qidStr = user.getId();
+            try {
+                Long qid = Long.valueOf(qidStr);
+                Map<Integer, Integer> id2n = new HashMap<>();
+                for (Integer id : bagMapper0.selectAll(qid)) {
+                    if (id2n.containsKey(id)) {
+                        Integer n = id2n.get(id);
+                        n++;
+                        id2n.put(id, n);
+                    } else id2n.put(id, 1);
                 }
-            } else break;
+                id2n.forEach((id, n) -> {
+                    Integer ide = id + 1800;
+                    bagMapper1.insert(new Bag(user.getUid(), ide, n, n));
+                    System.out.format("qid(%s-%s) %s fix %s\n", qid, user.getUid(), ide, n);
+                });
+            } catch (NumberFormatException e) {
+                System.err.println(e);
+            }
         }
-//
-//        data_migration.source.mapper.BagMapper bagMapper0 = DataMigration.context.getBean(data_migration.source.mapper.BagMapper.class);
-//        data_migration.target.mapper.BagMaper bagMapper1 = DataMigrationTarget.context.getBean(data_migration.target.mapper.BagMaper.class);
-//        UserMapper userMapper = DataMigrationTarget.context.getBean(UserMapper.class);
-//        for (User user : userMapper.selectList(null)) {
-//            String qidStr = user.getId();
-//            try {
-//                Long qid = Long.valueOf(qidStr);
-//                int num = 0;
-//                for (Integer i : bagMapper0.selectAll(qid)) {
-//                    if (i == 103) num++;
-//                }
-//                bagMapper1.insert(new Bag(user.getUid(), 101, num, num));
-//                System.out.format("qid(%s) o103 to n101 %s\n", qid, user.getUid(), num);
-//            } catch (NumberFormatException e) {
-//                System.err.println(e);
-//            }
-//        }
 
     }
 

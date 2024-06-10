@@ -72,7 +72,7 @@ public class CiBase extends LivingEntity {
         }
         Object r = null;
         switch (op) {
-            case 0:
+            case AttEff.TYPE:
                 LivingEntity entity = RandomUtils.getRand(as);
                 Integer avl = NumberUtils.percentTo(this.getAtt().getFinalValue(), 60).intValue();
                 EffResult result = eff(new AttEff(avl), entity);

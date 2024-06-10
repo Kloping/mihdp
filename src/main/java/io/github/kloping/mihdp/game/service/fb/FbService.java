@@ -34,6 +34,6 @@ public class FbService {
             if (text.endsWith(k)) level.set(v);
         });
         if (level.get() == null) return null;
-        return new LivingEntity[]{GoBase.create(1, 1)};
+        return new LivingEntity[]{GoBase.create(1, 3001)};
     }
 }

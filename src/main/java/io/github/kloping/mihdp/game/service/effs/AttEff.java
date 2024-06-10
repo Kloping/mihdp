@@ -11,7 +11,7 @@ import io.github.kloping.rand.RandomUtils;
  */
 public class AttEff extends Eff {
 
-    public static final Integer TYPE = 1;
+    public static final int TYPE = 1;
 
     public AttEff(Integer value) {
         super(TYPE, value);
@@ -31,7 +31,7 @@ public class AttEff extends Eff {
         //计算防御效用
         Integer dv = 1 - (DEFENSE_EFF / (DEFENSE_EFF + entity1.getDefense().getFinalValue()));
         //获得现在应该造成的伤害
-        Integer v1 = NumberUtils.percentTo(dv, v0).intValue();
+        Integer v1 = NumberUtils.percentTo(100 - dv, v0).intValue();
         //计算暴击
         Integer cc = entity0.getChc().getFinalValue();
         if (RandomUtils.RANDOM.nextInt(100) < cc) {

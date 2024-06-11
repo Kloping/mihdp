@@ -9,6 +9,7 @@ import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.scenario.Scenario;
 import io.github.kloping.mihdp.game.scenario.ScenarioImpl;
 import io.github.kloping.mihdp.game.scenario.ScenarioManager;
@@ -19,9 +20,9 @@ import io.github.kloping.mihdp.game.service.fb.FbService;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v1.CharactersController;
+import io.github.kloping.mihdp.game.v.v1.ShopController;
 import io.github.kloping.mihdp.game.v.v1.service.BaseCo;
 import io.github.kloping.mihdp.mapper.UserMapper;
-import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import org.springframework.core.io.ClassPathResource;
@@ -95,8 +96,16 @@ public class FuBenController {
     @AutoStand
     ContextManager contextManager;
 
+    @AutoStand
+    ShopController shopController;
+    @AutoStand
+    GameStaticResourceLoader resourceLoader;
+
     @Action("join-fb")
     public Object joinFb(Character character, String qid, User user, ReqDataPack pack) {
+        Long cd = redisSource.uid2fb.getValue(user.getUid());
+        if (cd != null && cd > System.currentTimeMillis())
+            return "冷却中..\n大约等待(分钟):" + ((cd - System.currentTimeMillis()) / 60000);
         if (manager.id2scenario.containsKey(qid)) {
             return "未结束副本状态";
         } else {
@@ -105,10 +114,21 @@ public class FuBenController {
 
             LivingEntity[] es = fbService.generationLivingEntity(name);
             if (es == null) return "不存在该副本";
+            //设置cd
+            redisSource.uid2fb.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
 
             CiBase ciBase = CiBase.create(baseCi.compute(character));
             ciBase.fid = qid;
-            Scenario scenario = new ScenarioImpl(new LivingEntity[]{ciBase}, es, manager);
+            Scenario scenario = new ScenarioImpl(new LivingEntity[]{ciBase}, es, manager) {
+                @Override
+                public void reward(int[] ids) {
+                    StringBuilder sb = new StringBuilder("获得:");
+                    resourceLoader.itemMap.forEach((k, v) -> {
+                        sb.append(v.getName()).append(",");
+                    });
+                    pack.send(new GeneralData.ResDataText(sb.toString()));
+                }
+            };
             manager.id2scenario.put(qid, scenario);
             executorService.submit(scenario);
             return scenario.getTips(contextManager);

@@ -1,6 +1,8 @@
 package io.github.kloping.mihdp.wss.data;
 
 import com.alibaba.fastjson.JSON;
+import io.github.kloping.mihdp.ex.GeneralData;
+import io.github.kloping.mihdp.wss.GameClient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,5 +57,15 @@ public class ReqDataPack {
     @Override
     public String toString() {
         return JSON.toJSONString(this);
+    }
+
+    private GameClient client;
+
+    public void set(GameClient gameClient) {
+        this.client = client;
+    }
+
+    public void send(GeneralData data) {
+        client.send(this, data);
     }
 }

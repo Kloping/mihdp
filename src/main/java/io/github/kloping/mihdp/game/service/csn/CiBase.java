@@ -33,7 +33,7 @@ public class CiBase extends LivingEntity {
 
     public CountDownLatch cdl = null;
 
-    public CiBase(Integer id, Integer cid) {
+    private CiBase(Integer id, Integer cid) {
         super(id, cid);
     }
 

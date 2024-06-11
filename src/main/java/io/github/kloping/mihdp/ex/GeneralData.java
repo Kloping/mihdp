@@ -150,10 +150,10 @@ public class GeneralData {
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static class ResDataChain extends GeneralData {
-        private List<GeneralData> list;
+        private List<GeneralData> list = new LinkedList<>();
 
         public ResDataChain(List<GeneralData> list) {
-            this.list = list;
+            list.forEach(e -> this.list.add(e));
             this.type = "chain";
         }
 

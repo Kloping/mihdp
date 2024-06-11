@@ -3,6 +3,7 @@ package io.github.kloping.mihdp.game.service.fb;
 import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.mihdp.game.service.LivingEntity;
 import io.github.kloping.mihdp.game.service.csn.GoBase;
+import io.github.kloping.rand.RandomUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,11 @@ public class FbService {
             if (text.endsWith(k)) level.set(v);
         });
         if (level.get() == null) return null;
-        return new LivingEntity[]{GoBase.create(1, 3001)};
+        else {
+            if (level.get() == 1) {
+                return new LivingEntity[]{GoBase.create(level.get(), 3001)};
+            }
+        }
+        return null;
     }
 }

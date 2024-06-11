@@ -6,6 +6,7 @@ import io.github.kloping.mihdp.game.service.Eff;
 import io.github.kloping.mihdp.game.service.EffResult;
 import io.github.kloping.mihdp.game.service.LivingEntity;
 import io.github.kloping.mihdp.game.service.effs.AttEff;
+import io.github.kloping.mihdp.game.service.gos.GoBaseImpl3001;
 import io.github.kloping.number.NumberUtils;
 import io.github.kloping.rand.RandomUtils;
 
@@ -16,14 +17,20 @@ import java.util.concurrent.CountDownLatch;
  *
  * @author github.kloping
  */
-public class GoBase extends LivingEntity {
+public abstract class GoBase extends LivingEntity {
 
     public GoBase(Integer id, Integer cid) {
         super(id, cid);
     }
 
     public static GoBase create(Integer level, Integer id) {
-        GoBase base = new GoBase(getId(),id);
+        if (id == 3001) return new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level);
+        GoBase base = new GoBase(getId(), id) {
+            @Override
+            public int[] getFallObjs() {
+                return new int[]{101, 101};
+            }
+        };
 
         base.maxHp = new Attr("hp", level * 100).setBaseValue(level * 100);
         base.att = new Attr("att", 10).setBaseValue(10);
@@ -56,4 +63,6 @@ public class GoBase extends LivingEntity {
         EffResult result = eff(new AttEff(avl), entity);
         return String.format("NPC使用了普通撞击对指定造成%s点伤害(%s)", avl, result.getState() == 0 ? "生效" : "未生效");
     }
+
+    public abstract int[] getFallObjs();
 }

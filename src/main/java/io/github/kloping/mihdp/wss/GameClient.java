@@ -7,6 +7,7 @@ import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.wss.data.BasePack;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
+import io.github.kloping.mihdp.wss.data.ResDataPack;
 import org.java_websocket.WebSocket;
 
 /**
@@ -36,6 +37,7 @@ public abstract class GameClient {
     public void onMessage(String msg) {
         ReqDataPack data = JSON.parseObject(msg, ReqDataPack.class);
         if (data == null) return;
+        data.set(this);
         GeneralData resData = gson.fromJson(data.getContent(), GeneralData.TYPE_TOKEN);
         data.getArgs().put(ODATA_KEY, resData);
         if (data.getAction().equals(TRANS_ACTION)) {
@@ -64,6 +66,19 @@ public abstract class GameClient {
                 dispose();
             }
         }
+    }
+
+    public void send(ReqDataPack reqDataPack, GeneralData generalData) {
+        ResDataPack pack = new ResDataPack();
+        pack.setId(reqDataPack.getId());
+        pack.setBot_id(reqDataPack.getBot_id());
+        pack.setEnv_type(reqDataPack.getEnv_type());
+        pack.setEnv_id(reqDataPack.getEnv_id());
+        pack.setAction(reqDataPack.getAction());
+        pack.setTime(reqDataPack.getTime());
+        pack.setArgs(reqDataPack.getArgs());
+        pack.setData(generalData);
+        webSocket.send(pack.toString());
     }
 
     public abstract void authed();

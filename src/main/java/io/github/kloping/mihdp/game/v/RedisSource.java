@@ -34,4 +34,9 @@ public class RedisSource {
      */
     @AutoStand(id = "4")
     public RedisOperate<Long> uid2cd;
+    /**
+     * 用户副本cd
+     */
+    @AutoStand(id = "5")
+    public RedisOperate<Long> uid2fb;
 }

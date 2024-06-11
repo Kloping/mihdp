@@ -7,6 +7,7 @@ import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.service.LivingEntity;
 import io.github.kloping.mihdp.game.service.csn.CiBase;
+import io.github.kloping.mihdp.game.service.csn.GoBase;
 import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.mihdp.utils.ImageDrawerUtils;
 import io.github.kloping.number.NumberUtils;
@@ -20,7 +21,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * @author github.kloping
  */
-public class ScenarioImpl implements Scenario {
+public abstract class ScenarioImpl implements Scenario {
     /**
      * 场景a方
      */
@@ -36,7 +37,6 @@ public class ScenarioImpl implements Scenario {
     /**
      * 默认场景距离1w m
      */
-
     public static final Integer MAX_JOURNEY = 10000;
 
 
@@ -151,6 +151,14 @@ public class ScenarioImpl implements Scenario {
     public void destroy(LivingEntity[] as) {
         run = false;
         manager.remove(this);
+        for (LivingEntity a : as) {
+            if (a instanceof CiBase) {
+
+            } else {
+                GoBase goBase = (GoBase) a;
+                reward(goBase.getFallObjs());
+            }
+        }
     }
 
 
@@ -220,12 +228,13 @@ public class ScenarioImpl implements Scenario {
 
     private GeneralData drawScenario(ContextManager context) {
         try {
+            final int sn = 12;
+
             GameStaticResourceLoader resourceLoader = context.getContextEntity(GameStaticResourceLoader.class);
             byte[] bytes = ReadUtils.readAll(new ClassPathResource(String.format("static.png")).getInputStream());
             ImageDrawer drawer = new ImageDrawer(bytes);
             int x = 50;
             int y = 300;
-            int sn = 12;
             for (LivingEntity a : as) {
                 drawer.draw(resourceLoader.getFileById(a.getCid()), 200, 200, x, y);
                 int hbv = NumberUtils.toPercent(a.getHp(), a.getMaxHp().getFinalValue());
@@ -234,7 +243,7 @@ public class ScenarioImpl implements Scenario {
                 drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, a.getHp().toString(), x, y - sn);
                 x += 200;
             }
-            //80-240
+
             x = 80;
             y = 40;
             for (LivingEntity a : bs) {
@@ -246,11 +255,11 @@ public class ScenarioImpl implements Scenario {
                 x += 200;
             }
 
+
             GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
                     .append(new GeneralData.ResDataImage(drawer.bytes(), 900, 600));
             if (first) {
-                builder.append(new GeneralData.ResDataButton("行动:攻击", "攻击"))
-                        .append(new GeneralData.ResDataButton("行动:撤离", "撤离"));
+                builder.append(new GeneralData.ResDataButton("行动:攻击", "攻击")).append(new GeneralData.ResDataButton("行动:撤离", "撤离"));
                 first = false;
             }
             return builder.build();
@@ -259,4 +268,6 @@ public class ScenarioImpl implements Scenario {
             return new GeneralData.ResDataText("绘图失败;" + e.getMessage());
         }
     }
+
+    public abstract void reward(int[] ids);
 }

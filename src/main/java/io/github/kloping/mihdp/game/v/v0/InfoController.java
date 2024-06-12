@@ -144,8 +144,7 @@ public class InfoController {
     }
 
     public JSONObject getInfoData(ReqDataPack dataPack, User user) {
-        UsersResources resources = usersResourcesMapper.selectById(user.getUid());
-        CalculateE(resources);
+        UsersResources resources = getAndCalculateE(user.getUid());
         Integer level = user.getLevel();
         JSONArray ar = defaultConfig.getJSONArray("xp_list");
         Integer max;
@@ -405,5 +404,11 @@ public class InfoController {
                 }
             });
         }
+    }
+
+    public UsersResources getAndCalculateE(String uid) {
+        UsersResources resources = usersResourcesMapper.selectById(uid);
+        CalculateE(resources);
+        return resources;
     }
 }

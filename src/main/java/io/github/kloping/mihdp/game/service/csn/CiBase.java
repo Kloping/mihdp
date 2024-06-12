@@ -7,7 +7,6 @@ import io.github.kloping.mihdp.game.service.LivingEntity;
 import io.github.kloping.mihdp.game.service.effs.AttEff;
 import io.github.kloping.mihdp.game.v.v1.service.BaseCo;
 import io.github.kloping.number.NumberUtils;
-import io.github.kloping.rand.RandomUtils;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -40,7 +39,7 @@ public class CiBase extends LivingEntity {
     public static CiBase create(BaseCo.CharacterOutResult result) {
         CiBase base = new CiBase(getId(), result.characterInfo.getId());
         base.maxHp = result.characterInfo.getHp().copy();
-        base.hp = base.maxHp.getFinalValue();
+        base.hp = result.character.getHp();
         base.att = result.characterInfo.getAtt().copy();
         base.defense = result.characterInfo.getDefense().copy();
         base.speed = result.characterInfo.getSpeed().copy();
@@ -73,18 +72,25 @@ public class CiBase extends LivingEntity {
         Object r = null;
         switch (op) {
             case AttEff.TYPE:
-                LivingEntity entity = RandomUtils.getRand(as);
+                LivingEntity entity = getRecentlyE(as);
                 Integer avl = NumberUtils.percentTo(this.getAtt().getFinalValue(), 60).intValue();
                 EffResult result = eff(new AttEff(avl), entity);
-                r = String.format("玩家使用了普通撞击对指定造成%s点伤害(%s)", avl, result.getState() == 0 ? "生效" : "未生效");
+                r = String.format("玩家使用了普通撞击对指定造成%s点伤害(%s)", result.getValue(), result.getStateTips());
         }
         prep = false;
         return r;
     }
 
+    private LivingEntity getRecentlyE(LivingEntity[] as) {
+        for (LivingEntity a : as) {
+            if (a.hp > 0) return a;
+        }
+        return null;
+    }
+
     @Override
     public Object letDoPre(Scenario scenario, CountDownLatch cdl, LivingEntity[] as) {
         prep = true;
-        return "请操作!";
+        return "请操作!(攻击/撤离)";
     }
 }

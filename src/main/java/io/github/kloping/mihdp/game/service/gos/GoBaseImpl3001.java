@@ -20,12 +20,12 @@ public class GoBaseImpl3001 extends GoBase {
     public GoBaseImpl3001(Integer level) {
         super(getId(), ID);
 
-        maxHp = new Attr("hp", level * 100).setBaseValue(level * 100);
-        att = new Attr("att", level + 10).setBaseValue(10);
-        defense = new Attr("defense", level).setBaseValue(10);
+        maxHp = new Attr("hp", level * 100);
+        att = new Attr("att", level + 12);
+        defense = new Attr("defense", level);
 
         hp = maxHp.getFinalValue();
-        speed = new Attr("speed", 110);
+        speed = new Attr("speed", 96 + RandomUtils.RANDOM.nextInt(15));
         chc = new Attr("chc", 0);
         che = new Attr("che", 50);
         efh = new Attr("efh", 50);

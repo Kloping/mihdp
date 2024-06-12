@@ -76,18 +76,20 @@ public class BaseCo {
         int maxXp = characterInfo.getXp().getFinalValue();
         redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
         redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
-        return new CharacterOutResult(maxHp, maxXp, characterInfo);
+        return new CharacterOutResult(maxHp, maxXp, characterInfo, character);
     }
 
     public static class CharacterOutResult {
         public final Integer maxHp;
         public final Integer maxXp;
         public final CharacterInfo characterInfo;
+        public final Character character;
 
-        public CharacterOutResult(Integer maxHp, Integer maxXp, CharacterInfo characterInfo) {
+        public CharacterOutResult(Integer maxHp, Integer maxXp, CharacterInfo characterInfo, Character character) {
             this.maxHp = maxHp;
             this.maxXp = maxXp;
             this.characterInfo = characterInfo;
+            this.character = character;
         }
     }
 }

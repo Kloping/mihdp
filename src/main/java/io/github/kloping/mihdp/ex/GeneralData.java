@@ -213,6 +213,10 @@ public class GeneralData {
         public ResDataChain build() {
             return new ResDataChain(list);
         }
+
+        public void clear() {
+            list.clear();
+        }
     }
 
     public static class GeneralDataDeserializer implements JsonDeserializer<GeneralData> {

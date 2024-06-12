@@ -1,8 +1,6 @@
 package io.github.kloping.mihdp.p0.services;
 
-import io.github.kloping.MySpringTool.annotations.Entity;
 import io.github.kloping.mihdp.ex.GeneralData;
-import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 
 import java.util.HashMap;
@@ -27,7 +25,7 @@ public class BaseService {
      * @return
      */
     public static ReqDataPack trnasActionOrNull(ReqDataPack pack) {
-        GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
+        GeneralData generalData = pack.getContentAsData();
         String action = null;
         if (generalData instanceof GeneralData.ResDataText) {
             GeneralData.ResDataText text = (GeneralData.ResDataText) generalData;
@@ -69,7 +67,7 @@ public class BaseService {
             text.setContent(null);
             action = "s" + content.trim();
         } else if (MSG2ACTION.containsKey(content)) {
-            text.setContent(null);
+            text.setContent("");
             action = MSG2ACTION.get(content);
         } else {
             for (String key : MSG2ACTION.keySet()) {

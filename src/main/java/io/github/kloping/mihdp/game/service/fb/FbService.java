@@ -37,7 +37,7 @@ public class FbService {
         if (level.get() == null) return null;
         else {
             if (level.get() == 1) {
-                return new LivingEntity[]{GoBase.create(level.get(), 3001)};
+                return GoBase.create(level.get(), 3001);
             }
         }
         return null;

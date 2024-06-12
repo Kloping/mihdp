@@ -20,7 +20,7 @@ public class EffResult {
      */
     private Integer value;
     /**
-     * 状态 0.默认已命中,1.未生效,2.被阻挡
+     * 状态 0.默认已命中,1.未生效,2.被阻挡,3,暴击生效
      */
     private Integer state = 0;
 
@@ -32,4 +32,19 @@ public class EffResult {
     }
 
     private String tips = "";
+
+    public String getStateTips() {
+        switch (state) {
+            case 0:
+                return "生效";
+            case 1:
+                return "未生效";
+            case 2:
+                return "被阻拦";
+            case 3:
+                return "暴击生效";
+            default:
+                return "未知";
+        }
+    }
 }

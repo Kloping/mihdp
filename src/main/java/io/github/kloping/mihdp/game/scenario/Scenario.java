@@ -39,4 +39,11 @@ public interface Scenario extends Runnable {
      * @return
      */
     Object getTips(ContextManager context);
+
+    /**
+     * 获得顺序 依照距离
+     *
+     * @return
+     */
+    LivingEntity[] getSortByDistance();
 }

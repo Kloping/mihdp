@@ -8,8 +8,10 @@ import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
 import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.User;
+import io.github.kloping.mihdp.dao.UsersResources;
 import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.GameStaticResourceLoader;
+import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.scenario.Scenario;
 import io.github.kloping.mihdp.game.scenario.ScenarioImpl;
 import io.github.kloping.mihdp.game.scenario.ScenarioManager;
@@ -19,10 +21,14 @@ import io.github.kloping.mihdp.game.service.effs.AttEff;
 import io.github.kloping.mihdp.game.service.fb.FbService;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
+import io.github.kloping.mihdp.game.v.v0.InfoController;
 import io.github.kloping.mihdp.game.v.v1.CharactersController;
 import io.github.kloping.mihdp.game.v.v1.ShopController;
 import io.github.kloping.mihdp.game.v.v1.service.BaseCo;
+import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
+import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
+import io.github.kloping.mihdp.p0.services.BaseService;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import org.springframework.core.io.ClassPathResource;
@@ -42,6 +48,8 @@ public class FuBenController {
     @AutoStand
     CharactersController charactersController;
 
+    public static final Integer EVE = 30;
+
     @Before
     public Object before(ReqDataPack dataPack) {
         User user = userMapper.selectById(dataPack.getSender_id());
@@ -51,19 +59,19 @@ public class FuBenController {
                 dataPack.getSender_id(), userMapper.selectById(dataPack.getSender_id())};
     }
 
-//    {
+    {
 //        BaseService.MSG2ACTION.put("进入副本", "join-fb");
 //        BaseService.MSG2ACTION.put("攻击", "att");
 //        BaseService.MSG2ACTION.put("撤离", "evacuate");
 //        BaseService.MSG2ACTION.put("副本列表", "fb-list");
-//    }
+    }
 
     @Action("fb-list")
     public Object fbList(Character character, String qid) {
         try {
             byte[] bytes = ReadUtils.readAll(new ClassPathResource("fb-list.jpg").getInputStream());
             return new GeneralData.ResDataChain.GeneralDataBuilder()
-                    .append("每次进入副本消耗30灵力")
+                    .append("每次进入副本消耗" + EVE + "灵力")
                     .append(new GeneralData.ResDataImage(bytes, 215, 350))
                     .append(new GeneralData.ResDataButton("原始森林","进入副本原始森林"))
                     .append(new GeneralData.ResDataButton("荒野森林","进入副本荒野森林"))
@@ -89,44 +97,62 @@ public class FuBenController {
 
     @AutoStand
     BaseCo baseCi;
-
     @AutoStand
     FbService fbService;
-
     @AutoStand
     ContextManager contextManager;
-
     @AutoStand
     ShopController shopController;
     @AutoStand
     GameStaticResourceLoader resourceLoader;
+    @AutoStand
+    UsersResourcesMapper usersResourcesMapper;
+    @AutoStand
+    InfoController infoController;
+    @AutoStand
+    CharacterMapper characterMapper;
 
     @Action("join-fb")
     public Object joinFb(Character character, String qid, User user, ReqDataPack pack) {
-        Long cd = redisSource.uid2fb.getValue(user.getUid());
-        if (cd != null && cd > System.currentTimeMillis())
-            return "冷却中..\n大约等待(分钟):" + ((cd - System.currentTimeMillis()) / 60000);
+        UsersResources resources = usersResourcesMapper.selectById(user.getUid());
+        infoController.getAndCalculateE(user.getUid());
+        if (resources.getEnergy() < EVE) return "灵力不足;每次进入副本消耗" + EVE + "灵力";
         if (manager.id2scenario.containsKey(qid)) {
             return "未结束副本状态";
         } else {
+            if (character.getHp() <= 100) return "当前魂角状态过低.使用'查看'";
             GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
             String name = generalData.allText().trim();
 
             LivingEntity[] es = fbService.generationLivingEntity(name);
             if (es == null) return "不存在该副本";
-            //设置cd
-            redisSource.uid2fb.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
+
+            resources.setEnergy(resources.getEnergy() - EVE);
+            resources.applyE(redisSource);
+            usersResourcesMapper.updateById(resources);
 
             CiBase ciBase = CiBase.create(baseCi.compute(character));
             ciBase.fid = qid;
             Scenario scenario = new ScenarioImpl(new LivingEntity[]{ciBase}, es, manager) {
                 @Override
                 public void reward(int[] ids) {
-                    StringBuilder sb = new StringBuilder("获得:");
-                    resourceLoader.itemMap.forEach((k, v) -> {
-                        sb.append(v.getName()).append(",");
-                    });
-                    pack.send(new GeneralData.ResDataText(sb.toString()));
+                    if (ids.length == 0) {
+                        pack.send(new GeneralData.ResDataText("挑战失败"));
+                    } else {
+                        StringBuilder sb = new StringBuilder("获得:");
+                        for (int id : ids) {
+                            if (resourceLoader.itemMap.containsKey(id)) {
+                                Item item = resourceLoader.itemMap.get(id);
+                                sb.append(item.getName()).append(",");
+                                shopController.appendItemToBag(user, item, 1);
+                            }
+                        }
+                        pack.send(new GeneralData.ResDataText(sb.toString()));
+                    }
+
+                    LivingEntity entity = getCurrentEntity(qid);
+                    character.setHp(entity.getHp());
+                    characterMapper.updateById(character);
                 }
             };
             manager.id2scenario.put(qid, scenario);

@@ -18,10 +18,8 @@ import io.github.kloping.mihdp.mapper.BagMaper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
-import io.github.kloping.mihdp.utils.DefConfig;
 import io.github.kloping.mihdp.utils.ImageDrawer;
 import io.github.kloping.mihdp.utils.ImageDrawerUtils;
-import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import io.github.kloping.number.NumberUtils;
 
@@ -127,7 +125,7 @@ public class ShopController {
 
     @Action("buy")
     public Object buy(ReqDataPack pack, User user) {
-        GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
+        GeneralData generalData = pack.getGeneralData();
         String name = generalData.allText().trim();
         Item target = null;
         for (Integer id : resourceLoader.itemMap.keySet()) {

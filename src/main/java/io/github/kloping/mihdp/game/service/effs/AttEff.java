@@ -26,6 +26,7 @@ public class AttEff extends Eff {
 
     @Override
     public EffResult fun(LivingEntity entity0, LivingEntity entity1) {
+        int state = 0;
         //获得攻击百分比值
         final Integer v0 = NumberUtils.percentTo(ATT_BV_N, entity0.getAtt().getFinalValue()).intValue();
         //计算防御效用
@@ -39,8 +40,9 @@ public class AttEff extends Eff {
             Integer cbv = entity0.getChe().getFinalValue();
             //计算加成
             v1 = v1 + NumberUtils.percentTo(cbv, v1).intValue();
+            state = 3;
         }
         entity1.asHp(-v1);
-        return new EffResult(TYPE, v0, v1, 0);
+        return new EffResult(TYPE, v0, v1, state);
     }
 }

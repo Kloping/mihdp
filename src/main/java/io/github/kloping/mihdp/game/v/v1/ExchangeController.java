@@ -91,8 +91,7 @@ public class ExchangeController {
     {
         int fb = 5;
         EXCHANGE_MAP.put("特殊币", (p, u) -> {
-            UsersResources resources = usersResourcesMapper.selectById(u.getUid());
-            infoController.CalculateE(resources);
+            UsersResources resources = infoController.getAndCalculateE(u.getUid());
             if (resources.getGold() > 2000) return STATE2;
             Integer num = NumberUtils.getIntegerFromString(p.getContent(), 1);
             if (resources.getEnergy() < num) return STATE0;
@@ -105,7 +104,7 @@ public class ExchangeController {
             return new AbstractMap.SimpleEntry<>("兑换成功!当前特殊币:" + resources.getGold(), true);
         });
         EXCHANGE_MAP.put("打劫次数", (p, u) -> {
-            UsersResources resources = usersResourcesMapper.selectById(u.getUid());
+            UsersResources resources = infoController.getAndCalculateE(u.getUid());
             infoController.CalculateE(resources);
             Integer num = NumberUtils.getIntegerFromString(p.getContent(), 1);
             if (resources.getEnergy() < num * 15) return STATE0;
@@ -118,7 +117,7 @@ public class ExchangeController {
         EXCHANGE_MAP.put("打劫", EXCHANGE_MAP.get("打劫次数"));
         int wrm = 40;
         EXCHANGE_MAP.put("打工", (p, u) -> {
-            UsersResources resources = usersResourcesMapper.selectById(u.getUid());
+            UsersResources resources = infoController.getAndCalculateE(u.getUid());
             infoController.CalculateE(resources);
             if (resources.getEnergy() < wrm) return STATE0;
             resources.setEnergy(resources.getEnergy() - (wrm));
@@ -129,8 +128,7 @@ public class ExchangeController {
         });
 
         EXCHANGE_MAP.put("灵力", (p, u) -> {
-            UsersResources resources = usersResourcesMapper.selectById(u.getUid());
-            infoController.CalculateE(resources);
+            UsersResources resources = infoController.getAndCalculateE(u.getUid());
             Integer num = NumberUtils.getIntegerFromString(p.getContent(), 1);
             if (resources.getGold() < num)
                 return new AbstractMap.SimpleEntry<>("你需要1点特殊币才能兑换1点灵力", false);

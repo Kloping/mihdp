@@ -53,7 +53,7 @@ public class ItemAboController {
 
     @Action("use")
     public Object use(User user, ReqDataPack pack) {
-        GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
+        GeneralData generalData = pack.getGeneralData();
         String name = generalData.allText().trim();
         //过滤数量
         Integer num = NumberUtils.getIntegerFromString(name, 1);

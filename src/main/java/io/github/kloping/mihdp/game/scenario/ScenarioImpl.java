@@ -14,6 +14,7 @@ import io.github.kloping.number.NumberUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -86,7 +87,10 @@ public abstract class ScenarioImpl implements Scenario {
     }
 
     private void step(LivingEntity e) {
-        e.distance = e.distance - e.getSpeed().getFinalValue();
+        if (e.getHp() <= 0) {
+            e.distance = 99999;
+            return;
+        } else e.distance = e.distance - e.getSpeed().getFinalValue();
     }
 
     public void allV1() {
@@ -151,9 +155,11 @@ public abstract class ScenarioImpl implements Scenario {
     public void destroy(LivingEntity[] as) {
         run = false;
         manager.remove(this);
+        if (pcdl != null) pcdl.countDown();
+        if (cdl != null) cdl.countDown();
         for (LivingEntity a : as) {
             if (a instanceof CiBase) {
-
+                reward(new int[0]);
             } else {
                 GoBase goBase = (GoBase) a;
                 reward(goBase.getFallObjs());
@@ -191,9 +197,13 @@ public abstract class ScenarioImpl implements Scenario {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        GeneralData.ResDataChain chain = builder.build();
-        chain.getList().add(drawScenario(context));
-        return chain;
+        try {
+            GeneralData.ResDataChain chain = builder.build();
+            chain.getList().add(drawScenario(context));
+            return chain;
+        } finally {
+            builder.clear();
+        }
     }
 
     @Override
@@ -211,6 +221,12 @@ public abstract class ScenarioImpl implements Scenario {
             }
         }
         return new LivingEntity[0];
+    }
+
+    @Override
+    public LivingEntity[] getSortByDistance() {
+        Arrays.sort(als, (a, b) -> a.distance - b.distance);
+        return als;
     }
 
     @Override
@@ -255,6 +271,14 @@ public abstract class ScenarioImpl implements Scenario {
                 x += 200;
             }
 
+            x = 55;
+            y = 535;
+            for (LivingEntity entity : getSortByDistance()) {
+                drawer.draw(resourceLoader.getFileById(entity.getCid()), 40, 40, x, y);
+                drawer.startDrawString(ImageDrawerUtils.SMALL_FONT18, ImageDrawerUtils.ORIGIN_A75,
+                        entity.distance.toString(), x - 5, y - 8);
+                x += 45;
+            }
 
             GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
                     .append(new GeneralData.ResDataImage(drawer.bytes(), 900, 600));

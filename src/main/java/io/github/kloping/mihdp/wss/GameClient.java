@@ -37,9 +37,10 @@ public abstract class GameClient {
     public void onMessage(String msg) {
         ReqDataPack data = JSON.parseObject(msg, ReqDataPack.class);
         if (data == null) return;
-        data.set(this);
+        data.set((GameClient) this);
         GeneralData resData = gson.fromJson(data.getContent(), GeneralData.TYPE_TOKEN);
         data.getArgs().put(ODATA_KEY, resData);
+        data.set((GeneralData) gson.fromJson(data.getContent(), GeneralData.TYPE_TOKEN));
         if (data.getAction().equals(TRANS_ACTION)) {
             data = BaseService.trnasActionOrNull(data);
         }

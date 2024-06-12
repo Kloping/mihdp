@@ -142,7 +142,7 @@ public class CharactersController {
 
     @Action("show_character")
     public Object showC0(ReqDataPack pack, User user) {
-        GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
+        GeneralData generalData = pack.getGeneralData();
         String name = generalData.allText().trim();
         //基础的魂角属性
         CharacterInfo characterInfo = null;
@@ -174,6 +174,7 @@ public class CharactersController {
 
         redisSource.str2int.setValue("cid-hp-" + character.getId(), characterInfo.getHp().getFinalValue());
         redisSource.str2int.setValue("cid-xp-" + character.getId(), characterInfo.getXp().getFinalValue());
+        BaseCo.CharacterOutResult result = baseCi.compute(character);
         final int w = 800, h = 1000;
         if (pack.isArgValue("draw", true)) {
             try {
@@ -194,6 +195,11 @@ public class CharactersController {
                             int sx = (210 - sw) / 2;
                             graphics.drawString(finalCharacterInfo.getName(), sx + 5, 300);
                         })
+
+                        .fillRoundRect(ImageDrawerUtils.WHITE_A80, 10, 325, 200, 20, 5, 5)
+                        .fillRoundRect(ImageDrawerUtils.GREEN_A75, 10, 325, NumberUtils.toPercent(character.getHp(), result.maxHp), 20, 5, 5)
+                        .startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90,
+                                String.format("%s/%s", character.getHp(), result.maxHp), 10, 350).finish()
 
                         .startDrawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "等级  :", 255, 50)
                         .drawString(characterInfo.getLevel(), ImageDrawerUtils.ORIGIN_A80)
@@ -281,8 +287,7 @@ public class CharactersController {
                         id = character.getId();
                         k = false;
                         break;
-                    }
-                    if (character.getId().equals(id)) {
+                    } else if (character.getId().equals(id)) {
                         k = true;
                     }
                 }
@@ -333,7 +338,6 @@ public class CharactersController {
             }
             //设置cd
             redisSource.uid2cd.setValue(user.getUid(), System.currentTimeMillis() + (18L * 60000));
-
 
             GeneralData.ResDataChain.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder();
             builder.append("每次修炼恢复当前使用魂角10%血量并增加10点经验");

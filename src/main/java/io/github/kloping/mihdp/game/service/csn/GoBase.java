@@ -23,8 +23,10 @@ public abstract class GoBase extends LivingEntity {
         super(id, cid);
     }
 
-    public static GoBase create(Integer level, Integer id) {
-        if (id == 3001) return new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level);
+    public static GoBase[] create(Integer level, Integer id) {
+        if (id == 3001) {
+            return new GoBase[]{new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level), new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level),};
+        }
         GoBase base = new GoBase(getId(), id) {
             @Override
             public int[] getFallObjs() {
@@ -43,7 +45,7 @@ public abstract class GoBase extends LivingEntity {
         base.efh = new Attr("efh", 50);
         base.efr = new Attr("efr", 50);
         base.distance = 1000;
-        return base;
+        return new GoBase[]{base};
     }
 
     @Override
@@ -61,7 +63,7 @@ public abstract class GoBase extends LivingEntity {
         LivingEntity entity = RandomUtils.getRand(as);
         Integer avl = NumberUtils.percentTo(this.getAtt().getFinalValue(), 60).intValue();
         EffResult result = eff(new AttEff(avl), entity);
-        return String.format("NPC使用了普通撞击对指定造成%s点伤害(%s)", avl, result.getState() == 0 ? "生效" : "未生效");
+        return String.format("NPC使用了普通撞击对指定造成%s点伤害(%s)", result.getValue(), result.getStateTips());
     }
 
     public abstract int[] getFallObjs();

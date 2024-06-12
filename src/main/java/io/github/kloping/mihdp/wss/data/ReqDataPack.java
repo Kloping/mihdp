@@ -59,10 +59,21 @@ public class ReqDataPack {
         return JSON.toJSONString(this);
     }
 
+
+    private GeneralData generalData;
+
+    public GeneralData getContentAsData() {
+        return this.generalData;
+    }
+
+    public void set(GeneralData data) {
+        this.generalData = data;
+    }
+
     private GameClient client;
 
     public void set(GameClient gameClient) {
-        this.client = client;
+        this.client = gameClient;
     }
 
     public void send(GeneralData data) {

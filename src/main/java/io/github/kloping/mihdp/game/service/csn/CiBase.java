@@ -22,11 +22,9 @@ public class CiBase extends LivingEntity {
      */
     public String fid;
 
-    private boolean prep = false;
+    public boolean prep = false;
     /**
-     * 操作码 -1 等于无
-     * 0 攻击
-     * 1 撤离
+     * 操作码 {@link Eff#getType()}
      */
     public int op = -1;
 
@@ -71,13 +69,18 @@ public class CiBase extends LivingEntity {
         }
         Object r = null;
         switch (op) {
+            case 0:
+                r = "跳过";
+                break;
             case AttEff.TYPE:
                 LivingEntity entity = getRecentlyE(as);
                 Integer avl = NumberUtils.percentTo(this.getAtt().getFinalValue(), 60).intValue();
                 EffResult result = eff(new AttEff(avl), entity);
                 r = String.format("玩家使用了普通撞击对指定造成%s点伤害(%s)", result.getValue(), result.getStateTips());
+                break;
         }
         prep = false;
+        cdl = null;
         return r;
     }
 
@@ -91,6 +94,6 @@ public class CiBase extends LivingEntity {
     @Override
     public Object letDoPre(Scenario scenario, CountDownLatch cdl, LivingEntity[] as) {
         prep = true;
-        return "请操作!(攻击/撤离)";
+        return "请操作!(攻击/撤离/跳过)";
     }
 }

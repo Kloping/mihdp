@@ -29,11 +29,14 @@ import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
 import io.github.kloping.mihdp.p0.services.BaseService;
+import io.github.kloping.mihdp.p0.utils.NumberSelector;
+import io.github.kloping.mihdp.utils.LanguageConfig;
 import io.github.kloping.mihdp.wss.GameClient;
 import io.github.kloping.mihdp.wss.data.ReqDataPack;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -45,6 +48,30 @@ public class FuBenController {
     BeginController beginController;
     @AutoStand
     UserMapper userMapper;
+    @AutoStand
+    LanguageConfig lconfig;
+    @AutoStand
+    ScenarioManager manager;
+    @AutoStand
+    RedisSource redisSource;
+    @AutoStand
+    ExecutorService executorService;
+    @AutoStand
+    BaseCo baseCi;
+    @AutoStand
+    FbService fbService;
+    @AutoStand
+    ContextManager contextManager;
+    @AutoStand
+    ShopController shopController;
+    @AutoStand
+    GameStaticResourceLoader resourceLoader;
+    @AutoStand
+    UsersResourcesMapper usersResourcesMapper;
+    @AutoStand
+    InfoController infoController;
+    @AutoStand
+    CharacterMapper characterMapper;
     @AutoStand
     CharactersController charactersController;
 
@@ -59,11 +86,66 @@ public class FuBenController {
                 dataPack.getSender_id(), userMapper.selectById(dataPack.getSender_id())};
     }
 
-    {
+//    {
 //        BaseService.MSG2ACTION.put("进入副本", "join-fb");
 //        BaseService.MSG2ACTION.put("攻击", "att");
 //        BaseService.MSG2ACTION.put("撤离", "evacuate");
 //        BaseService.MSG2ACTION.put("副本列表", "fb-list");
+//        BaseService.MSG2ACTION.put("跳过", "jem");
+//        BaseService.MSG2ACTION.put("副本邀请", "fb-invite");
+//        BaseService.MSG2ACTION.put("退队", "fb-team-out");
+//        BaseService.MSG2ACTION.put("当前队伍", "fb-team");
+//    }
+
+    @Action("fb-invite")
+    public Object invite(ReqDataPack dataPack, User user) {
+        GeneralData generalData = (GeneralData) dataPack.getArgs().get(GameClient.ODATA_KEY);
+        GeneralData.ResDataAt at = generalData.find(GeneralData.ResDataAt.class);
+        if (at == null) return lconfig.getString("TargetNotFoundPrompt");
+        String aid = at.getId();
+        User atUser = infoController.getUser(aid);
+        if (atUser == null) return lconfig.getString("TargetUnregisteredPrompt");
+        String fid = atUser.getId();
+        NumberSelector.reg(fid).set(1, d -> {
+            return new GeneralData.ResDataChain.GeneralDataBuilder()
+                    .append(manager.invite(user.getId(), atUser.getId()) ? "邀请成功" : "邀请失败")
+                    .append(new GeneralData.ResDataButton("退出队伍", "退队"))
+                    .append(new GeneralData.ResDataButton("当前队伍", "当前队伍"))
+                    .append(new GeneralData.ResDataButton("继续邀请", "副本邀请@"))
+                    .append(new GeneralData.ResDataButton("进入副本", "进入副本"))
+                    .build();
+        }).set(2, d -> {
+            return new GeneralData.ResDataChain.GeneralDataBuilder()
+                    .append("已取消")
+                    .append(new GeneralData.ResDataButton("退出队伍", "退队"))
+                    .append(new GeneralData.ResDataButton("当前队伍", "当前队伍"))
+                    .append(new GeneralData.ResDataButton("继续邀请", "副本邀请@"))
+                    .append(new GeneralData.ResDataButton("进入副本", "进入副本"))
+                    .build();
+        });
+        return new GeneralData.ResDataChain.GeneralDataBuilder()
+                .append("邀请成功;回复数字:1:同意 2.取消")
+                .append(new GeneralData.ResDataButton("同意", "1"))
+                .append(new GeneralData.ResDataButton("取消", "2"))
+                .build();
+    }
+
+    @Action("fb-team-out")
+    public Object out(User user) {
+        return manager.outTeam(user) ? "成功" : "异常";
+    }
+
+    @Action("fb-team")
+    public Object team(User user) {
+        if (!manager.id2list.containsKey(user.getId())) {
+            return "无";
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (User u : manager.id2list.get(user.getId())) {
+                sb.append(u.getId()).append(" - ").append(u.getUid()).append("\n");
+            }
+            return sb.toString();
+        }
     }
 
     @Action("fb-list")
@@ -86,32 +168,6 @@ public class FuBenController {
         return null;
     }
 
-    @AutoStand
-    ScenarioManager manager;
-
-    @AutoStand
-    RedisSource redisSource;
-
-    @AutoStand
-    ExecutorService executorService;
-
-    @AutoStand
-    BaseCo baseCi;
-    @AutoStand
-    FbService fbService;
-    @AutoStand
-    ContextManager contextManager;
-    @AutoStand
-    ShopController shopController;
-    @AutoStand
-    GameStaticResourceLoader resourceLoader;
-    @AutoStand
-    UsersResourcesMapper usersResourcesMapper;
-    @AutoStand
-    InfoController infoController;
-    @AutoStand
-    CharacterMapper characterMapper;
-
     @Action("join-fb")
     public Object joinFb(Character character, String qid, User user, ReqDataPack pack) {
         UsersResources resources = usersResourcesMapper.selectById(user.getUid());
@@ -131,9 +187,24 @@ public class FuBenController {
             resources.applyE(redisSource);
             usersResourcesMapper.updateById(resources);
 
-            CiBase ciBase = CiBase.create(baseCi.compute(character));
-            ciBase.fid = qid;
-            Scenario scenario = new ScenarioImpl(new LivingEntity[]{ciBase}, es, manager) {
+            LivingEntity[] cis = new LivingEntity[0];
+            if (manager.id2list.containsKey(qid)) {
+                List<User> list = manager.id2list.get(qid);
+                cis = new LivingEntity[list.size()];
+                int n = 0;
+                for (User u : list) {
+                    Character c0 = charactersController.getCurrentCharacterOrLowestLevel(u.getUid());
+                    CiBase base = CiBase.create(baseCi.compute(c0));
+                    base.fid = u.getId();
+                    cis[n++] = base;
+                }
+            } else {
+                CiBase ciBase = CiBase.create(baseCi.compute(character));
+                ciBase.fid = qid;
+                cis = new LivingEntity[]{ciBase};
+            }
+
+            Scenario scenario = new ScenarioImpl(cis, es, manager) {
                 @Override
                 public void reward(int[] ids) {
                     if (ids.length == 0) {
@@ -149,13 +220,19 @@ public class FuBenController {
                         }
                         pack.send(new GeneralData.ResDataText(sb.toString()));
                     }
-
                     LivingEntity entity = getCurrentEntity(qid);
                     character.setHp(entity.getHp());
                     characterMapper.updateById(character);
                 }
             };
-            manager.id2scenario.put(qid, scenario);
+
+            if (manager.id2list.containsKey(qid)) {
+                for (User u : manager.id2list.get(qid)) {
+                    manager.id2scenario.put(u.getId(), scenario);
+                }
+            } else {
+                manager.id2scenario.put(qid, scenario);
+            }
             executorService.submit(scenario);
             return scenario.getTips(contextManager);
         }
@@ -170,8 +247,27 @@ public class FuBenController {
             LivingEntity currentEntity = scenario.getCurrentEntity(qid);
             if (currentEntity instanceof CiBase) {
                 CiBase ciBase = (CiBase) currentEntity;
+                if (!ciBase.prep) return "非行动方";
                 if (ciBase.fid.equals(qid)) {
                     ciBase.op = AttEff.TYPE;
+                    ciBase.cdl.countDown();
+                }
+            }
+            return scenario.getTips(contextManager);
+        }
+    }
+
+    @Action("jem")
+    public Object jem(String qid) {
+        if (!manager.id2scenario.containsKey(qid)) {
+            return "未处于副本状态";
+        } else {
+            Scenario scenario = manager.id2scenario.get(qid);
+            LivingEntity currentEntity = scenario.getCurrentEntity(qid);
+            if (currentEntity instanceof CiBase) {
+                CiBase ciBase = (CiBase) currentEntity;
+                if (ciBase.fid.equals(qid)) {
+                    ciBase.op = 0;
                     ciBase.cdl.countDown();
                 }
             }

@@ -1,13 +1,12 @@
 package data_migration;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import data_migration.dao.Bag;
 import data_migration.source.DataMigration;
 import data_migration.target.DataMigrationTarget;
-import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.mapper.UserMapper;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -27,8 +26,6 @@ public class Starter {
         }).start();
         cdl.await();
 
-//        DataMigrationTarget.main(args);
-
 
         data_migration.source.mapper.BagMapper bagMapper0 = DataMigration.context.getBean(data_migration.source.mapper.BagMapper.class);
         io.github.kloping.mihdp.mapper.BagMaper bagMapper1 = DataMigrationTarget.context.getBean(io.github.kloping.mihdp.mapper.BagMaper.class);
@@ -37,26 +34,19 @@ public class Starter {
             String qidStr = user.getId();
             try {
                 Long qid = Long.valueOf(qidStr);
-                Map<Integer, Integer> id2n = new HashMap<>();
-                for (Integer id : bagMapper0.selectAll(qid)) {
-                    if (id >= 200 && id <= 210) {
-                        if (id2n.containsKey(id)) {
-                            Integer n = id2n.get(id);
-                            n++;
-                            id2n.put(id, n);
-                        } else id2n.put(id, 1);
-                    }
-                }
-                id2n.forEach((id, n) -> {
-                    Integer ide = id + 1800;
-                    bagMapper1.insert(new Bag(user.getUid(), ide, n, n));
-                    System.out.format("qid(%s-%s) %s fix %s\n", qid, user.getUid(), ide, n);
-                });
+                QueryWrapper<Bag> qw = new QueryWrapper<>();
+                qw.eq("qid", qid);
+                qw.eq("oid", 102);
+                Integer count = bagMapper0.selectCount(qw).intValue();
+                if (count <= 0) continue;
+                io.github.kloping.mihdp.dao.Bag bag = new io.github.kloping.mihdp.dao.Bag(user.getUid(), 104, count, count);
+                bagMapper1.insert(bag);
+                System.out.println("完成" + qidStr + "-" + user.getUid() + "-" + bag);
             } catch (NumberFormatException e) {
                 System.err.println(e);
             }
         }
-
+        System.out.println("end===============");
     }
 
 //    private static void extractedWhHh() {

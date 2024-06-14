@@ -282,10 +282,9 @@ public abstract class ScenarioImpl implements Scenario {
 
             GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
                     .append(new GeneralData.ResDataImage(drawer.bytes(), 900, 600));
-            if (first) {
-                builder.append(new GeneralData.ResDataButton("行动:攻击", "攻击")).append(new GeneralData.ResDataButton("行动:撤离", "撤离"));
-                first = false;
-            }
+
+            builder.append(new GeneralData.ResDataButton("行动:攻击", "攻击")).append(new GeneralData.ResDataButton("行动:撤离", "撤离"));
+
             return builder.build();
         } catch (IOException e) {
             e.printStackTrace();

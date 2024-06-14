@@ -29,6 +29,11 @@ public class AdditionImpl implements Addition {
         this.attr = attr;
     }
 
+    /**
+     * @param attr 属性名
+     * @param type 1基础值 2百分值
+     * @param value
+     */
     public AdditionImpl(String attr, Integer type, Integer value) {
         this.attr = attr;
         this.type = type;

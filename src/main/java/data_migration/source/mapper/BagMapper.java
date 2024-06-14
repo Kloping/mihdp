@@ -1,5 +1,7 @@
 package data_migration.source.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import data_migration.dao.Bag;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
  * @author github.kloping
  */
 @Mapper
-public interface BagMapper {
+public interface BagMapper extends BaseMapper<Bag> {
     /**
      * 插入一条记录
      *

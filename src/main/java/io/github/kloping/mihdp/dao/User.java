@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Objects;
+
 /**
  * @author github.kloping
  */
@@ -42,5 +44,18 @@ public class User {
 
     public void addXp(int i) {
         this.xp += i;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(uid, user.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, uid, name, icon, xp, level, reg);
     }
 }

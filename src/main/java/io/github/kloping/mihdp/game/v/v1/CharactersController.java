@@ -74,7 +74,7 @@ public class CharactersController {
                     Integer.valueOf("10" + RandomUtils.RANDOM.nextInt(32))
             ).setMid(0).setHp(100);
             charactersMapper.insert(c0);
-            return GeneralData.GeneralDataBuilder.create("符合领取条件;领取成功");
+            return GeneralData.GeneralDataBuilder.create("符合领取条件;领取成功").build();
         }
         return "不符合领取条件";
     }
@@ -197,7 +197,8 @@ public class CharactersController {
                         })
 
                         .fillRoundRect(ImageDrawerUtils.WHITE_A80, 10, 325, 200, 20, 5, 5)
-                        .fillRoundRect(ImageDrawerUtils.GREEN_A75, 10, 325, NumberUtils.toPercent(character.getHp(), result.maxHp), 20, 5, 5)
+                        .fillRoundRect(ImageDrawerUtils.GREEN_A75, 10, 325,
+                                NumberUtils.toPercent(character.getHp(), result.maxHp) * 2, 20, 5, 5)
                         .startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90,
                                 String.format("%s/%s", character.getHp(), result.maxHp), 10, 350).finish()
 

@@ -14,6 +14,7 @@ import io.github.kloping.mihdp.game.v.v1.CharactersController;
 import io.github.kloping.mihdp.game.v.v1.ItemAboController;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.UsersResourcesMapper;
+import io.github.kloping.number.NumberUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,27 @@ public class ItemOf {
             usersResourcesMapper.updateById(resources);
             return new ItemAboController.UseState(true, "成功,请查看信息.tips:灵力大于等于上限不在回复", 1);
         });
+        CONTEXT_MAP.put(104, cc -> {
+            Integer c = cc.get(Integer.class);
+            User user = cc.get(User.class);
+            Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
+            if (character == null) return new ItemAboController.UseState(false, "未拥有任何魂角", 0);
+            int maxHp = baseCi.compute(character).maxHp;
+
+            int n = 0;
+            for (Integer i = 0; i < c; i++) {
+                Integer v0 = NumberUtils.percentTo(15, maxHp).intValue();
+                character.setHp(character.getHp() + v0);
+                n++;
+                if (character.getHp() >= maxHp) {
+                    character.setHp(maxHp);
+                    charactersMapper.updateById(character);
+                    return new ItemAboController.UseState(true, "使用完成;当前魂角血量100%", n);
+                }
+            }
+            if (n > 0) charactersMapper.updateById(character);
+            return new ItemAboController.UseState(true, "使用完成;当前魂角血量" + NumberUtils.toPercent(character.getHp(), maxHp) + "%", n);
+        });
     }
 
     private ItemAboController.UseState addXpOfItem(Class2OMap cc, int x) {
@@ -65,18 +87,20 @@ public class ItemOf {
         Integer c = cc.get(Integer.class);
         Character character = charactersController.getCharacterOrLowestLevel(user.getUid());
         if (character == null) return new ItemAboController.UseState(false, "未拥有任何魂角", 0);
-        Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
+        int maxXp = baseCi.compute(character).maxXp;
         int xpa = 0, levela = 0;
         int c0 = 0;
         for (int i = 0; i < c; i++) {
             xpa += x;
             c0++;
             character.setXp(character.getXp() + x);
-            if (baseCi.testForC(character, maxXp)) {
-                maxXp = baseCi.compute(character).maxXp;
-                levela++;
-            } else {
-                return new ItemAboController.UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
+            if (character.getXp() >= maxXp) {
+                if (baseCi.testForC(character, maxXp)) {
+                    maxXp = baseCi.compute(character).maxXp;
+                    levela++;
+                } else {
+                    return new ItemAboController.UseState(true, "经验上限喽\n再次升级需要吸收魂环.", c0);
+                }
             }
         }
         charactersMapper.updateById(character);

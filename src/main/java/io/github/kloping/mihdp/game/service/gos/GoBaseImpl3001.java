@@ -1,9 +1,13 @@
 package io.github.kloping.mihdp.game.service.gos;
 
+import com.google.gson.JsonObject;
 import io.github.kloping.mihdp.game.dao.Attr;
 import io.github.kloping.mihdp.game.scenario.Scenario;
+import io.github.kloping.mihdp.game.service.EffResult;
 import io.github.kloping.mihdp.game.service.LivingEntity;
 import io.github.kloping.mihdp.game.service.csn.GoBase;
+import io.github.kloping.mihdp.game.service.effs.AttEff;
+import io.github.kloping.number.NumberUtils;
 import io.github.kloping.rand.RandomUtils;
 
 import java.util.concurrent.CountDownLatch;
@@ -35,7 +39,10 @@ public class GoBaseImpl3001 extends GoBase {
 
     @Override
     public Object letDo(Scenario scenario, CountDownLatch cdl, LivingEntity[] as) {
-        return super.letDo(scenario, cdl, as);
+        LivingEntity entity = RandomUtils.getRand(as);
+        Integer avl = NumberUtils.percentTo(this.getAtt().getFinalValue(), 60).intValue();
+        EffResult result = eff(new AttEff(avl), entity);
+        return String.format("人面魔蛛使用了普通撞击对指定造成%s点伤害(%s)", result.getValue(), result.getStateTips());
     }
 
     @Override

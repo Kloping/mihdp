@@ -9,6 +9,7 @@ import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.date.DateUtils;
 import io.github.kloping.judge.Judge;
+import io.github.kloping.mihdp.dao.Bag;
 import io.github.kloping.mihdp.dao.Character;
 import io.github.kloping.mihdp.dao.Cycle;
 import io.github.kloping.mihdp.dao.User;
@@ -16,10 +17,12 @@ import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.GameStaticResourceLoader;
 import io.github.kloping.mihdp.game.api.Addition;
 import io.github.kloping.mihdp.game.dao.CharacterInfo;
+import io.github.kloping.mihdp.game.dao.Item;
 import io.github.kloping.mihdp.game.service.AdditionLogic;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v1.service.BaseCo;
+import io.github.kloping.mihdp.mapper.BagMaper;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.CycleMapper;
 import io.github.kloping.mihdp.mapper.UserMapper;
@@ -60,7 +63,12 @@ public class CharactersController {
     }
 
     {
+        BaseService.MSG2ACTION.put("查看", "show_character");
+        BaseService.MSG2ACTION.put("切换", "handoff");
+        BaseService.MSG2ACTION.put("修炼", "xl");
+        BaseService.MSG2ACTION.put("魂角列表", "characters");
         BaseService.MSG2ACTION.put("领取魂角", "greenhorn");
+        BaseService.MSG2ACTION.put("吸收", "absorb");
     }
 
     @Action("greenhorn")
@@ -77,10 +85,6 @@ public class CharactersController {
             return GeneralData.GeneralDataBuilder.create("符合领取条件;领取成功").build();
         }
         return "不符合领取条件";
-    }
-
-    {
-        BaseService.MSG2ACTION.put("魂角列表", "characters");
     }
 
     @Action("characters")
@@ -101,7 +105,7 @@ public class CharactersController {
                     Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
                     Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
                     if (maxHp == null || maxXp == null) {
-                        BaseCo.CharacterOutResult result = baseCi.compute(character);
+                        BaseCo.CharacterResult result = baseCi.compute(character);
                         if (result == null) return "未知错误 code:-201.";
                         maxHp = result.maxHp;
                         maxXp = result.maxXp;
@@ -129,10 +133,6 @@ public class CharactersController {
         } else {
             return JSON.toJSONString(characters);
         }
-    }
-
-    {
-        BaseService.MSG2ACTION.put("查看", "show_character");
     }
 
     @AutoStand
@@ -174,7 +174,7 @@ public class CharactersController {
 
         redisSource.str2int.setValue("cid-hp-" + character.getId(), characterInfo.getHp().getFinalValue());
         redisSource.str2int.setValue("cid-xp-" + character.getId(), characterInfo.getXp().getFinalValue());
-        BaseCo.CharacterOutResult result = baseCi.compute(character);
+        BaseCo.CharacterResult result = baseCi.compute(character);
         final int w = 800, h = 1000;
         if (pack.isArgValue("draw", true)) {
             try {
@@ -196,11 +196,27 @@ public class CharactersController {
                             graphics.drawString(finalCharacterInfo.getName(), sx + 5, 300);
                         })
 
+                        .fillRoundRect(ImageDrawerUtils.WHITE_A80, 10, 250, 200, 20, 5, 5)
+                        .fillRoundRect(ImageDrawerUtils.XP_A75, 10, 250,
+                                NumberUtils.toPercent(character.getXp(), result.maxXp) * 2, 20, 5, 5)
+
+                        .startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90,
+                                String.format("%s/%s", character.getXp(), result.maxXp), 10, 265).finish()
+
                         .fillRoundRect(ImageDrawerUtils.WHITE_A80, 10, 325, 200, 20, 5, 5)
                         .fillRoundRect(ImageDrawerUtils.GREEN_A75, 10, 325,
                                 NumberUtils.toPercent(character.getHp(), result.maxHp) * 2, 20, 5, 5)
-                        .startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A90,
-                                String.format("%s/%s", character.getHp(), result.maxHp), 10, 350).finish()
+
+                        .startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90,
+                                String.format("%s/%s", character.getHp(), result.maxHp), 10, 340).finish()
+
+                        .fillRoundRect(ImageDrawerUtils.WHITE_A80, 10, 355, 200, 20, 5, 5)
+                        .fillRoundRect(ImageDrawerUtils.ORIGIN_A75, 10, 355,
+                                NumberUtils.toPercent(result.getHl(), characterInfo.getHl().getFinalValue()) * 2, 20, 5, 5)
+                        .startDrawString(ImageDrawerUtils.SMALL_FONT20, ImageDrawerUtils.BLACK_A90,
+                                String.format("%s/%s", result.getHl(), characterInfo.getHl().getFinalValue()), 10, 370)
+
+                        .finish()
 
                         .startDrawString(ImageDrawerUtils.SMALL_FONT32, ImageDrawerUtils.BLACK_A90, "等级  :", 255, 50)
                         .drawString(characterInfo.getLevel(), ImageDrawerUtils.ORIGIN_A80)
@@ -266,10 +282,6 @@ public class CharactersController {
         }
     }
 
-    {
-        BaseService.MSG2ACTION.put("切换", "handoff");
-    }
-
     @Action("handoff")
     public Object handoff(ReqDataPack pack, User user) {
         GeneralData generalData = (GeneralData) pack.getArgs().get(GameClient.ODATA_KEY);
@@ -308,15 +320,17 @@ public class CharactersController {
         }
         if (id != null)
             redisSource.uid2cid.setValue(user.getUid(), id);
-        return "切换成功!";
+        GeneralData.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder()
+                .append("切换成功!")
+                .append(new GeneralData.ResDataButton("查看[魂角名]", "查看"))
+                .append(new GeneralData.ResDataButton("切换[魂角名]", "切换"))
+                .append(new GeneralData.ResDataButton("吸收[物品名]", "吸收"))
+                .append(new GeneralData.ResDataButton("副本列表", "副本列表"));
+        return builder.build();
     }
 
     @AutoStand
     BaseCo baseCi;
-
-    {
-        BaseService.MSG2ACTION.put("修炼", "xl");
-    }
 
     @Action("xl")
     public Object xl(ReqDataPack pack, User user) {
@@ -330,7 +344,7 @@ public class CharactersController {
             Integer maxHp = redisSource.str2int.getValue("cid-hp-" + character.getId());
             Integer maxXp = redisSource.str2int.getValue("cid-xp-" + character.getId());
             if (maxHp == null || maxXp == null) {
-                BaseCo.CharacterOutResult result = baseCi.compute(character);
+                BaseCo.CharacterResult result = baseCi.compute(character);
                 if (result == null) {
                     return "计算加成异常.";
                 }
@@ -354,7 +368,7 @@ public class CharactersController {
                 if (!baseCi.testForC(character, maxXp)) {
                     builder.append("\n等级限制,经验上限无法升级.再次升级需要吸收魂环.");
                 } else {
-                    BaseCo.CharacterOutResult result = baseCi.compute(character);
+                    BaseCo.CharacterResult result = baseCi.compute(character);
                     if (result == null) {
                         return "计算加成异常.";
                     }
@@ -364,11 +378,7 @@ public class CharactersController {
                 }
             } else charactersMapper.updateById(character);
             builder.append("\n当前:血量" + String.format("%s%%;等级:%s;经验:%s/%s"
-                    , NumberUtils.toPercent(character.getHp(), maxHp)
-                    , character.getLevel()
-                    , character.getXp()
-                    , maxHp));
-
+                    , NumberUtils.toPercent(character.getHp(), maxHp), character.getLevel(), character.getXp(), maxHp));
             try {
                 int x = 10, y = 10;
                 int w = 220, h = 420;
@@ -379,9 +389,163 @@ public class CharactersController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            builder.append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
-                    .append(new GeneralData.ResDataButton("查看", "查看"));
+            builder
+                    .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
+                    .append(new GeneralData.ResDataButton("查看", "查看"))
+                    .append(new GeneralData.ResDataButton("吸收魂环", "吸收"))
+                    .append(new GeneralData.ResDataButton("副本列表", "副本列表"))
+            ;
             return builder.build();
+        }
+    }
+
+    @AutoStand
+    BagMaper bagMaper;
+
+    private GeneralData AB_RB = new GeneralData.ResDataChain.GeneralDataBuilder()
+            .append(new GeneralData.ResDataButton("查看魂角信息", "查看"))
+            .append(new GeneralData.ResDataButton("查看背包", "背包"))
+            .append(new GeneralData.ResDataButton("魂角列表", "魂角列表"))
+            .append(new GeneralData.ResDataButton("商城", "商城")).build();
+
+    private final GeneralData AB_R0 = new GeneralData.ResDataChain.GeneralDataBuilder()
+            .append("吸收成功.请使用`查看`").append(AB_RB)
+            .build();
+    private final GeneralData AB_R1 = new GeneralData.ResDataChain.GeneralDataBuilder()
+            .append("吸收失败.\n尝试降低吸收魂环的年限.").append(AB_RB)
+            .build();
+    private final GeneralData AB_R = new GeneralData.ResDataChain.GeneralDataBuilder()
+            .append("可能未满足条件\n在10级以及倍数且满经验时时可吸收魂环\n魂环基础吸收限制为:黄黄紫紫黑黑黑红红红橙蓝\n超出限制降低成功率").append(AB_RB)
+            .build();
+
+
+    @Action("absorb")
+    public Object absorb(ReqDataPack pack, User user) {
+        Character character = getCharacterOrLowestLevel(user.getUid());
+        if (character == null) return "暂无魂角,请先`领取魂角`";
+        GeneralData generalData = pack.getGeneralData();
+        String name = generalData.allText().trim();
+        Item item = null;
+        for (Item value : resourceLoader.itemMap.values()) {
+            if (name.contains(value.getName())) {
+                if (item == null)
+                    item = value;
+                else if (value.getName().length() > item.getName().length())
+                    item = value;
+                else continue;
+            }
+        }
+        if (item == null) return "未发现相关物品";
+        //判断数量是否足够
+        Bag bag = bagMaper.selectByUidAndRid(user.getUid(), item.getId());
+        if (bag == null || bag.getNum() < 1) return "已拥有物品数量不足.";
+        if (item.getId() < 2000 || item.getId() > 2010) return "物品暂不可吸收";
+        else {
+            if (character.getLevel() % 10 == 0) {
+                BaseCo.CharacterResult result = baseCi.compute(character);
+                if (character.getXp().intValue() >= result.maxXp) {
+                    int r = getAbsorbApproximateRate(character.getLevel(), item.getId());
+                    int r0 = RandomUtils.RANDOM.nextInt(100) + 1;
+                    if (r0 <= r) {
+                        Cycle cycle = new Cycle();
+                        cycle.setCid(character.getId());
+                        cycle.setOid(item.getId());
+                        cycleMapper.insert(cycle);
+                        character.setXp(0);
+                        character.setLevel(character.getLevel() + 1);
+                        charactersMapper.updateById(character);
+                        bag.setNum(bag.getNum() - 1);
+                        bag.save(bagMaper);
+                        return AB_R0;
+                    } else {
+                        character.setXp(0);
+                        charactersMapper.updateById(character);
+                        bag.setNum(bag.getNum() - 1);
+                        bag.save(bagMaper);
+                        return AB_R1;
+                    }
+                }
+            }
+            return AB_R;
+        }
+    }
+
+    /**
+     * 02 黄
+     * 03 紫
+     * 04 黑
+     * 05 红
+     * 06 橙
+     *
+     * @param level
+     * @param oid
+     * @return
+     */
+    private int getAbsorbApproximateRate(int level, int oid) {
+        switch (level) {
+            case 10:
+                if (oid <= 2002) return 100;
+                else if (oid == 2003) return 50;
+                else if (oid == 2004) return 10;
+                else return 1;
+            case 20:
+                if (oid <= 2002) return 100;
+                else if (oid == 2003) return 60;
+                else if (oid == 2004) return 20;
+                else return 1;
+            case 30:
+                if (oid <= 2003) return 100;
+                else if (oid == 2004) return 50;
+                else if (oid == 2005) return 10;
+                else return 1;
+            case 40:
+                if (oid <= 2003) return 100;
+                else if (oid == 2004) return 60;
+                else if (oid == 2005) return 20;
+                else return 1;
+            case 50:
+                if (oid <= 2004) return 100;
+                else if (oid == 2005) return 40;
+                else if (oid == 2006) return 5;
+                else return 1;
+            case 60:
+                if (oid <= 2004) return 100;
+                else if (oid == 2005) return 55;
+                else if (oid == 2006) return 10;
+                else return 1;
+            case 70:
+                if (oid <= 2004) return 100;
+                else if (oid == 2005) return 65;
+                else if (oid == 2006) return 15;
+                else return 1;
+            case 80:
+                if (oid <= 2005) return 98;
+                else if (oid == 2006) return 45;
+                else if (oid == 2007) return 5;
+            case 90:
+                if (oid <= 2005) return 100;
+                else if (oid == 2006) return 60;
+                else if (oid == 2007) return 15;
+            case 100:
+                if (oid <= 2005) return 100;
+                else if (oid == 2006) return 75;
+                else if (oid == 2007) return 30;
+            case 110:
+                if (oid <= 2006) return 100;
+                else if (oid == 2007) return 50;
+            case 120:
+                if (oid <= 2006) return 100;
+                else if (oid == 2007) return 60;
+            case 130:
+                if (oid <= 2006) return 100;
+                else if (oid == 2007) return 75;
+            case 140:
+                if (oid <= 2006) return 100;
+                else if (oid == 2007) return 90;
+            case 150:
+                return 100;
+            default:
+                return 0;
         }
     }
 

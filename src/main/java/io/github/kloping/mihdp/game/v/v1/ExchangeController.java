@@ -7,6 +7,7 @@ import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
 import io.github.kloping.mihdp.dao.User;
 import io.github.kloping.mihdp.dao.UsersResources;
+import io.github.kloping.mihdp.ex.GeneralData;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.game.v.v0.BeginController;
 import io.github.kloping.mihdp.game.v.v0.InfoController;
@@ -77,11 +78,17 @@ public class ExchangeController {
 
     @Action("exchange-list")
     public Object elist(ReqDataPack pack, User user) throws Exception {
-        return "\ntips,灵力每5分钟回复1点\n" +
-                "兑换特殊币<n> #使用灵力+积分按照1:5的比例兑换为特殊币,上限2000\n" +
-                "兑换打劫次数<n> #使用15灵力兑换1次打劫次数\n" +
-                "兑换灵力<n> #使用1特殊币兑换1点灵力\n" +
-                "兑换打工 #使用40灵力刷新一次打工\n";
+        return new GeneralData.ResDataChain.GeneralDataBuilder()
+                .append("tips,灵力每5分钟回复1点\n" +
+                        "兑换特殊币<n> #使用灵力+积分按照1:5的比例兑换为特殊币,上限2000\n" +
+                        "兑换打劫次数<n> #使用15灵力兑换1次打劫次数\n" +
+                        "兑换灵力<n> #使用1特殊币兑换1点灵力\n" +
+                        "兑换打工 #使用40灵力刷新一次打工")
+                .append(new GeneralData.ResDataButton("兑换特殊币", "兑换特殊币"))
+                .append(new GeneralData.ResDataButton("兑换打劫", "兑换打劫"))
+                .append(new GeneralData.ResDataButton("兑换打工", "兑换打工"))
+                .append(new GeneralData.ResDataButton("兑换灵力", "兑换灵力"))
+                .build();
     }
 
     public static final Map.Entry STATE0 = new AbstractMap.SimpleEntry<>("灵力不足!", false);

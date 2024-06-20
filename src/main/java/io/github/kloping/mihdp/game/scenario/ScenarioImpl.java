@@ -249,13 +249,22 @@ public abstract class ScenarioImpl implements Scenario {
             GameStaticResourceLoader resourceLoader = context.getContextEntity(GameStaticResourceLoader.class);
             byte[] bytes = ReadUtils.readAll(new ClassPathResource(String.format("static.png")).getInputStream());
             ImageDrawer drawer = new ImageDrawer(bytes);
+
             int x = 50;
             int y = 300;
+            int w = 15;
             for (LivingEntity a : as) {
                 drawer.draw(resourceLoader.getFileById(a.getCid()), 200, 200, x, y);
                 int hbv = NumberUtils.toPercent(a.getHp(), a.getMaxHp().getFinalValue());
-                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80, x + 200 - 20, y, 20, 200, 5, 5);
-                drawer.fillRoundRect(ImageDrawerUtils.GREEN_A75, x + 200 - 20, y, 20, 2 * hbv, 5, 5);
+                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80,
+                        x + 200 - w, y, w, 200, 5, 5);
+
+                int sy = 200 - (2 * hbv);
+
+                drawer.fillRoundRect(
+                        hbv > 50 ? ImageDrawerUtils.GREEN_A75 : hbv > 25 ? ImageDrawerUtils.ORIGIN_A75 : ImageDrawerUtils.RED_A75,
+                        x + 200 - w, y+sy, w, 2 * hbv, 5, 5);
+
                 drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, a.getHp().toString(), x, y - sn);
                 x += 200;
             }
@@ -265,8 +274,9 @@ public abstract class ScenarioImpl implements Scenario {
             for (LivingEntity a : bs) {
                 drawer.draw(resourceLoader.getFileById(a.getCid()), 200, 200, x, y);
                 int hbv = NumberUtils.toPercent(a.getHp(), a.getMaxHp().getFinalValue());
-                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80, x + 200 - 20, y, 20, 200, 5, 5);
-                drawer.fillRoundRect(ImageDrawerUtils.GREEN_A75, x + 200 - 20, y, 20, 2 * hbv, 5, 5);
+                drawer.fillRoundRect(ImageDrawerUtils.WHITE_A80, x + 200 - w, y, w, 200, 5, 5);
+                int sy = 200 - (2 * hbv);
+                drawer.fillRoundRect(ImageDrawerUtils.GREEN_A75, x + 200 - w, y+sy, w, (2 * hbv), 5, 5);
                 drawer.startDrawString(ImageDrawerUtils.SMALL_FONT24, ImageDrawerUtils.BLACK_A85, a.getHp().toString(), x, y - sn);
                 x += 200;
             }

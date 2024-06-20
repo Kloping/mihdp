@@ -12,6 +12,7 @@ import io.github.kloping.mihdp.game.service.AdditionLogic;
 import io.github.kloping.mihdp.game.v.RedisSource;
 import io.github.kloping.mihdp.mapper.CharacterMapper;
 import io.github.kloping.mihdp.mapper.CycleMapper;
+import lombok.Getter;
 
 import java.util.List;
 
@@ -24,6 +25,13 @@ public class BaseCo {
     @AutoStand
     CharacterMapper charactersMapper;
 
+    /**
+     * 检测 魂角是否符合并升级
+     *
+     * @param character
+     * @param maxXp
+     * @return true 升级了 false 最大或上限
+     */
     public boolean testForC(Character character, Integer maxXp) {
         if (character.getLevel() < 151 && character.getXp() >= maxXp) {
             if (character.getLevel() % 10 == 0) {
@@ -55,7 +63,7 @@ public class BaseCo {
      * @param character
      * @return
      */
-    public CharacterOutResult compute(Character character) {
+    public CharacterResult compute(Character character) {
         //基础的魂角属性
         CharacterInfo characterInfo = resourceLoader.getCharacterInfoById(character.getCid());
         if (characterInfo == null) return null;
@@ -76,20 +84,50 @@ public class BaseCo {
         int maxXp = characterInfo.getXp().getFinalValue();
         redisSource.str2int.setValue("cid-hp-" + character.getId(), maxHp);
         redisSource.str2int.setValue("cid-xp-" + character.getId(), maxXp);
-        return new CharacterOutResult(maxHp, maxXp, characterInfo, character);
+        Integer hl = redisSource.str2int.getValue("cid-hl-" + character.getCid());
+        if (hl == null) hl = characterInfo.getHl().getFinalValue();
+        Integer hj = redisSource.str2int.getValue("cid-hj-" + character.getCid());
+        if (hj == null) hj = characterInfo.getHj().getFinalValue();
+
+        return new CharacterResult(maxHp, maxXp, hl, hj, characterInfo, character, redisSource);
     }
 
-    public static class CharacterOutResult {
+    public static class CharacterResult {
+        @Getter
+        public Integer hj;
+        @Getter
+        public Integer hl;
         public final Integer maxHp;
         public final Integer maxXp;
         public final CharacterInfo characterInfo;
         public final Character character;
 
-        public CharacterOutResult(Integer maxHp, Integer maxXp, CharacterInfo characterInfo, Character character) {
+        private RedisSource redisSource;
+
+        public CharacterResult(Integer maxHp, Integer maxXp, Integer hl, Integer hj, CharacterInfo characterInfo, Character character, RedisSource redisSource) {
             this.maxHp = maxHp;
             this.maxXp = maxXp;
+            this.hl = hl;
+            this.hj = hj;
             this.characterInfo = characterInfo;
             this.character = character;
+            this.redisSource = redisSource;
+        }
+
+        public CharacterResult setHj(Integer hj) {
+            int max = characterInfo.getHj().getFinalValue();
+            hj = hj < 0 ? 0 : hj > max ? max : hj;
+            redisSource.str2int.setValue("cid-hj-" + character.getId(), hj);
+            this.hj = hj;
+            return this;
+        }
+
+        public CharacterResult setHl(Integer hl) {
+            int max = characterInfo.getHj().getFinalValue();
+            hl = hl < 0 ? 0 : hl > max ? max : hl;
+            redisSource.str2int.setValue("cid-hl-" + character.getId(), hl);
+            this.hl = hl;
+            return this;
         }
     }
 }

@@ -10,7 +10,9 @@ import io.github.kloping.mihdp.mapper.UserMapper;
 import java.util.concurrent.CountDownLatch;
 
 /**
+ * java -classpath ".\target\classes;.\libs\*" data_migration.Starter -Dfile.encoding=UTF-8
  * @author github.kloping
+ *
  */
 public class Starter {
 

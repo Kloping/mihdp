@@ -4,6 +4,7 @@ import io.github.kloping.MySpringTool.annotations.Action;
 import io.github.kloping.MySpringTool.annotations.AutoStand;
 import io.github.kloping.MySpringTool.annotations.Before;
 import io.github.kloping.MySpringTool.annotations.Controller;
+import io.github.kloping.MySpringTool.exceptions.NoRunException;
 import io.github.kloping.MySpringTool.interfaces.component.ContextManager;
 import io.github.kloping.io.ReadUtils;
 import io.github.kloping.mihdp.dao.Character;
@@ -81,21 +82,21 @@ public class FuBenController {
     public Object before(ReqDataPack dataPack) {
         User user = userMapper.selectById(dataPack.getSender_id());
         if (user == null) user = beginController.regNow0(dataPack.getSender_id());
-        return new Object[]{
-                charactersController.getCurrentCharacterOrLowestLevel(user.getUid()),
-                dataPack.getSender_id(), userMapper.selectById(dataPack.getSender_id())};
+        Character character = charactersController.getCurrentCharacterOrLowestLevel(user.getUid());
+        if (character == null) throw new NoRunException("Character==null for " + user);
+        return new Object[]{character, dataPack.getSender_id(), user};
     }
 
-//    {
-//        BaseService.MSG2ACTION.put("进入副本", "join-fb");
-//        BaseService.MSG2ACTION.put("攻击", "att");
-//        BaseService.MSG2ACTION.put("撤离", "evacuate");
-//        BaseService.MSG2ACTION.put("副本列表", "fb-list");
-//        BaseService.MSG2ACTION.put("跳过", "jem");
-//        BaseService.MSG2ACTION.put("副本邀请", "fb-invite");
-//        BaseService.MSG2ACTION.put("退队", "fb-team-out");
-//        BaseService.MSG2ACTION.put("当前队伍", "fb-team");
-//    }
+    {
+        BaseService.MSG2ACTION.put("进入副本", "join-fb");
+        BaseService.MSG2ACTION.put("攻击", "att");
+        BaseService.MSG2ACTION.put("撤离", "evacuate");
+        BaseService.MSG2ACTION.put("副本列表", "fb-list");
+        BaseService.MSG2ACTION.put("跳过", "jem");
+        BaseService.MSG2ACTION.put("副本邀请", "fb-invite");
+        BaseService.MSG2ACTION.put("退队", "fb-team-out");
+        BaseService.MSG2ACTION.put("当前队伍", "fb-team");
+    }
 
     @Action("fb-invite")
     public Object invite(ReqDataPack dataPack, User user) {
@@ -153,7 +154,7 @@ public class FuBenController {
         try {
             byte[] bytes = ReadUtils.readAll(new ClassPathResource("fb-list.jpg").getInputStream());
             return new GeneralData.ResDataChain.GeneralDataBuilder()
-                    .append("每次进入副本消耗" + EVE + "灵力")
+                    .append("每次进入副本消耗" + EVE + "灵力\n使用`进入副本xxxx`\ntips:当前暂仅开放'原始森林'")
                     .append(new GeneralData.ResDataImage(bytes, 215, 350))
                     .append(new GeneralData.ResDataButton("原始森林","进入副本原始森林"))
                     .append(new GeneralData.ResDataButton("荒野森林","进入副本荒野森林"))
@@ -161,6 +162,8 @@ public class FuBenController {
                     .append(new GeneralData.ResDataButton("落日森林","进入副本落日森林"))
                     .append(new GeneralData.ResDataButton("极北之地","进入副本极北之地"))
                     .append(new GeneralData.ResDataButton("神界之地","进入副本神界之地"))
+                    .append(new GeneralData.ResDataButton("副本邀请@", "副本邀请@"))
+                    .append(new GeneralData.ResDataButton("当前队伍", "当前队伍"))
                     .build();
         } catch (IOException e) {
             e.printStackTrace();

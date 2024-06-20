@@ -1,5 +1,6 @@
 package io.github.kloping.mihdp.game.service.csn;
 
+import io.github.kloping.mihdp.game.dao.Attr;
 import io.github.kloping.mihdp.game.scenario.Scenario;
 import io.github.kloping.mihdp.game.service.Eff;
 import io.github.kloping.mihdp.game.service.EffResult;
@@ -16,7 +17,6 @@ import java.util.concurrent.CountDownLatch;
  * @author github.kloping
  */
 public class CiBase extends LivingEntity {
-
     /**
      * 控制者id
      */
@@ -30,14 +30,18 @@ public class CiBase extends LivingEntity {
 
     public CountDownLatch cdl = null;
 
+    private Attr maxHl;
+    private Attr maxHj;
+
+    public int hl, hj;
+
     private CiBase(Integer id, Integer cid) {
         super(id, cid);
     }
 
-    public static CiBase create(BaseCo.CharacterOutResult result) {
+    public static CiBase create(BaseCo.CharacterResult result) {
         CiBase base = new CiBase(getId(), result.characterInfo.getId());
         base.maxHp = result.characterInfo.getHp().copy();
-        base.hp = result.character.getHp();
         base.att = result.characterInfo.getAtt().copy();
         base.defense = result.characterInfo.getDefense().copy();
         base.speed = result.characterInfo.getSpeed().copy();
@@ -45,7 +49,12 @@ public class CiBase extends LivingEntity {
         base.che = result.characterInfo.getChe().copy();
         base.efh = result.characterInfo.getEfh().copy();
         base.efr = result.characterInfo.getEfr().copy();
+        base.maxHj = result.characterInfo.getHj().copy();
+        base.maxHl = result.characterInfo.getHl().copy();
         base.distance = 1000;
+        base.hp = result.character.getHp();
+        base.hl = result.hl;
+        base.hj = result.hj;
         return base;
     }
 

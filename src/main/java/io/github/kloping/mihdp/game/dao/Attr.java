@@ -43,9 +43,9 @@ public class Attr {
     }
 
     public Attr copy() {
-        Attr attr = new Attr(name, value);
-        attr.bv = bv;
-        attr.baseValue = baseValue;
+        Attr attr = new Attr(name, value.intValue());
+        attr.bv = bv.intValue();
+        attr.baseValue = baseValue.intValue();
         return attr;
     }
 }

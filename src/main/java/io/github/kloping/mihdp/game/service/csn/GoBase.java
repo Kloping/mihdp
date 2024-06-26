@@ -7,6 +7,7 @@ import io.github.kloping.mihdp.game.service.EffResult;
 import io.github.kloping.mihdp.game.service.LivingEntity;
 import io.github.kloping.mihdp.game.service.effs.AttEff;
 import io.github.kloping.mihdp.game.service.gos.GoBaseImpl3001;
+import io.github.kloping.mihdp.game.service.gos.GoBaseImpl3002;
 import io.github.kloping.number.NumberUtils;
 import io.github.kloping.rand.RandomUtils;
 
@@ -23,9 +24,26 @@ public abstract class GoBase extends LivingEntity {
         super(id, cid);
     }
 
+    /**
+     * @param level
+     * @param id
+     * @return
+     */
     public static GoBase[] create(Integer level, Integer id) {
+        //1级副本2只
         if (id == 3001) {
-            return new GoBase[]{new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level), new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level),};
+            return new GoBase[]{new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level),
+                    new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level),};
+        } else if (id == 3002) {
+            //2只 或 1只带2只小的
+            if (RandomUtils.RANDOM.nextInt(2) == 1) {
+                return new GoBase[]{new GoBaseImpl3002(RandomUtils.RANDOM.nextInt(20) + level),
+                        new GoBaseImpl3002(RandomUtils.RANDOM.nextInt(20) + level),};
+            } else {
+                return new GoBase[]{new GoBaseImpl3002(RandomUtils.RANDOM.nextInt(20) + level)
+                        , new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level),
+                        new GoBaseImpl3001(RandomUtils.RANDOM.nextInt(20) + level)};
+            }
         }
         GoBase base = new GoBase(getId(), id) {
             @Override

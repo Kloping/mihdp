@@ -19,11 +19,6 @@ public class AttEff extends Eff {
 
     public static Integer ATT_BV_N = 60;
 
-    /**
-     * 防御效用 y = 1- (c/c+x)
-     */
-    public static final Integer DEFENSE_EFF = 1000;
-
     @Override
     public EffResult fun(LivingEntity entity0, LivingEntity entity1) {
         int state = 0;

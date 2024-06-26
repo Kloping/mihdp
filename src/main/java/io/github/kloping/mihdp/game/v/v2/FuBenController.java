@@ -153,18 +153,16 @@ public class FuBenController {
     public Object fbList(Character character, String qid) {
         try {
             byte[] bytes = ReadUtils.readAll(new ClassPathResource("fb-list.jpg").getInputStream());
-            return new GeneralData.ResDataChain.GeneralDataBuilder()
-                    .append("每次进入副本消耗" + EVE + "灵力\n使用`进入副本xxxx`\ntips:当前暂仅开放'原始森林'")
-                    .append(new GeneralData.ResDataImage(bytes, 215, 350))
-                    .append(new GeneralData.ResDataButton("原始森林","进入副本原始森林"))
-                    .append(new GeneralData.ResDataButton("荒野森林","进入副本荒野森林"))
-                    .append(new GeneralData.ResDataButton("星斗森林","进入副本星斗森林"))
-                    .append(new GeneralData.ResDataButton("落日森林","进入副本落日森林"))
-                    .append(new GeneralData.ResDataButton("极北之地","进入副本极北之地"))
-                    .append(new GeneralData.ResDataButton("神界之地","进入副本神界之地"))
-                    .append(new GeneralData.ResDataButton("副本邀请@", "副本邀请@"))
-                    .append(new GeneralData.ResDataButton("当前队伍", "当前队伍"))
-                    .build();
+            GeneralData.ResDataChain.GeneralDataBuilder builder = new GeneralData.GeneralDataBuilder();
+
+            builder.append("每次进入副本消耗" + EVE + "灵力\n使用`进入副本xxxx`\ntips:当前暂仅开放'原始森林','荒野森林'")
+                    .append(new GeneralData.ResDataImage(bytes, 215, 350));
+            for (String value : fbService.NAME2LEVEL_MIN.keySet()) {
+                builder.append(new GeneralData.ResDataButton(value, "进入副本" + value));
+            }
+            builder.append(new GeneralData.ResDataButton("副本邀请@", "副本邀请@"))
+                    .append(new GeneralData.ResDataButton("当前队伍", "当前队伍"));
+            return builder.build();
         } catch (IOException e) {
             e.printStackTrace();
         }

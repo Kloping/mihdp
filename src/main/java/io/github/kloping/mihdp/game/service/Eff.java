@@ -9,6 +9,12 @@ import lombok.Data;
  */
 @Data
 public abstract class Eff {
+    /**
+     * 防御效用 y = 1- (c/c+x)
+     */
+    public static final Integer DEFENSE_EFF = 1000;
+
+
     private Integer type;
     private Integer value;
 

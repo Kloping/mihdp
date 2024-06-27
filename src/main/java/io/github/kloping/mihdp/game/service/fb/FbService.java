@@ -37,7 +37,7 @@ public class FbService {
         else {
             if (level.get() == 1) {
                 return GoBase.create(level.get(), 3001);
-            } else if (level.get() == 2) {
+            } else if (level.get() == 20) {
                 return GoBase.create(level.get(), 3002);
             }
         }
